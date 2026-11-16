@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#10252B"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tourism Layout Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;800&family=Inter:wght@400;600&family=Sora:wght@400;700&family=Manrope:wght@400;700&family=DM+Serif+Display&family=DM+Sans:wght@400;600&family=Space+Mono&family=Great+Vibes&family=Bebas+Neue&family=Oswald&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E6ECEA;--ink:#10252B;--mut:#5B6F74;--ac:#2447D0;--ln:#B9C6C4;--pn:#F6F9F8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1D21;--ink:#E3ECEA;--mut:#8FA3A6;--ac:#7C98FF;--ln:#2A3E43;--pn:#162A2F}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 'Inter',sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{min-height:44px;padding:0 14px;border:1px solid var(--ln);background:var(--pn);border-radius:4px;cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}button.on{border-color:var(--ac);color:var(--ac)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+input,select,textarea{width:100%;min-height:44px;padding:8px;border:1px solid var(--ln);background:var(--pn);border-radius:4px}
+#app{height:100%;display:flex;flex-direction:column}
+.scr{flex:1;overflow:auto;padding:18px 16px 24px}
+.mono{font-family:'Space Mono',monospace;font-size:11px;color:var(--mut);letter-spacing:.04em}
+h1{font:800 34px/1 'Playfair Display',serif;margin:6px 0 8px}h2{font:600 13px 'Space Mono',monospace;margin:22px 0 10px;border-bottom:1px solid var(--ln);padding-bottom:6px}
+nav{display:flex;border-top:1px solid var(--ln);background:var(--pn);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;border-radius:0;background:none;min-height:52px}nav .on{box-shadow:inset 0 -3px var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.row>*{flex:1 1 auto}
+.card{display:flex;gap:12px;border-top:1px solid var(--ln);padding:12px 0}
+.th{flex:none;overflow:hidden;box-shadow:0 0 0 1px var(--ln);background:#fff}
+.card div.i{flex:1;min-width:0}
+.bar{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid var(--ln);background:var(--pn)}
+.bar b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.tools{display:flex;gap:6px;overflow-x:auto;padding:6px 8px;background:var(--pn);border-top:1px solid var(--ln)}.tools button{flex:none}
+.stage{flex:1;overflow:auto;display:grid;place-items:start safe center;padding:12px;min-height:0}
+.sheet{max-height:46%;overflow:auto;background:var(--pn);border-top:2px solid var(--ac);padding:12px}
+.sheet label{display:block;margin:8px 0 2px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ins{border-left:3px solid var(--ac);padding:4px 10px;margin:6px 0;background:var(--bg)}
+.cvw{position:relative;box-shadow:0 0 0 1px var(--ln)}.cv{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden}
+.cv .e{position:absolute;overflow:hidden}.cv .e svg{width:100%;height:100%;display:block}
+.cv .sel{outline:6px solid #2447D0;outline-offset:2px}.cv .ph{display:grid;place-items:center;text-align:center;width:100%;height:100%;background:repeating-linear-gradient(45deg,#0001 0 12px,#0000 12px 24px);border:3px dashed #0007;font:24px 'Space Mono',monospace;padding:20px;color:#000a}
+.ly{display:flex;gap:4px;align-items:center;border-bottom:1px solid var(--ln)}.ly button{min-width:44px;padding:0}.ly .n{flex:1;text-align:left;border:0;background:none}
+.ck{padding:6px 0;border-bottom:1px solid var(--ln)}.ok{color:#1b8a4b}.wn{color:#b7791f}.ms{color:#c53030}
+.modal{position:fixed;inset:0;background:var(--bg);z-index:9;overflow:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
+pre,#out{font:12px 'Space Mono',monospace;white-space:pre-wrap}
+.err{border:1px solid #c53030;padding:10px;color:#c53030;white-space:pre-wrap;font:12px 'Space Mono',monospace;margin:8px 0}
+</style></head><body><div id="app"></div>
+
+<!-- ===== TEMPLATE DATA: each <script data-tpl> is one JSON template (same schema as an importable .json file). Loader below reads them all; adding one adds a library entry. ===== -->
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.0","template":{"id":"coastal-expedition-01","name":"Coastal Expedition","category":"Destination Poster","assignmentOption":1,"style":"Editorial · Coastal","description":"Travel-magazine cover meets geographic field document.","tags":["coastal","editorial"]},
+"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},
+"theme":{"background":"#EEF1EC","primary":"#173F4A","secondary":"#C8553D","displayFont":"Playfair Display","bodyFont":"Inter"},
+"contentSchema":{"destinationName":{"type":"text","label":"Destination name","required":true},"heroImage":{"type":"image","label":"Hero image","required":true}},
+"elements":[
+{"id":"waves","type":"svg","label":"Wave lines","editable":true,"instruction":"Decorative contour/wave lines. Recolor or replace with your own SVG.","lock":true,"position":{"x":0,"y":900,"w":1000,"h":514},"style":{"color":"#173F4A","opacity":0.18},"svg":"<svg viewBox='0 0 400 200' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='0.6'><path d='M0 30C80 0 160 60 240 30S360 10 400 40'/><path d='M0 55C80 25 160 85 240 55S360 35 400 65'/><path d='M0 80C80 50 160 110 240 80S360 60 400 90'/><path d='M0 105C80 75 160 135 240 105S360 85 400 115'/><path d='M0 130C80 100 160 160 240 130S360 110 400 140'/></svg>"},
+{"id":"coord","type":"text","label":"Coordinate label","editable":true,"instruction":"Enter the verified coordinates of the destination.","position":{"x":70,"y":60,"w":600,"h":30},"style":{"size":18,"ls":0.12,"font":"b","color":"#C8553D"},"text":"N 00°00′  E 000°00′ — enter verified coordinates","ph":true,"rec":true},
+{"id":"title","type":"text","label":"Destination name","editable":true,"required":true,"instruction":"Type the destination's official name. Keep it short so it stays huge.","position":{"x":70,"y":100,"w":860,"h":280},"style":{"size":150,"weight":800,"font":"d","lh":0.92,"color":"#173F4A"},"text":"DESTINATION\nNAME","ph":true},
+{"id":"loc","type":"text","label":"Location","editable":true,"required":true,"instruction":"Town/municipality and province, verified from an official source.","position":{"x":70,"y":392,"w":420,"h":60},"style":{"size":24,"font":"b","color":"#173F4A"},"text":"LOCATION\nEnter verified location","ph":true},
+{"id":"hero","type":"image","label":"Hero image","editable":true,"required":true,"instruction":"Use a high-quality photograph clearly showing the destination. Note its credit in Sources.","lock":true,"position":{"x":240,"y":470,"w":760,"h":520},"style":{"radius":0},"src":""},
+{"id":"vline","type":"shape","label":"Vertical rule","editable":true,"instruction":"Thin editorial rule.","position":{"x":200,"y":470,"w":3,"h":760},"style":{"bg":"#C8553D"}},
+{"id":"promo","type":"text","label":"Promotional statement","editable":true,"required":true,"instruction":"One short sentence inviting visitors. Write it yourself.","position":{"x":70,"y":900,"w":560,"h":200},"style":{"size":44,"font":"d","weight":500,"lh":1.1,"color":"#fff","bg":"#173F4A","pad":28},"text":"Write one inviting sentence here.","ph":true},
+{"id":"desc","type":"text","label":"Destination description","editable":true,"required":true,"instruction":"2–4 sentences about the place, using facts you can cite.","position":{"x":240,"y":1020,"w":420,"h":180},"style":{"size":20,"lh":1.5,"font":"b","color":"#173F4A"},"text":"Describe the destination with verified facts.","ph":true},
+{"id":"acts","type":"text","label":"Activities","editable":true,"required":true,"instruction":"List 2–4 real activities available to visitors, one per line.","position":{"x":690,"y":1020,"w":260,"h":180},"style":{"size":20,"lh":1.6,"font":"b","color":"#173F4A"},"text":"◉ Activity one\n◉ Activity two","ph":true},
+{"id":"tips","type":"text","label":"Visitor tips","editable":true,"instruction":"Practical, verified tips: best time, access, etiquette.","position":{"x":240,"y":1220,"w":420,"h":80},"style":{"size":18,"font":"b","color":"#173F4A"},"text":"Visitor tips — add verified notes.","ph":true,"rec":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"List every source for facts and photos. One per line.","position":{"x":70,"y":1320,"w":700,"h":70},"style":{"size":13,"font":"b","color":"#173F4A"},"items":[],"rec":true},
+{"id":"foot","type":"text","label":"Student footer","editable":true,"instruction":"Name and section, small and discreet.","position":{"x":790,"y":1360,"w":180,"h":30},"style":{"size":13,"align":"right","font":"b","color":"#173F4A"},"text":"Name · Section"}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.0","template":{"id":"route-journal-01","name":"Route Journal","category":"Tourism Itinerary","assignmentOption":6,"style":"Travel Journal · Cartographic","description":"One continuous route threads the stops across the sheet.","tags":["route","journal"]},
+"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},
+"theme":{"background":"#F3EDE0","primary":"#2A2A44","secondary":"#1E7F74","displayFont":"DM Serif Display","bodyFont":"DM Sans"},
+"contentSchema":{"stops":{"type":"list","min":3}},
+"elements":[
+{"id":"title","type":"text","label":"Itinerary title","editable":true,"required":true,"instruction":"Name your itinerary, e.g. its length and area. Write it yourself.","position":{"x":70,"y":70,"w":600,"h":200},"style":{"size":96,"font":"d","lh":0.95,"color":"#2A2A44"},"text":"Itinerary\ntitle","ph":true},
+{"id":"route","type":"svg","label":"Route line","editable":true,"instruction":"The journey line. Replace with your own SVG route, or resize to fit your stops.","position":{"x":0,"y":0,"w":1000,"h":1414},"style":{"color":"#1E7F74"},"svg":"<svg viewBox='0 0 1000 1414' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='5' stroke-dasharray='4 14' stroke-linecap='round'><path d='M180 380C180 470 700 440 740 560S200 640 240 800S760 860 760 1000S300 1120 300 1230'/><g fill='#F3EDE0' stroke-dasharray='0'><circle cx='180' cy='380' r='20'/><circle cx='740' cy='560' r='20'/><circle cx='240' cy='800' r='20'/><circle cx='760' cy='1000' r='20'/><circle cx='300' cy='1230' r='20'/></g></svg>"},
+{"id":"d1","type":"text","label":"Day 1 label","editable":true,"instruction":"Day label.","position":{"x":70,"y":300,"w":200,"h":50},"style":{"size":34,"font":"d","color":"#1E7F74"},"text":"DAY 01"},
+{"id":"s1","type":"text","label":"Stop 1","editable":true,"required":true,"instruction":"Destination name, location, one activity. Verify travel notes yourself; do not guess times or prices.","position":{"x":225,"y":330,"w":380,"h":110},"style":{"size":20,"font":"b","lh":1.35,"color":"#2A2A44"},"text":"Stop name\nLocation · activity","ph":true},
+{"id":"d2","type":"text","label":"Day 2 label","editable":true,"instruction":"Day label.","position":{"x":780,"y":500,"w":160,"h":50},"style":{"size":34,"font":"d","color":"#1E7F74","align":"right"},"text":"DAY 02"},
+{"id":"s2","type":"text","label":"Stop 2","editable":true,"required":true,"instruction":"Destination, location, activity. Add verified travel notes.","position":{"x":390,"y":560,"w":310,"h":100},"style":{"size":20,"font":"b","lh":1.35,"align":"right","color":"#2A2A44"},"text":"Stop name\nLocation · activity","ph":true},
+{"id":"s3","type":"text","label":"Stop 3","editable":true,"required":true,"instruction":"Destination, location, activity.","position":{"x":290,"y":780,"w":380,"h":100},"style":{"size":20,"font":"b","lh":1.35,"color":"#2A2A44"},"text":"Stop name\nLocation · activity","ph":true},
+{"id":"d3","type":"text","label":"Day 3 label","editable":true,"instruction":"Day label (delete if itinerary is 2 days).","position":{"x":780,"y":940,"w":160,"h":50},"style":{"size":34,"font":"d","color":"#1E7F74","align":"right"},"text":"DAY 03"},
+{"id":"s4","type":"text","label":"Stop 4","editable":true,"instruction":"Destination, location, activity.","position":{"x":420,"y":1000,"w":310,"h":100},"style":{"size":20,"font":"b","lh":1.35,"align":"right","color":"#2A2A44"},"text":"Stop name\nLocation · activity","ph":true,"rec":true},
+{"id":"s5","type":"text","label":"Stop 5","editable":true,"instruction":"Final stop.","position":{"x":350,"y":1210,"w":380,"h":90},"style":{"size":20,"font":"b","lh":1.35,"color":"#2A2A44"},"text":"Stop name\nLocation · activity","ph":true},
+{"id":"locmap","type":"map","label":"Locator map","editable":true,"required":true,"instruction":"Insert a verified map showing the required geographic area.","position":{"x":740,"y":70,"w":200,"h":240},"style":{"border":"3px solid #2A2A44"},"src":""},
+{"id":"notes","type":"text","label":"Travel notes","editable":true,"instruction":"Verified travel considerations only (transport, timing). Leave blank if unverified.","position":{"x":70,"y":1330,"w":260,"h":60},"style":{"size":14,"font":"b","color":"#2A2A44"},"text":"Travel notes — add verified info.","ph":true,"rec":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Sources for facts and images, one per line.","position":{"x":600,"y":1330,"w":340,"h":60},"style":{"size":13,"font":"b","color":"#2A2A44"},"items":[],"rec":true}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.0","template":{"id":"field-guide-01","name":"Topographic Field Guide","category":"Nature & Adventure","assignmentOption":7,"style":"Field Guide · Technical","description":"Contour lines, plate numbers and annotated callouts.","tags":["technical","field"]},
+"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},
+"theme":{"background":"#DDE3D3","primary":"#22372C","secondary":"#9A4B22","displayFont":"Sora","bodyFont":"Manrope"},
+"contentSchema":{"destination":{"type":"text","required":true}},
+"elements":[
+{"id":"contours","type":"svg","label":"Contour lines","editable":true,"instruction":"Terrain contours. Recolor, resize or replace with your own SVG.","lock":true,"position":{"x":0,"y":0,"w":1000,"h":1414},"style":{"color":"#22372C","opacity":0.16},"svg":"<svg viewBox='0 0 100 140' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='0.25'><ellipse cx='70' cy='45' rx='60' ry='30'/><ellipse cx='70' cy='45' rx='48' ry='24'/><ellipse cx='70' cy='45' rx='36' ry='18'/><ellipse cx='70' cy='45' rx='24' ry='12'/><ellipse cx='25' cy='110' rx='55' ry='24'/><ellipse cx='25' cy='110' rx='40' ry='17'/><ellipse cx='25' cy='110' rx='25' ry='10'/></svg>"},
+{"id":"plate","type":"text","label":"Plate number","editable":true,"instruction":"Plate/field reference, e.g. coordinates once verified.","position":{"x":60,"y":50,"w":500,"h":30},"style":{"size":16,"ls":0.1,"font":"b","color":"#9A4B22"},"text":"PLATE 01 · coordinates: enter verified","ph":true,"rec":true},
+{"id":"title","type":"text","label":"Destination","editable":true,"required":true,"instruction":"Name of the nature/adventure destination.","position":{"x":60,"y":90,"w":880,"h":150},"style":{"size":84,"weight":700,"font":"d","lh":1,"color":"#22372C"},"text":"Destination\nname","ph":true},
+{"id":"img","type":"image","label":"Specimen photo","editable":true,"required":true,"instruction":"Photograph of the site or activity. Credit it in Sources.","lock":true,"position":{"x":60,"y":280,"w":560,"h":460},"style":{"border":"4px solid #22372C"},"src":""},
+{"id":"call","type":"text","label":"Image callout","editable":true,"instruction":"Annotation pointing at something in the photo.","position":{"x":650,"y":300,"w":290,"h":120},"style":{"size":16,"font":"b","lh":1.4,"color":"#22372C","border":"1px solid #22372C","pad":12},"text":"Fig. 1 — annotate the photo.","ph":true},
+{"id":"env","type":"text","label":"Location · environment","editable":true,"required":true,"instruction":"Verified location and type of environment.","position":{"x":650,"y":440,"w":290,"h":150},"style":{"size":16,"font":"b","lh":1.4,"color":"#22372C"},"text":"LOCATION\nEnvironment / activity","ph":true},
+{"id":"fn","type":"text","label":"Field notes","editable":true,"required":true,"instruction":"3–5 short field notes from verified sources, one per line.","position":{"x":60,"y":790,"w":420,"h":280},"style":{"size":17,"font":"b","lh":1.5,"color":"#22372C"},"text":"FIELD NOTES\n1. Note one\n2. Note two\n3. Note three","ph":true},
+{"id":"prep","type":"text","label":"Prepare","editable":true,"required":true,"instruction":"What visitors should bring or do. Use verified guidance.","position":{"x":520,"y":790,"w":420,"h":280},"style":{"size":17,"font":"b","lh":1.5,"color":"#22372C"},"text":"PREPARE\n▲ Item one\n▲ Item two","ph":true},
+{"id":"resp","type":"text","label":"Responsible visit","editable":true,"required":true,"instruction":"Responsible-tourism reminders from official guidance.","position":{"x":60,"y":1100,"w":880,"h":150},"style":{"size":18,"font":"b","lh":1.5,"color":"#fff","bg":"#22372C","pad":24},"text":"RESPONSIBLE VISIT\nAdd reminders from verified guidance.","ph":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Sources for facts and images, one per line.","position":{"x":60,"y":1290,"w":700,"h":90},"style":{"size":13,"font":"b","color":"#22372C"},"items":[],"rec":true}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.0","template":{"id":"urban-discovery-01","name":"Urban Discovery","category":"City Visitor Guide","assignmentOption":4,"style":"Contemporary · Editorial Cartography","description":"A large central map with location callouts around it.","tags":["city","map"]},
+"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},
+"theme":{"background":"#F1F1EE","primary":"#111A33","secondary":"#E0452B","displayFont":"Sora","bodyFont":"Manrope"},
+"contentSchema":{"map":{"type":"map","required":true}},
+"elements":[
+{"id":"title","type":"text","label":"Guide title","editable":true,"required":true,"instruction":"City/guide title.","position":{"x":50,"y":50,"w":900,"h":170},"style":{"size":104,"weight":700,"font":"d","lh":0.95,"color":"#111A33"},"text":"CITY\nGUIDE","ph":true},
+{"id":"map","type":"map","label":"Central map","editable":true,"required":true,"instruction":"Insert a verified map showing the required geographic area (image or SVG). Do not draw positions from memory.","lock":true,"position":{"x":50,"y":260,"w":900,"h":640},"style":{"bg":"#D5DEE8"},"src":""},
+{"id":"m1","type":"svg","label":"Markers","editable":true,"instruction":"Numbered markers. Move/resize to sit on your verified locations.","position":{"x":50,"y":260,"w":900,"h":640},"style":{"color":"#E0452B"},"svg":"<svg viewBox='0 0 900 640' fill='currentColor'><g stroke='#fff' stroke-width='3'><circle cx='250' cy='200' r='16'/><circle cx='620' cy='330' r='16'/><circle cx='380' cy='480' r='16'/></g><g fill='#fff' font-size='16' text-anchor='middle' font-family='sans-serif'><text x='250' y='206'>1</text><text x='620' y='336'>2</text><text x='380' y='486'>3</text></g></svg>"},
+{"id":"c1","type":"text","label":"Callout 1","editable":true,"required":true,"instruction":"Name, category (Landmark / Heritage / Food / Public Space / Visitor Service), short description.","position":{"x":50,"y":940,"w":280,"h":170},"style":{"size":16,"font":"b","lh":1.4,"color":"#111A33","border":"2px solid #E0452B","pad":14},"text":"1 · Name\nCategory\nShort description","ph":true},
+{"id":"c2","type":"text","label":"Callout 2","editable":true,"required":true,"instruction":"Name, category, short description.","position":{"x":360,"y":940,"w":280,"h":170},"style":{"size":16,"font":"b","lh":1.4,"color":"#111A33","border":"2px solid #E0452B","pad":14},"text":"2 · Name\nCategory\nShort description","ph":true},
+{"id":"c3","type":"text","label":"Callout 3","editable":true,"instruction":"Name, category, short description.","position":{"x":670,"y":940,"w":280,"h":170},"style":{"size":16,"font":"b","lh":1.4,"color":"#111A33","border":"2px solid #E0452B","pad":14},"text":"3 · Name\nCategory\nShort description","ph":true,"rec":true},
+{"id":"leg","type":"text","label":"Legend","editable":true,"instruction":"Legend of the categories you use.","position":{"x":50,"y":1140,"w":900,"h":40},"style":{"size":16,"font":"b","ls":0.05,"color":"#111A33"},"text":"Landmark · Heritage · Food · Public space · Visitor service"},
+{"id":"vs","type":"text","label":"Visitor services","editable":true,"instruction":"Verified visitor services info.","position":{"x":50,"y":1200,"w":600,"h":100},"style":{"size":16,"font":"b","lh":1.4,"color":"#111A33"},"text":"Visitor services — add verified info.","ph":true,"rec":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Map and fact sources, one per line.","position":{"x":50,"y":1320,"w":700,"h":70},"style":{"size":13,"font":"b","color":"#111A33"},"items":[],"rec":true}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.1","template":{"id":"arch-triptych-01","name":"Arch Triptych","category":"Destination Poster","assignmentOption":1,"style":"Contemporary · Layered","description":"Three arched windows over a faded landscape, script kicker, poster title.","tags":["arch","layered"]},"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},"theme":{"background":"linear-gradient(#0B1E3A,#14485A)","primary":"#FFFFFF","secondary":"#7FE3F0","displayFont":"Bebas Neue","bodyFont":"Manrope"},"contentSchema":{},"elements":[
+{"id":"bg","type":"image","label":"Background photo","editable":true,"required":true,"instruction":"Wide landscape photo of the destination. Credit it in Sources.","lock":true,"position":{"x":0,"y":0,"w":1000,"h":900},"style":{"fade":"bottom"},"src":""},
+{"id":"a1","type":"image","label":"Arch photo 1","editable":true,"required":true,"instruction":"Photo of a place or activity. Zoom/position to crop.","lock":true,"position":{"x":60,"y":330,"w":270,"h":560},"style":{"mask":"arch"},"src":""},
+{"id":"a2","type":"image","label":"Arch photo 2","editable":true,"required":true,"instruction":"Center photo, the strongest image.","lock":true,"position":{"x":365,"y":260,"w":270,"h":630},"style":{"mask":"arch"},"src":""},
+{"id":"a3","type":"image","label":"Arch photo 3","editable":true,"instruction":"Photo of a place or activity.","lock":true,"position":{"x":670,"y":330,"w":270,"h":560},"style":{"mask":"arch"},"src":""},
+{"id":"kick","type":"text","label":"Script kicker","editable":true,"instruction":"Short invitation in script type.","position":{"x":60,"y":905,"w":880,"h":90},"style":{"size":68,"font":"s","align":"center","color":"#7FE3F0"},"text":"Visit your favorite spot","ph":true},
+{"id":"title","type":"text","label":"Destination name","editable":true,"required":true,"instruction":"Official destination name.","position":{"x":40,"y":985,"w":920,"h":210},"style":{"size":170,"font":"d","align":"center","color":"#FFFFFF","tt":"uppercase","shadow":"0 0 24px #7FE3F055"},"text":"Destination","ph":true},
+{"id":"desc","type":"text","label":"Description","editable":true,"required":true,"instruction":"2–3 sentences with facts you can cite.","position":{"x":80,"y":1210,"w":520,"h":110},"style":{"size":20,"lh":1.45,"color":"#FFFFFF"},"text":"Describe the destination with verified facts.","ph":true},
+{"id":"ic","type":"icon","label":"Location icon","editable":true,"instruction":"Pick or upload an icon.","position":{"x":650,"y":1215,"w":44,"h":44},"style":{"color":"#7FE3F0"},"icon":"pin"},
+{"id":"loc","type":"text","label":"Location","editable":true,"required":true,"instruction":"Verified location.","position":{"x":705,"y":1215,"w":240,"h":80},"style":{"size":20,"color":"#FFFFFF"},"text":"Location\nEnter verified place","ph":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Sources for facts and photos, one per line.","position":{"x":60,"y":1335,"w":700,"h":60},"style":{"size":13,"color":"#C9D8E0"},"items":[],"rec":true}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.1","template":{"id":"panel-columns-01","name":"Panel Columns","category":"Regional Guide","assignmentOption":2,"style":"Editorial · Vertical","description":"Four tall photo panels with vertical labels under a script and condensed headline.","tags":["panels","vertical"]},"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},"theme":{"background":"linear-gradient(#CFE6F5,#EAF3F8 60%)","primary":"#0B4A6F","secondary":"#0B4A6F","displayFont":"Oswald","bodyFont":"Inter"},"contentSchema":{},"elements":[
+{"id":"kick","type":"text","label":"Script kicker","editable":true,"instruction":"One or two words in script.","position":{"x":70,"y":70,"w":500,"h":110},"style":{"size":96,"font":"s","color":"#0B4A6F"},"text":"Explore","ph":true},
+{"id":"title","type":"text","label":"Title","editable":true,"required":true,"instruction":"Region or theme title.","position":{"x":70,"y":150,"w":860,"h":220},"style":{"size":150,"weight":700,"font":"d","lh":0.95,"color":"#0B4A6F","tt":"uppercase"},"text":"The Region","ph":true},
+{"id":"p1","type":"image","label":"Panel 1","editable":true,"required":true,"instruction":"Tall photo. Crop with zoom/position.","lock":true,"position":{"x":70,"y":400,"w":200,"h":640},"style":{},"src":""},
+{"id":"p2","type":"image","label":"Panel 2","editable":true,"required":true,"instruction":"Tall photo.","lock":true,"position":{"x":290,"y":400,"w":200,"h":640},"style":{},"src":""},
+{"id":"p3","type":"image","label":"Panel 3","editable":true,"instruction":"Tall photo.","lock":true,"position":{"x":510,"y":400,"w":200,"h":640},"style":{},"src":""},
+{"id":"p4","type":"image","label":"Panel 4","editable":true,"instruction":"Tall photo.","lock":true,"position":{"x":730,"y":400,"w":200,"h":640},"style":{},"src":""},
+{"id":"l1","type":"text","label":"Label 1","editable":true,"required":true,"instruction":"Place name, vertical.","position":{"x":86,"y":420,"w":34,"h":300},"style":{"size":24,"ls":0.3,"color":"#FFFFFF","vert":"1","tt":"uppercase","shadow":"0 0 8px #0008"},"text":"Place one","ph":true},
+{"id":"l2","type":"text","label":"Label 2","editable":true,"required":true,"instruction":"Place name, vertical.","position":{"x":306,"y":420,"w":34,"h":300},"style":{"size":24,"ls":0.3,"color":"#FFFFFF","vert":"1","tt":"uppercase","shadow":"0 0 8px #0008"},"text":"Place two","ph":true},
+{"id":"l3","type":"text","label":"Label 3","editable":true,"instruction":"Place name, vertical.","position":{"x":526,"y":420,"w":34,"h":300},"style":{"size":24,"ls":0.3,"color":"#FFFFFF","vert":"1","tt":"uppercase","shadow":"0 0 8px #0008"},"text":"Place three","ph":true},
+{"id":"l4","type":"text","label":"Label 4","editable":true,"instruction":"Place name, vertical.","position":{"x":746,"y":420,"w":34,"h":300},"style":{"size":24,"ls":0.3,"color":"#FFFFFF","vert":"1","tt":"uppercase","shadow":"0 0 8px #0008"},"text":"Place four","ph":true},
+{"id":"desc","type":"text","label":"Intro","editable":true,"required":true,"instruction":"Short intro with verified facts; *wrap words* to color them.","position":{"x":70,"y":1090,"w":620,"h":150},"style":{"size":22,"lh":1.5,"color":"#0B4A6F","accent":"#D9482B"},"text":"Write about the *region* using verified facts.","ph":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Sources for facts and photos.","position":{"x":70,"y":1300,"w":700,"h":80},"style":{"size":13,"color":"#0B4A6F"},"items":[],"rec":true}
+]}
+</script>
+
+<script type="application/json" data-tpl>
+{"schemaVersion":"1.1","template":{"id":"giant-type-01","name":"Giant Type","category":"Destination Poster","assignmentOption":1,"style":"Poster · Typographic","description":"Oversized gradient title behind an optional cutout, with an icon strip.","tags":["type","icons"]},"canvas":{"width":1000,"height":1414,"format":"A2","orientation":"portrait"},"theme":{"background":"linear-gradient(#F7C9B0,#E9885E 55%,#2A1B2E)","primary":"#FFFFFF","secondary":"#D9301B","displayFont":"Bebas Neue","bodyFont":"Manrope"},"contentSchema":{},"elements":[
+{"id":"bg","type":"image","label":"Background photo","editable":true,"required":true,"instruction":"Full-bleed photo. Credit it in Sources.","lock":true,"position":{"x":0,"y":0,"w":1000,"h":1414},"style":{"opacity":0.9},"src":""},
+{"id":"title","type":"text","label":"Giant title","editable":true,"required":true,"instruction":"One short word, set huge.","position":{"x":40,"y":100,"w":920,"h":420},"style":{"size":400,"font":"d","lh":1,"align":"center","tg":"linear-gradient(#D9301B,#D9301B 55%,#D9301B00)","tt":"uppercase"},"text":"Name","ph":true},
+{"id":"cut","type":"image","label":"Cutout subject","editable":true,"rec":true,"instruction":"Optional transparent PNG (landmark/person) that overlaps the title.","position":{"x":200,"y":220,"w":600,"h":760},"style":{},"src":""},
+{"id":"tag","type":"text","label":"Tagline","editable":true,"required":true,"instruction":"One line; *wrap words* to accent them.","position":{"x":560,"y":1000,"w":380,"h":70},"style":{"size":22,"align":"right","color":"#FFFFFF","accent":"#FF5A3C","tt":"uppercase"},"text":"Fall in love with *place*, one moment at a time","ph":true},
+{"id":"rule","type":"shape","label":"Rule","editable":true,"instruction":"Thin divider.","position":{"x":60,"y":1130,"w":880,"h":2},"style":{"bg":"#FFFFFF"}},
+{"id":"i1","type":"icon","label":"Icon 1","editable":true,"instruction":"Pick an icon.","position":{"x":105,"y":1160,"w":50,"h":50},"style":{"color":"#FFFFFF"},"icon":"hotel"},
+{"id":"i2","type":"icon","label":"Icon 2","editable":true,"instruction":"Pick an icon.","position":{"x":295,"y":1160,"w":50,"h":50},"style":{"color":"#FFFFFF"},"icon":"camera"},
+{"id":"i3","type":"icon","label":"Icon 3","editable":true,"instruction":"Pick an icon.","position":{"x":475,"y":1160,"w":50,"h":50},"style":{"color":"#FFFFFF"},"icon":"flight"},
+{"id":"i4","type":"icon","label":"Icon 4","editable":true,"instruction":"Pick an icon.","position":{"x":655,"y":1160,"w":50,"h":50},"style":{"color":"#FFFFFF"},"icon":"leaf"},
+{"id":"i5","type":"icon","label":"Icon 5","editable":true,"instruction":"Pick an icon.","position":{"x":845,"y":1160,"w":50,"h":50},"style":{"color":"#FFFFFF"},"icon":"document"},
+{"id":"labels","type":"text","label":"Icon captions","editable":true,"required":true,"instruction":"Five short captions in one line, spaced to sit under the icons.","position":{"x":60,"y":1220,"w":880,"h":40},"style":{"size":17,"color":"#FFFFFF","align":"center","ls":0.04,"tt":"uppercase"},"text":"Stay      See      Eat      Go      Prepare","ph":true},
+{"id":"src","type":"sourceList","label":"Sources","editable":true,"instruction":"Sources for facts and photos.","position":{"x":60,"y":1320,"w":700,"h":70},"style":{"size":13,"color":"#FFFFFF"},"items":[],"rec":true}
+]}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+/* ===== STORAGE: localStorage wrapped in try/catch ===== */
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>document.querySelector(s);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ===== TEMPLATE LOADING: built-ins come from <script data-tpl> JSON; imported ones from storage ===== */
+const BUILT=[...document.querySelectorAll('script[data-tpl]')].map(s=>JSON.parse(s.textContent));
+let custom=ld('tls-custom',[]),projects=ld('tls-proj',[]);
+const lib=()=>[...BUILT,...custom];
+const CV={A2:{h:1414,l:'A2',cm:[42,59.4]},'18x24':{h:1333,l:'18×24 in',cm:[45.72,60.96]},'4x5':{h:1250,l:'4:5 poster',cm:[40,50]},letter:{h:1294,l:'Letter',cm:[21.59,27.94]}};
+const ICONS=Object.fromEntries(Object.entries({hotel:"<rect x='5' y='3' width='14' height='18'/><path d='M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4'/>",flight:"<path d='M21 15l-8-4V5a1 1 0 00-2 0v6l-8 4v2l8-2v4l-2 1v1l3-.5 3 .5v-1l-2-1v-4l8 2z'/>",camera:"<path d='M4 8h3l2-3h6l2 3h3v11H4z'/><circle cx='12' cy='13' r='3.5'/>",document:"<path d='M6 3h9l4 4v14H6z'/><path d='M9 12h7M9 16h7'/>",pin:"<path d='M12 22C6 14 4 12 4 10a8 8 0 0116 0c0 2-2 4-8 12z'/><circle cx='12' cy='10' r='3'/>",phone:"<path d='M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z'/>",globe:"<circle cx='12' cy='12' r='9'/><path d='M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'/>",clock:"<circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/>",tag:"<path d='M3 12V3h9l9 9-9 9z'/><circle cx='7.5' cy='7.5' r='1.2'/>",leaf:"<path d='M5 19C5 9 11 4 20 4c0 9-5 15-15 15zM5 19l8-8'/>"}).map(([k,v])=>[k,`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'>${v}</svg>`]));
+const TXT=['text','heading','subheading','paragraph','label','caption','coordinate','metadata','activity','stat','badge','checklist','locationBadge'];
+const TYPES=[...TXT,'image','svg','icon','shape','line','divider','group','map','mapMarker','route','compass','sourceList'];
+
+/* ===== TEMPLATE VALIDATION: required top-level fields, element id/type/label/position, instruction on editable ===== */
+function validate(t){const e=[];
+ if(!t||typeof t!=='object')return['Not a JSON object.'];
+ ['schemaVersion','template','canvas','theme','contentSchema','elements'].forEach(k=>{if(t[k]==null)e.push('Missing top-level field: '+k)});
+ if(e.length)return e;
+ if(!Array.isArray(t.elements))return['"elements" must be an array.'];
+ t.elements.forEach((x,i)=>{const n=x.id||'#'+i;
+  ['id','type','label','position'].forEach(k=>{if(x[k]==null)e.push(`Element ${n}: missing "${k}"`)});
+  if(x.type&&!TYPES.includes(x.type))e.push(`Unknown element type: "${x.type}" (element ${n})\nSupported types: ${TYPES.join(', ')}`);
+  if(x.editable!==false&&!x.instruction)e.push(`Element ${n}: editable but has no "instruction"`)});
+ return e}
+
+/* ===== RENDERER: element JSON -> absolutely positioned DOM in a 1000x1414 coordinate space (A2 ratio), scaled by CSS transform ===== */
+const PAIRS=[['Editorial','Playfair Display','Inter'],['Modern','Sora','Manrope'],['Travel Journal','DM Serif Display','DM Sans'],['Poster','Bebas Neue','Manrope'],['Condensed','Oswald','Inter']];
+const cleanSvg=s=>String(s).replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,'');
+function elHTML(el,fonts,sel){
+ const p=el.position,s=el.style||{};
+ let c=`left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px;opacity:${s.opacity??1};transform:rotate(${s.rotate||0}deg);`;
+ if(s.bg)c+=`background:${s.bg};`;if(s.border)c+=`border:${s.border};`;if(s.radius)c+=`border-radius:${s.radius}px;`;if(s.color)c+=`color:${s.color};`;if(s.grad)c+=`background:${s.grad};`;if(s.blend)c+=`mix-blend-mode:${s.blend};`;if(s.fade){const g={bottom:'linear-gradient(#000 60%,transparent)',top:'linear-gradient(transparent,#000 40%)',edges:'radial-gradient(#000 55%,transparent 75%)'}[s.fade];if(g)c+=`-webkit-mask-image:${g};mask-image:${g};`}
+ let i='';
+ if(TXT.includes(el.type)||el.type==='sourceList'){
+  c+=`font-family:${s.font==='d'?fonts.d:s.font==='s'?"'Great Vibes',cursive":fonts.b};text-transform:${s.tt||'none'};${s.shadow?`text-shadow:${s.shadow};`:''}${s.vert?'writing-mode:vertical-rl;':''}${s.tg?`background:${s.tg};-webkit-background-clip:text;background-clip:text;color:transparent;`:''}font-size:${s.size||20}px;font-weight:${s.weight||400};letter-spacing:${s.ls||0}em;line-height:${s.lh||1.3};text-align:${s.align||'left'};padding:${s.pad||0}px;white-space:pre-wrap;`;
+  i=el.type!=='sourceList'?esc(el.text).replace(/\*(.+?)\*/g,`<span style="color:${s.accent||'inherit'}">$1</span>`):(el.items&&el.items.length?el.items.map((t,k)=>`${k+1}. ${esc(t)}`).join('\n'):'<i style="opacity:.55">Sources — add one per line</i>');
+ }else if(el.type==='svg'||el.type==='icon')i=cleanSvg(el.svg||ICONS[el.icon]||'');
+ else if(el.type==='compass')i="<svg viewBox='0 0 100 100' fill='none' stroke='currentColor' stroke-width='2'><circle cx='50' cy='50' r='44'/><path d='M50 8L60 50L50 92L40 50Z' fill='currentColor'/><path d='M8 50H92' stroke-width='1'/></svg>";
+ else if(el.type==='route'){const pts=el.points||[[0,0],[100,100]];i=`<svg viewBox='0 0 ${p.w} ${p.h}' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='${s.sw||5}' stroke-dasharray='4 12' stroke-linecap='round'><polyline points='${pts.map(q=>q.join(',')).join(' ')}'/></svg>`}
+ else if(el.type==='mapMarker'){c+=`border-radius:50%;display:grid;place-items:center;font:700 ${s.size||20}px sans-serif;`;i=esc(el.text||'')}
+ else if(el.type==='image'||el.type==='map'){if(s.mask)c+=`clip-path:${{circle:'circle(50% at 50% 50%)',ellipse:'ellipse(50% 50% at 50% 50%)',arch:'inset(0 round 999px 999px 0 0)'}[s.mask]||'none'};`;i=el.src?`<img src="${esc(el.src)}" style="width:100%;height:100%;object-fit:cover;display:block;transform:scale(${s.zoom||1});object-position:${s.px??50}% ${s.py??50}%;filter:${{grayscale:'grayscale(1)',sepia:'sepia(.8)',contrast:'contrast(1.4)',warm:'saturate(1.3) hue-rotate(-10deg)'}[s.tr]||'none'}">`+(s.ov?`<div style="position:absolute;inset:0;background:${s.ov};opacity:${s.ova??.3}"></div>`:''):`<div class="ph">${esc(el.label)}<br>${esc((el.instruction||'').slice(0,90))}</div>`}
+ return `<div class="e${sel?' sel':''}" data-id="${esc(el.id)}" style="${c}">${i}</div>`}
+function canvasHTML(P,w,o={}){ // P = {els,fd,fb,bg,size}
+ const S=w/1000,H=P.H||1414,f={d:P.fd,b:P.fb};
+ return `<div class="cvw" style="width:${w}px;height:${H*S}px"><div class="cv" style="width:1000px;height:${H}px;background:${P.bg};transform:scale(${S})">${P.els.filter(e=>!e.hidden).map(e=>elHTML(e,f,e.id===o.sel)).join('')}${o.safe?'<div style="position:absolute;inset:50px;border:3px dashed #e0452b;pointer-events:none"></div>':''}</div></div>`}
+const projP=p=>({els:p.els,fd:p.fd,fb:p.fb,bg:p.bg,H:(CV[p.canvas]||CV.A2).h});
+const tplP=t=>({els:t.elements,fd:t.theme.displayFont,fb:t.theme.bodyFont,bg:t.theme.background});
+
+/* ===== STATE ===== */
+let zoom=1,view='home',proj=null,selId=null,mode='sel',safe=false,hist=[],fut=[],lastH=0,saveT=0,tdet=null;
+
+/* ===== PROJECT CRUD / AUTOSAVE ===== */
+function newProject(t){const d=clone(t);proj={id:'p'+Date.now(),name:d.template.name,tplId:d.template.id,els:d.elements,fd:d.theme.displayFont,fb:d.theme.bodyFont,bg:d.theme.background,updated:Date.now(),canvas:'A2'};projects.unshift(proj);sv('tls-proj',projects);hist=[];fut=[];selId=null;mode='sel';view='editor';render()}
+function save(){proj.updated=Date.now();const i=projects.findIndex(p=>p.id===proj.id);if(i<0)projects.unshift(proj);sv('tls-proj',projects);const s=$('#st');if(s){s.textContent='Saved'}}
+function touch(){const s=$('#st');if(s)s.textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(save,500)}
+/* ===== HISTORY: snapshot of elements before each change ===== */
+function snap(force){const n=Date.now();if(force||n-lastH>900){hist.push(JSON.stringify(proj.els));if(hist.length>60)hist.shift();fut=[]}lastH=n}
+function undo(){if(!hist.length)return;fut.push(JSON.stringify(proj.els));proj.els=JSON.parse(hist.pop());refresh(true)}
+function redo(){if(!fut.length)return;hist.push(JSON.stringify(proj.els));proj.els=JSON.parse(fut.pop());refresh(true)}
+const cur=()=>proj.els.find(e=>e.id===selId);
+
+/* ===== CONTENT CHECK + PRINT CHECK (existence checks only; no factual claims) ===== */
+function contentCheck(){return proj.els.filter(e=>e.required||e.rec).map(e=>{
+ const empty=e.type==='image'||e.type==='map'?!e.src:e.type==='sourceList'?!(e.items&&e.items.length):(e.ph||!String(e.text||'').trim());
+ return{l:e.label,s:!empty?'ok':e.required?'ms':'wn'}})}
+function printCheck(){const r=[];const small=proj.els.filter(e=>TXT.includes(e.type)&&!e.hidden&&(e.style.size||20)*1.19<10);
+ r.push(['ok','Portrait orientation']);r.push(['ok',CV[proj.canvas||'A2'].l+' portrait ratio ('+CV[proj.canvas||'A2'].cm.join('×')+' cm)']);
+ const H=projP(proj).H,out=proj.els.filter(e=>{const p=e.position;return p.x<0||p.y<0||p.x+p.w>1000||p.y+p.h>H&&e.type!=='svg'});
+ const unsafe=proj.els.filter(e=>e.type!=='svg'&&e.type!=='shape'&&!e.hidden&&(e.position.x<50||e.position.y<50||e.position.x+e.position.w>950||e.position.y+e.position.h>H-50));
+ r.push([out.length?'ms':'ok',out.length?'Outside canvas: '+out.map(e=>e.label).join(', '):'No elements outside canvas']);
+ r.push([unsafe.length?'wn':'ok',unsafe.length?'Inside safe margin: '+unsafe.map(e=>e.label).join(', '):'Content inside safe margins']);
+ r.push([small.length?'wn':'ok',small.length?'Text may be small (<10pt at A2): '+small.map(e=>e.label).join(', '):'Text sizes look readable (approx.)']);
+ const cc=contentCheck().filter(x=>x.s==='ms');r.push([cc.length?'wn':'ok',cc.length?cc.length+' required item(s) missing':'Required content present']);return r}
+
+/* ===== VIEWS ===== */
+const tabs=[['home','Home'],['tpls','Templates'],['projs','Projects'],['create','Create']];
+const fmt=t=>new Date(t).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});
+function thumb(t,w){return `<div class="th" style="width:${w}px">${canvasHTML(tplP(t),w)}</div>`}
+function tplCard(t){return `<div class="card">${thumb(t,96)}<div class="i"><b>${esc(t.template.name)}</b><div class="mono">${esc(t.template.category)} · HM 302 Opt ${t.template.assignmentOption??'—'}</div><div class="mono">${esc(t.template.style||'')}</div><div style="margin:4px 0">${esc(t.template.description||'')}</div><div class="row"><button data-a="detail" data-i="${esc(t.template.id)}">Details</button><button class="p" data-a="use" data-i="${esc(t.template.id)}">Use template</button></div></div></div>`}
+function render(){const a=$('#app');
+ if(view==='editor'){a.innerHTML=editorShell();refresh(true);return}
+ let b='';
+ if(view==='home')b=`<div class="mono">SHEET A2 · 42 × 59.4 CM · PORTRAIT</div><h1>Tourism Layout Studio</h1><p>Build a visitor-ready tourism layout. You write the content and verify the facts; the templates handle the composition.</p>
+ <div class="row"><button class="p" data-a="go" data-v="tpls">Start from template</button><button data-a="go" data-v="projs">My projects</button><button data-a="go" data-v="create">Import template</button><button data-a="go" data-v="create">Create template</button></div><h2>FEATURED TEMPLATES</h2>${lib().slice(0,4).map(tplCard).join('')}`;
+ if(view==='tpls')b=`<h1>Templates</h1>${lib().map(tplCard).join('')}`;
+ if(view==='detail'){const t=tdet;b=`<button data-a="go" data-v="tpls">Back</button><div style="margin:12px 0">${thumb(t,Math.min(340,innerWidth-34))}</div><h1>${esc(t.template.name)}</h1><div class="mono">${esc(t.template.category)} · HM 302 OPTION ${t.template.assignmentOption??'—'}<br>STYLE: ${esc(t.template.style||'')}<br>${t.elements.length} ELEMENTS</div><h2>INCLUDES</h2>${t.elements.filter(e=>e.required||e.rec).map(e=>`<div class="ck">${e.required?'●':'○'} ${esc(e.label)} <span class="mono">${e.required?'required':'recommended'}</span></div>`).join('')}<div class="row"><button class="p" data-a="use" data-i="${esc(t.template.id)}">Use this template</button></div>`}
+ if(view==='projs')b=`<h1>My projects</h1>${projects.length?projects.map(p=>`<div class="card"><div class="th" style="width:80px">${canvasHTML(projP(p),80)}</div><div class="i"><b>${esc(p.name)}</b><div class="mono">${esc(p.tplId)}<br>${fmt(p.updated)}</div><div class="row"><button class="p" data-a="open" data-i="${p.id}">Open</button><button data-a="ren" data-i="${p.id}">Rename</button><button data-a="dup" data-i="${p.id}">Duplicate</button><button data-a="del" data-i="${p.id}">Delete</button></div></div></div>`).join(''):'<p>No projects yet. Pick a template to start.</p><button class="p" data-a="go" data-v="tpls">Browse templates</button>'}`;
+ if(view==='create')b=createView();
+ a.innerHTML=`<div class="scr">${b}</div><nav>${tabs.map(([k,l])=>`<button data-a="go" data-v="${k}" class="${view===k||(k==='tpls'&&view==='detail')?'on':''}">${l}</button>`).join('')}</nav>`}
+
+/* Sample template showing most element types (also downloadable from Create) */
+const SAMPLE={schemaVersion:'1.0',template:{id:'sample-01',name:'Schema Sample',category:'Destination Poster',assignmentOption:1,style:'Minimal',description:'Shows several element types.',tags:['sample']},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait'},theme:{background:'#FFFFFF',primary:'#173F4A',secondary:'#C8553D',displayFont:'Playfair Display',bodyFont:'Inter'},contentSchema:{title:{type:'text',label:'Title',required:true}},elements:[{id:'t',type:'heading',label:'Title',editable:true,required:true,instruction:'Short title.',position:{x:60,y:60,w:880,h:120},style:{size:80,font:'d',color:'#173F4A'},text:'TITLE',ph:true},{id:'i',type:'image',label:'Photo',editable:true,required:true,instruction:'Credit it in Sources.',lock:true,position:{x:60,y:220,w:880,h:500},style:{},src:''},{id:'c',type:'compass',label:'Compass',editable:true,instruction:'Decorative.',position:{x:800,y:760,w:140,h:140},style:{color:'#C8553D'}},{id:'r',type:'route',label:'Route',editable:true,instruction:'Edit points.',position:{x:60,y:760,w:700,h:300},points:[[10,10],[300,200],[680,280]],style:{color:'#173F4A',sw:4}},{id:'m',type:'mapMarker',label:'Marker',editable:true,instruction:'Place on a verified location.',position:{x:340,y:940,w:40,h:40},text:'1',style:{bg:'#C8553D',color:'#ffffff',size:18}},{id:'s',type:'sourceList',label:'Sources',editable:true,instruction:'One per line.',position:{x:60,y:1300,w:700,h:70},style:{size:13,font:'b',color:'#173F4A'},items:[]}]};
+function addEl(t){const b={id:'n'+Date.now(),type:t,label:t[0].toUpperCase()+t.slice(1)+' (new)',editable:true,instruction:'Added by you. Edit the content and cite any facts in Sources.',position:{x:300,y:600,w:400,h:100},style:{size:24,font:'b',color:'#111111'}};
+ if(TXT.includes(t)){b.text='New '+t}
+ if(t==='image'||t==='map'){b.position={x:250,y:500,w:500,h:400};b.src='';b.style={}}
+ if(t==='svg'||t==='icon'){b.position={x:400,y:600,w:200,h:200};b.svg="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.5'><circle cx='12' cy='10' r='3'/><path d='M12 22C6 14 4 12 4 10a8 8 0 0116 0c0 2-2 4-8 12z'/></svg>";b.style={color:'#111111'}}
+ if(t==='compass'){b.position={x:400,y:600,w:160,h:160};b.style={color:'#111111'}}
+ if(t==='mapMarker'){b.position={x:480,y:640,w:44,h:44};b.text='1';b.style={bg:'#e0452b',color:'#ffffff',size:20}}
+ if(t==='route'){b.position={x:200,y:500,w:600,h:400};b.points=[[20,20],[300,180],[580,380]];b.style={color:'#111111',sw:5}}
+ if(t==='line'){b.position={x:200,y:600,w:600,h:3};b.style={bg:'#111111'}}
+ if(t==='sourceList'){b.items=[];b.position={x:100,y:1300,w:600,h:70};b.style={size:13,font:'b',color:'#111111'}}
+ proj.els.push(b);selId=b.id;mode='sel';refresh(1)}
+function exportPDF(){if(!window.html2canvas||!window.jspdf){alert('PDF libraries did not load. Check your connection.');return}
+ const n=document.createElement('div');n.style.cssText='position:fixed;left:-9999px;top:0';n.innerHTML=canvasHTML(projP(proj),1000);document.body.appendChild(n);
+ html2canvas(n.firstChild,{scale:3,useCORS:true}).then(c=>{const d=CV[proj.canvas||'A2'].cm,pdf=new jspdf.jsPDF({unit:'cm',format:d,orientation:'portrait'});pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',0,0,d[0],d[1]);pdf.save(proj.name+'.pdf');n.remove()}).catch(()=>{n.remove();alert('PDF export failed.')})}
+function createView(){const opt=a=>a.map(x=>`<option>${x}</option>`).join('');
+ const cats=['Destination Poster','Tourism Map','Philippines Tourism Map','Dumaguete Visitor Guide','Food Map','Tourism Itinerary','Nature & Adventure','Culture & Heritage','Practical Guide','Safety & Responsible Travel'];
+ const sty=['Editorial','Cartographic','Field Guide','Travel Journal','Contemporary','Heritage','Coastal','Botanical','Documentary','Minimalist','Experimental'];
+ const lay=['Asymmetrical','Large hero image','Route-based','Map-centered','Typography-focused','Technical','Magazine-style','Illustrated','Geographic','Layered','Full-bleed','Structured whitespace'];
+ return `<h1>Create</h1><h2>IMPORT JSON TEMPLATE</h2><div class="row"><button data-a="sample">Download sample template JSON</button></div><input type="file" id="imp" accept=".json,application/json"><div id="impo"></div>
+ <h2>CREATE TEMPLATE WITH AI (PROMPT ONLY)</h2><p class="mono">Generates a prompt to paste into an external assistant. It does not make your poster.</p>
+ <label>Template name<input id="g-n" value="My Template"></label><label>Category<select id="g-c">${opt(cats)}</select></label><label>Assignment option (1–10)<input id="g-o" type="number" min="1" max="10" value="1"></label><label>Visual style<select id="g-s">${opt(sty)}</select></label>
+ <label>Layout characteristics</label><div>${lay.map(l=>`<label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" class="g-l" value="${l}" style="width:24px;min-height:24px">${l}</label>`).join('')}</div>
+ <label>Required content (one field per line)<textarea id="g-f" rows="3">Destination name\nLocation\nSources</textarea></label><label>Special design instructions<textarea id="g-d" rows="3" placeholder="Avoid cards. Use a continuous route line…"></textarea></label>
+ <div class="row"><button class="p" data-a="gen">Generate AI prompt</button></div><textarea id="out" rows="10" readonly></textarea><div class="row"><button data-a="cp">Copy</button><button data-a="dl">Download</button><button data-a="clr">Clear</button></div>`}
+
+function genPrompt(){const v=i=>$(i).value.trim(),ls=[...document.querySelectorAll('.g-l:checked')].map(x=>x.value);
+ return `You are designing a template for TOURISM LAYOUT STUDIO, a template-based tourism layout editor. Return ONLY one valid JSON template, no commentary.
+
+TEMPLATE
+- Name: ${v('#g-n')}
+- Category: ${v('#g-c')} (HM 302 assignment option ${v('#g-o')})
+- Visual style: ${v('#g-s')}
+- Layout characteristics: ${ls.join(', ')||'your choice'}
+- Required content fields:\n${v('#g-f').split('\n').filter(Boolean).map(x=>'  • '+x).join('\n')}
+- Special design instructions: ${v('#g-d')||'none'}
+
+SCHEMA
+Top-level: schemaVersion "1.0", template {id,name,category,assignmentOption,style,description,tags}, canvas {width:1000,height:1414,format:"A2",orientation:"portrait"} (A2 portrait 42×59.4 cm; coordinates are in this 1000×1414 space), theme {background,primary,secondary,displayFont,bodyFont}, contentSchema {}, elements [].
+Each element: id, type, label, instruction (what the user should put here), editable, required (true for must-fill content), rec (true for recommended), lock (true to prevent move/resize), position {x,y,w,h}, style {size,weight,font:"d"|"b",color,lh,ls,align,bg,border,radius,pad,opacity,rotate}.
+Allowed types ONLY: ${TYPES.join(', ')}. Text-like types (${TXT.join(', ')}) use "text" with "ph":true while placeholder; image/map use "src":""; svg/icon use "svg" (inline SVG, currentColor, single quotes); route uses "points":[[x,y],...] inside its own box; mapMarker uses "text"; sourceList uses "items":[]; shape/line/divider use style.bg. Canvas may be A2 (1000×1414) or 18×24 in (1000×1333).
+
+RULES
+- Every important element is separately editable. Do not flatten the design or use a poster PNG as background.
+- Use scalable SVG for decorations (contours, waves, routes, compass, markers, rules).
+- Configurable typography via theme fonts (style.font "d" display / "b" body).
+- Include instructions for every editable element, required fields, and a source list.
+- Do NOT fabricate geographic information, coordinates, prices, travel times or facts. Use clearly marked placeholders and map slots for user-supplied verified content.
+- Schema 1.1 style keys: grad, tg (text gradient), fade (bottom|top|edges), blend, shadow, tt, vert, accent (wrap words in *asterisks* in text), mask (circle|ellipse|arch), tr, zoom, px, py, ov/ova; font "s" = script; icon elements accept "icon": ${Object.keys(ICONS).join(', ')}.
+- Make the layout original, uncluttered, with clear hierarchy and readable text sizes for A2 print.`}
+
+/* ===== EDITOR ===== */
+function editorShell(){return `<div class="bar"><button data-a="back" aria-label="Back">←</button><b>${esc(proj.name)}</b><span class="mono" id="st">Saved</span></div>
+<div class="stage" id="stage"></div><div class="sheet" id="sheet"></div>
+<div class="tools"><button data-a="undo">Undo</button><button data-a="redo">Redo</button><button data-a="zo">Zoom −</button><button data-a="zi">Zoom +</button><button data-a="cv">${CV[proj.canvas||'A2'].l}</button><button data-a="m" data-m="add">+ Element</button><button data-a="safe" id="bs">Safe area</button><button data-a="m" data-m="sel">Edit</button><button data-a="m" data-m="layers">Layers</button><button data-a="m" data-m="check">Check</button><button data-a="m" data-m="type">Fonts</button><button data-a="print">Print preview</button><button data-a="png">PNG</button><button data-a="pdf">PDF</button><button data-a="pj">Project JSON</button><button data-a="tj">Template JSON</button></div>`}
+function drawCanvas(){const st=$('#stage');if(!st)return;const w=Math.min(innerWidth-24,(innerHeight*.5-60)/1.414*1.1,620)*zoom;st.innerHTML=canvasHTML(projP(proj),Math.max(200,Math.round(w)),{sel:selId,safe});const b=$('#bs');if(b)b.className=safe?'on':''}
+const num=(k,v,l)=>`<div><label>${l}<input type="number" data-f="${k}" value="${v}"></label></div>`;
+const selH=(k,l,v,o)=>`<div><label>${l}<select data-f="${k}">${o.map(([a,b])=>`<option value="${a}" ${(v||'')===a?'selected':''}>${b}</option>`).join('')}</select></label></div>`;
+function drawSheet(){const sh=$('#sheet');if(!sh)return;let h='';
+ if(mode==='add'){h='<div class="mono">ADD ELEMENT</div><div class="g4">'+[['text','Text'],['heading','Heading'],['activity','Activity'],['stat','Stat'],['badge','Badge'],['checklist','Checklist'],['image','Image'],['svg','SVG'],['icon','Icon'],['compass','Compass'],['map','Map'],['mapMarker','Marker'],['route','Route'],['line','Line'],['sourceList','Sources']].map(([t,l])=>`<button data-a="add" data-t="${t}">${l}</button>`).join('')+'</div>'}
+ else if(mode==='layers'){h='<div class="mono">LAYERS (top first)</div>'+[...proj.els].reverse().map(e=>`<div class="ly"><button class="n" data-a="pick" data-i="${e.id}" style="${e.id===selId?'color:var(--ac)':''}">${esc(e.label)}</button><button data-a="hid" data-i="${e.id}" aria-label="Hide or show">${e.hidden?'Show':'Hide'}</button><button data-a="lk" data-i="${e.id}" aria-label="Lock or unlock">${e.llock?'Unlock':'Lock'}</button><button data-a="up" data-i="${e.id}" aria-label="Move up">↑</button><button data-a="dn" data-i="${e.id}" aria-label="Move down">↓</button></div>`).join('')}
+ else if(mode==='check'){h='<div class="mono">CONTENT CHECK</div>'+contentCheck().map(c=>`<div class="ck ${c.s}">${{ok:'✓ Complete',wn:'⚠ Warning',ms:'✕ Missing'}[c.s]} — ${esc(c.l)}</div>`).join('')+'<div class="mono" style="margin-top:12px">PRINT CHECK</div>'+printCheck().map(([s,t])=>`<div class="ck ${s}">${{ok:'✓',wn:'⚠',ms:'✕'}[s]} ${esc(t)}</div>`).join('')+'<p class="mono">Checks only that content exists. Verify facts and sources yourself.</p>'}
+ else if(mode==='type'){h=`<div class="mono">GLOBAL TYPOGRAPHY (whole template)</div><div class="row">${PAIRS.map((p,i)=>`<button data-a="pair" data-i="${i}" class="${proj.fd===p[1]?'on':''}">${p[0]}<br><small>${p[1]} / ${p[2]}</small></button>`).join('')}</div><label>Custom font (WOFF, WOFF2, TTF, OTF)<input type="file" id="fontf" accept=".woff,.woff2,.ttf,.otf"></label><div class="mono" style="margin-top:8px">Element overrides: select an element, then pick Display / Body font.</div>`}
+ else{const e=cur();if(!e){h='<div class="mono">TAP AN ELEMENT ON THE CANVAS, OR OPEN LAYERS</div>'}else{
+  const s=e.style||{},p=e.position,lock=e.lock;
+  h=`<div class="mono">${esc(e.type.toUpperCase())} ${e.required?'· REQUIRED':''}${lock?' · LOCKED POSITION':''}</div><b>${esc(e.label)}</b><div class="ins"><div class="mono">WHAT TO PUT HERE</div>${esc(e.instruction||'')}</div>`;
+  if(TXT.includes(e.type))h+=`<label>Content<textarea rows="4" data-f="text">${esc(e.text)}</textarea></label><div class="g4">${num('s.size',s.size||20,'Size')}${num('s.weight',s.weight||400,'Weight')}${num('s.ls',s.ls||0,'Spacing')}${num('s.lh',s.lh||1.2,'Line ht')}</div><div class="g4"><div><label>Font<select data-f="s.font"><option value="d" ${s.font==='d'?'selected':''}>Display</option><option value="s" ${s.font==='s'?'selected':''}>Script</option><option value="b" ${s.font!=='d'&&s.font!=='s'?'selected':''}>Body</option></select></label></div><div><label>Align<select data-f="s.align">${['left','center','right'].map(a=>`<option ${s.align===a?'selected':''}>${a}</option>`).join('')}</select></label></div><div><label>Color<input type="color" data-f="s.color" value="${/^#[0-9a-f]{6}$/i.test(s.color||'')?s.color:'#000000'}"></label></div>${num('s.opacity',s.opacity??1,'Opacity')}</div>`;
+  if(TXT.includes(e.type))h+=`<div class="g4">${selH('s.tt','Case',s.tt,[['','As typed'],['uppercase','UPPER'],['capitalize','Title']])}<div><label>*Accent*<input type="color" data-f="s.accent" value="${/^#[0-9a-f]{6}$/i.test(s.accent||'')?s.accent:'#e0452b'}"></label></div>${selH('s.vert','Vertical',s.vert?'1':'',[['','No'],['1','Yes']])}${selH('s.blend','Blend',s.blend,[['','Normal'],['multiply','Multiply'],['screen','Screen'],['overlay','Overlay']])}</div><label>Shadow / glow (CSS)<input data-f="s.shadow" value="${esc(s.shadow||'')}" placeholder="0 0 20px #7ff"></label><label>Text gradient (CSS)<input data-f="s.tg" value="${esc(s.tg||'')}" placeholder="linear-gradient(#e0452b,#fff0)"></label>`;
+  if(e.type==='sourceList')h+=`<div class="mono">SOURCES</div>`+(e.items||[]).map((t,k)=>`<div class="ly"><input data-f="item.${k}" value="${esc(t)}" aria-label="Source ${k+1}"><button data-a="sup" data-k="${k}" aria-label="Move up">↑</button><button data-a="sdn" data-k="${k}" aria-label="Move down">↓</button><button data-a="sdel" data-k="${k}" aria-label="Remove">✕</button></div>`).join('')+`<div class="row"><button data-a="sadd">Add source</button></div><div class="g4">${num('s.size',s.size||13,'Font size')}${selH('s.align','Align',s.align,[['left','Left'],['center','Center'],['right','Right']])}</div>`;
+  if(e.type==='image'||e.type==='map')h+=`<label>${e.type==='map'?'Replace map (image or SVG)':'Replace image'}<input type="file" id="imgf" accept="image/*"></label><div class="g4">${num('s.radius',s.radius||0,'Radius')}${num('s.opacity',s.opacity??1,'Opacity')}${num('s.rotate',s.rotate||0,'Rotate')}</div><div class="mono">CROP: zoom + position</div><div class="g4">${num('s.zoom',s.zoom||1,'Zoom')}${num('s.px',s.px??50,'Pos X %')}${num('s.py',s.py??50,'Pos Y %')}${selH('s.mask','Mask',s.mask,[['','None'],['circle','Circle'],['ellipse','Ellipse'],['arch','Arch']])}</div><div class="g4">${selH('s.tr','Treatment',s.tr,[['','None'],['grayscale','Gray'],['sepia','Sepia'],['contrast','Contrast'],['warm','Warm']])}<div><label>Overlay<input type="color" data-f="s.ov" value="${/^#[0-9a-f]{6}$/i.test(s.ov||'')?s.ov:'#000000'}"></label></div>${num('s.ova',s.ova??0.3,'Overlay op.')}</div>`;
+  if(e.type==='icon')h+=`<div class="g4">${selH('icon','Icon',e.icon,Object.keys(ICONS).map(k=>[k,k]))}</div>`;
+  if(['svg','icon','compass','route'].includes(e.type))h+=`<label>Upload SVG<input type="file" id="svgf" accept=".svg,image/svg+xml"></label><div class="g4"><div><label>Color<input type="color" data-f="s.color" value="${/^#[0-9a-f]{6}$/i.test(s.color||'')?s.color:'#000000'}"></label></div>${num('s.opacity',s.opacity??1,'Opacity')}${num('s.rotate',s.rotate||0,'Rotate')}</div>`;
+  if(['shape','line','divider','group','mapMarker'].includes(e.type))h+=`<div class="g4"><div><label>Fill<input type="color" data-f="s.bg" value="${/^#[0-9a-f]{6}$/i.test(s.bg||'')?s.bg:'#000000'}"></label></div>${num('s.opacity',s.opacity??1,'Opacity')}</div>`;
+  if(e.type==='route')h+=`<label>Points (x,y per line, inside box)<textarea rows="4" data-f="pts">${esc((e.points||[]).map(q=>q.join(',')).join('\n'))}</textarea></label>${num('s.sw',s.sw||5,'Line width')}`;if(e.type==='mapMarker')h+=`<label>Label<input data-f="text" value="${esc(e.text||'')}"></label>`;
+  h+=`<div class="g4">${selH('s.fade','Edge fade',s.fade,[['','None'],['bottom','Bottom'],['top','Top'],['edges','Edges']])}</div><label>Background gradient (CSS)<input data-f="s.grad" value="${esc(s.grad||'')}" placeholder="linear-gradient(#f00,#00f)"></label>`;h+=`<div class="mono" style="margin-top:8px">POSITION ${lock?'(locked by template)':''}</div><div class="g4">${['x','y','w','h'].map(k=>`<div><label>${k.toUpperCase()}<input type="number" data-f="p.${k}" value="${Math.round(p[k])}" ${lock?'disabled':''}></label></div>`).join('')}</div>`;
+  if(lock)h+=`<div class="row"><button data-a="detach">Detach from template (free move/resize)</button></div>`;h+=`<div class="row"><button data-a="edup">Duplicate</button><button data-a="edel">Delete element</button></div>`;
+ }}
+ sh.innerHTML=h}
+function refresh(full){drawCanvas();drawSheet();if(full)touch()}
+
+/* ===== EVENTS ===== */
+const setF=(e,k,v)=>{const[g,n]=k.split('.');
+ if(k==='icon'){e.icon=v;delete e.svg}else if(k==='text')e.text=v,e.ph=false;else if(k==='items')e.items=v.split('\n').map(x=>x.trim()).filter(Boolean);
+ else if(g==='item')e.items[+n]=v;
+ else if(g==='pts')e.points=v.split('\n').map(l=>l.split(',').map(Number)).filter(q=>q.length==2&&!q.some(isNaN));
+ else if(g==='s'){const numeric=['size','weight','ls','lh','opacity','rotate','radius','zoom','px','py','ova','sw'].includes(n);e.style[n]=numeric?(parseFloat(v)||0):v}
+ else if(g==='p')e.position[n]=parseFloat(v)||0};
+function exportPNG(){const f={d:proj.fd,b:proj.fb},n=document.createElement('div');n.style.cssText='position:fixed;left:-9999px;top:0';n.innerHTML=canvasHTML(projP(proj),1000);document.body.appendChild(n);
+ if(!window.html2canvas){alert('PNG library did not load. Check your connection.');n.remove();return}
+ html2canvas(n.firstChild,{scale:3,useCORS:true}).then(c=>{c.toBlob(b=>dlBlob(b,proj.name+'.png'));n.remove()}).catch(()=>{n.remove();alert('PNG export failed.')})}
+function dlBlob(b,name){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+const dlText=(t,n)=>dlBlob(new Blob([t],{type:'text/plain'}),n);
+function importFile(f){const o=$('#impo');const r=new FileReader();r.onload=()=>{let t;
+ try{t=JSON.parse(r.result)}catch(e){o.innerHTML=`<div class="err">TEMPLATE IMPORT ERROR\n\nInvalid JSON: ${esc(e.message)}</div>`;return}
+ const er=validate(t);if(er.length){o.innerHTML=`<div class="err">TEMPLATE IMPORT ERROR\n\n${esc(er.join('\n\n'))}</div>`;return}
+ window._imp=t;o.innerHTML=`<p class="mono">PREVIEW — ${esc(t.template?.name||'Untitled')}</p>${thumb(t,160)}<div class="row"><button class="p" data-a="addtpl">Add to library</button></div>`};r.readAsText(f)}
+
+document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]'),a=b&&b.dataset.a,i=b&&b.dataset.i;
+ if(!a){const el=ev.target.closest('.cv .e');if(el&&view==='editor'){const x=proj.els.find(e=>e.id===el.dataset.id);if(x&&!x.llock){selId=x.id;mode='sel';refresh()}}return}
+ const e=proj&&proj.els.find(x=>x.id===i),idx=proj&&proj.els.findIndex(x=>x.id===i);
+ if(a==='go'){view=b.dataset.v;render()}
+ else if(a==='detail'){tdet=lib().find(t=>t.template.id===i);view='detail';render()}
+ else if(a==='use')newProject(lib().find(t=>t.template.id===i));
+ else if(a==='open'){proj=projects.find(p=>p.id===i);hist=[];fut=[];selId=null;view='editor';render()}
+ else if(a==='ren'){const p=projects.find(p=>p.id===i),n=prompt('Project name',p.name);if(n){p.name=n;sv('tls-proj',projects);render()}}
+ else if(a==='dup'){const p=clone(projects.find(p=>p.id===i));p.id='p'+Date.now();p.name+=' copy';projects.unshift(p);sv('tls-proj',projects);render()}
+ else if(a==='del'){if(confirm('Delete this project?')){projects=projects.filter(p=>p.id!==i);sv('tls-proj',projects);render()}}
+ else if(a==='back'){save();view='projs';render()}
+ else if(a==='undo')undo();else if(a==='redo')redo();
+ else if(a==='safe'){safe=!safe;drawCanvas()}
+ else if(a==='m'){mode=b.dataset.m;drawSheet()}
+ else if(a==='pick'){selId=i;mode='sel';refresh()}
+ else if(a==='hid'){snap(1);e.hidden=!e.hidden;refresh(1)}
+ else if(a==='lk'){e.llock=!e.llock;if(e.llock&&selId===i)selId=null;refresh(1)}
+ else if(a==='up'&&idx<proj.els.length-1){snap(1);proj.els.splice(idx+1,0,proj.els.splice(idx,1)[0]);refresh(1)}
+ else if(a==='dn'&&idx>0){snap(1);proj.els.splice(idx-1,0,proj.els.splice(idx,1)[0]);refresh(1)}
+ else if(a==='detach'){snap(1);cur().lock=false;refresh(1)}
+ else if(a==='pair'){snap(1);proj.fd=PAIRS[i][1];proj.fb=PAIRS[i][2];refresh(1)}
+ else if(a==='print'){const w=Math.min(innerWidth-32,560);const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="row"><button class="p" id="cl">Close</button></div><div class="mono">FULL SHEET · A2 PORTRAIT · 42 × 59.4 CM · DASHED = SAFE AREA</div><div style="margin:12px auto;width:${w}px">${canvasHTML(projP(proj),w,{safe:true})}</div>`;document.body.appendChild(m);m.querySelector('#cl').onclick=()=>m.remove()}
+ else if(a==='zi'){zoom=Math.min(3,zoom+.25);drawCanvas()}
+ else if(a==='zo'){zoom=Math.max(.5,zoom-.25);drawCanvas()}
+ else if(a==='cv'){snap(1);const ks=Object.keys(CV),o=proj.canvas||'A2',to=ks[(ks.indexOf(o)+1)%ks.length],k=CV[to].h/CV[o].h;proj.els.forEach(e=>{e.position.y*=k;e.position.h*=k});proj.canvas=to;b.textContent=CV[to].l;refresh(1)}
+ else if(a==='add'){snap(1);addEl(b.dataset.t)}
+ else if(a==='edup'){const c=cur();if(c){snap(1);const d=clone(c);d.id='n'+Date.now();d.label+=' copy';d.position.x+=30;d.position.y+=30;d.lock=false;proj.els.push(d);selId=d.id;refresh(1)}}
+ else if(a==='edel'){const c=cur();if(c){snap(1);proj.els=proj.els.filter(x=>x!==c);selId=null;refresh(1)}}
+ else if(a==='sadd'){const c=cur();snap(1);(c.items=c.items||[]).push('');refresh(1)}
+ else if(a==='sdel'){const c=cur();snap(1);c.items.splice(+b.dataset.k,1);refresh(1)}
+ else if(a==='sup'||a==='sdn'){const c=cur(),k=+b.dataset.k,j=a==='sup'?k-1:k+1;if(j>=0&&j<c.items.length){snap(1);c.items.splice(j,0,c.items.splice(k,1)[0]);refresh(1)}}
+ else if(a==='pdf')exportPDF();
+ else if(a==='sample')dlText(JSON.stringify(SAMPLE,null,2),'sample-template.json');
+ else if(a==='png')exportPNG();
+ else if(a==='pj')dlText(JSON.stringify({kind:'project',project:proj},null,2),proj.name+'.project.json');
+ else if(a==='tj'){const t=clone(lib().find(t=>t.template.id===proj.tplId)||BUILT[0]);t.elements=clone(proj.els);t.theme.displayFont=proj.fd;t.theme.bodyFont=proj.fb;dlText(JSON.stringify(t,null,2),proj.name+'.template.json')}
+ else if(a==='addtpl'){const t=window._imp;if(t){t.template=t.template||{};t.template.id=(t.template.id||'imported')+'-'+Date.now();custom.push(t);sv('tls-custom',custom);view='tpls';render()}}
+ else if(a==='gen')$('#out').value=genPrompt();
+ else if(a==='cp'){const t=$('#out');t.select();(navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).catch(()=>document.execCommand('copy'))}
+ else if(a==='dl')dlText($('#out').value,'tourism-template-prompt.txt');
+ else if(a==='clr')$('#out').value='';
+});
+document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset.f||!proj)return;const e=cur();if(!e)return;snap();setF(e,t.dataset.f,t.value);drawCanvas();touch()});
+document.addEventListener('change',ev=>{const t=ev.target,f=t.files&&t.files[0];
+ if(t.id==='imp'&&f)return importFile(f);
+ if(!f||!proj)return;const e=cur(),r=new FileReader();
+ if(t.id==='imgf'&&e){r.onload=()=>{snap(1);e.src=r.result;refresh(1)};r.readAsDataURL(f)}
+ if(t.id==='svgf'&&e){r.onload=()=>{snap(1);e.svg=cleanSvg(r.result).replace(/<svg/i,"<svg preserveAspectRatio='xMidYMid meet'");refresh(1)};r.readAsText(f)}
+ if(t.id==='fontf'){r.onload=()=>{const fam='Custom '+f.name.replace(/\.\w+$/,'');new FontFace(fam,r.result).load().then(ff=>{document.fonts.add(ff);snap(1);proj.fd=fam;proj.fb=fam;refresh(1)}).catch(()=>alert('Could not load that font file.'))};r.readAsArrayBuffer(f)}
+});
+/* drag to move unlocked elements */
+let drag=null;
+document.addEventListener('pointerdown',ev=>{const el=ev.target.closest('.cv .e');if(!el||view!=='editor')return;const x=proj.els.find(e=>e.id===el.dataset.id);if(!x||x.llock||x.lock||x.id!==selId)return;const sc=el.closest('.cvw').getBoundingClientRect().width/1000;drag={x,sx:ev.clientX,sy:ev.clientY,ox:x.position.x,oy:x.position.y,sc,moved:false}});
+document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.clientX-drag.sx)/drag.sc,dy=(ev.clientY-drag.sy)/drag.sc;if(!drag.moved&&Math.hypot(dx,dy)>4){snap(1);drag.moved=true}if(drag.moved){drag.x.position.x=Math.round(drag.ox+dx);drag.x.position.y=Math.round(drag.oy+dy);drawCanvas()}});
+document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
+addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
+render();
+</script><script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
