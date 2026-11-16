@@ -225,7 +225,7 @@ const projP=p=>({els:p.els,fd:p.fd,fb:p.fb,bg:p.bg,H:(CV[p.canvas]||CV.A2).h});
 const tplP=t=>({els:t.elements,fd:t.theme.displayFont,fb:t.theme.bodyFont,bg:t.theme.background});
 
 /* ===== STATE ===== */
-let zoom=1,view='home',proj=null,selId=null,mode='sel',safe=false,hist=[],fut=[],lastH=0,saveT=0,tdet=null;
+let hid=false,zoom=1,view='home',proj=null,selId=null,mode='sel',safe=false,hist=[],fut=[],lastH=0,saveT=0,tdet=null;
 
 /* ===== PROJECT CRUD / AUTOSAVE ===== */
 function newProject(t){const d=clone(t);proj={id:'p'+Date.now(),name:d.template.name,tplId:d.template.id,els:d.elements,fd:d.theme.displayFont,fb:d.theme.bodyFont,bg:d.theme.background,updated:Date.now(),canvas:'A2'};projects.unshift(proj);sv('tls-proj',projects);hist=[];fut=[];selId=null;mode='sel';view='editor';render()}
@@ -318,10 +318,10 @@ RULES
 - Make the layout original, uncluttered, with clear hierarchy and readable text sizes for A2 print.`}
 
 /* ===== EDITOR ===== */
-function editorShell(){return `<div class="bar"><button data-a="back" aria-label="Back">←</button><b>${esc(proj.name)}</b><span class="mono" id="st">Saved</span></div>
+function editorShell(){hid=false;return `<div class="bar"><button data-a="back" aria-label="Back">←</button><b>${esc(proj.name)}</b><button data-a="tg" id="tgb">Preview</button><span class="mono" id="st">Saved</span></div>
 <div class="stage" id="stage"></div><div class="sheet" id="sheet"></div>
 <div class="tools"><button data-a="undo">Undo</button><button data-a="redo">Redo</button><button data-a="zo">Zoom −</button><button data-a="zi">Zoom +</button><button data-a="cv">${CV[proj.canvas||'A2'].l}</button><button data-a="m" data-m="add">+ Element</button><button data-a="safe" id="bs">Safe area</button><button data-a="m" data-m="sel">Edit</button><button data-a="m" data-m="layers">Layers</button><button data-a="m" data-m="check">Check</button><button data-a="m" data-m="type">Fonts</button><button data-a="print">Print preview</button><button data-a="png">PNG</button><button data-a="pdf">PDF</button><button data-a="pj">Project JSON</button><button data-a="tj">Template JSON</button></div>`}
-function drawCanvas(){const st=$('#stage');if(!st)return;const w=Math.min(innerWidth-24,(innerHeight*.5-60)/1.414*1.1,620)*zoom;st.innerHTML=canvasHTML(projP(proj),Math.max(200,Math.round(w)),{sel:selId,safe});const b=$('#bs');if(b)b.className=safe?'on':''}
+function drawCanvas(){const st=$('#stage');if(!st)return;const w=Math.min(innerWidth-24,(hid?innerHeight-170:innerHeight*.5-60)/1.414*1.1,hid?900:620)*zoom;st.innerHTML=canvasHTML(projP(proj),Math.max(200,Math.round(w)),{sel:hid?null:selId,safe});const b=$('#bs');if(b)b.className=safe?'on':''}
 const num=(k,v,l)=>`<div><label>${l}<input type="number" data-f="${k}" value="${v}"></label></div>`;
 const selH=(k,l,v,o)=>`<div><label>${l}<select data-f="${k}">${o.map(([a,b])=>`<option value="${a}" ${(v||'')===a?'selected':''}>${b}</option>`).join('')}</select></label></div>`;
 function drawSheet(){const sh=$('#sheet');if(!sh)return;let h='';
@@ -343,7 +343,7 @@ function drawSheet(){const sh=$('#sheet');if(!sh)return;let h='';
   h+=`<div class="g4">${selH('s.fade','Edge fade',s.fade,[['','None'],['bottom','Bottom'],['top','Top'],['edges','Edges']])}</div><label>Background gradient (CSS)<input data-f="s.grad" value="${esc(s.grad||'')}" placeholder="linear-gradient(#f00,#00f)"></label>`;h+=`<div class="mono" style="margin-top:8px">POSITION ${lock?'(locked by template)':''}</div><div class="g4">${['x','y','w','h'].map(k=>`<div><label>${k.toUpperCase()}<input type="number" data-f="p.${k}" value="${Math.round(p[k])}" ${lock?'disabled':''}></label></div>`).join('')}</div>`;
   if(lock)h+=`<div class="row"><button data-a="detach">Detach from template (free move/resize)</button></div>`;h+=`<div class="row"><button data-a="edup">Duplicate</button><button data-a="edel">Delete element</button></div>`;
  }}
- sh.innerHTML=h}
+ sh.innerHTML=`<div class="row" style="margin:0 0 6px"><button data-a="tg">Hide panel ▾</button></div>`+h}
 function refresh(full){drawCanvas();drawSheet();if(full)touch()}
 
 /* ===== EVENTS ===== */
@@ -364,7 +364,7 @@ function importFile(f){const o=$('#impo');const r=new FileReader();r.onload=()=>
  window._imp=t;o.innerHTML=`<p class="mono">PREVIEW — ${esc(t.template?.name||'Untitled')}</p>${thumb(t,160)}<div class="row"><button class="p" data-a="addtpl">Add to library</button></div>`};r.readAsText(f)}
 
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]'),a=b&&b.dataset.a,i=b&&b.dataset.i;
- if(!a){const el=ev.target.closest('.cv .e');if(el&&view==='editor'){const x=proj.els.find(e=>e.id===el.dataset.id);if(x&&!x.llock){selId=x.id;mode='sel';refresh()}}return}
+ if(!a){const el=ev.target.closest('.cv .e');if(el&&view==='editor'){const x=proj.els.find(e=>e.id===el.dataset.id);if(x&&!x.llock){selId=x.id;mode='sel';if(hid){hid=false;$('#sheet').style.display='';$('#tgb').textContent='Preview'}refresh()}}return}
  const e=proj&&proj.els.find(x=>x.id===i),idx=proj&&proj.els.findIndex(x=>x.id===i);
  if(a==='go'){view=b.dataset.v;render()}
  else if(a==='detail'){tdet=lib().find(t=>t.template.id===i);view='detail';render()}
@@ -385,6 +385,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]'),a=b
  else if(a==='detach'){snap(1);cur().lock=false;refresh(1)}
  else if(a==='pair'){snap(1);proj.fd=PAIRS[i][1];proj.fb=PAIRS[i][2];refresh(1)}
  else if(a==='print'){const w=Math.min(innerWidth-32,560);const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="row"><button class="p" id="cl">Close</button></div><div class="mono">FULL SHEET · A2 PORTRAIT · 42 × 59.4 CM · DASHED = SAFE AREA</div><div style="margin:12px auto;width:${w}px">${canvasHTML(projP(proj),w,{safe:true})}</div>`;document.body.appendChild(m);m.querySelector('#cl').onclick=()=>m.remove()}
+ else if(a==='tg'){hid=!hid;$('#sheet').style.display=hid?'none':'';$('#tgb').textContent=hid?'Edit':'Preview';drawCanvas()}
  else if(a==='zi'){zoom=Math.min(3,zoom+.25);drawCanvas()}
  else if(a==='zo'){zoom=Math.max(.5,zoom-.25);drawCanvas()}
  else if(a==='cv'){snap(1);const ks=Object.keys(CV),o=proj.canvas||'A2',to=ks[(ks.indexOf(o)+1)%ks.length],k=CV[to].h/CV[o].h;proj.els.forEach(e=>{e.position.y*=k;e.position.h*=k});proj.canvas=to;b.textContent=CV[to].l;refresh(1)}
