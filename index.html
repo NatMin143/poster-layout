@@ -619,7 +619,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.6.2';
+const VERSION='2.6.3';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
@@ -660,7 +660,39 @@ const DW=(v,vb)=>`<svg viewBox='${vb}' preserveAspectRatio='none' fill='none' st
 const DEC={stamp:[DW("<circle cx='50' cy='50' r='46'/><circle cx='50' cy='50' r='38' stroke-width='1.5'/><path d='M50 24l7 15 16 2-12 11 3 16-14-8-14 8 3-16L27 41l16-2z' fill='currentColor' stroke='none'/>",'0 0 100 100'),200,200],tape:[DW("<path d='M6 0L0 8l6 8-6 8 6 8-6 8 6 10h188l-6-10 6-8-6-8 6-8-6-8 6-8z' fill='currentColor' opacity='.6' stroke='none'/>",'0 0 200 50'),260,60],arrow:[DW("<path d='M5 80C30 10 100 10 140 60' stroke-width='4'/><path d='M120 62l22 2-6-22' stroke-width='4'/>",'0 0 150 100'),220,150],brush:[DW("<path d='M5 30C40 5 80 50 120 25S180 40 195 20L195 34C170 50 120 40 90 55S30 40 5 48z' fill='currentColor' stroke='none'/>",'0 0 200 60'),420,110],ornament:[DW("<path d='M2 20h80M118 20h80' stroke-width='2'/><path d='M100 8l8 12-8 12-8-12z' fill='currentColor' stroke='none'/>",'0 0 200 40'),500,60]};
 const _eh=elHTML;elHTML=function(el,f,sel){const s=el.style||{};if(s.eff!=='arc'||!TXT.includes(el.type))return _eh(el,f,sel);const e2=clone(el);e2.text='';const p=el.position,z=s.size||24,id='ar'+String(el.id).replace(/\W/g,'');return _eh(e2,f,sel).replace(/<\/div>$/,`<svg viewBox="0 0 ${p.w} ${p.h}" style="overflow:visible"><path id="${id}" d="M ${z/2} ${p.h-8} A ${p.w/2-z/2} ${p.h-16} 0 0 1 ${p.w-z/2} ${p.h-8}" fill="none"/><text fill="currentColor" font-size="${z}" letter-spacing="${(s.ls||0)*z}"><textPath href="#${id}" startOffset="50%" text-anchor="middle">${esc(el.text)}</textPath></text></svg></div>`)};
 /* export: html-to-image renders clip-path, masks and blur correctly. 3x = draft (3000px), 5x = print (5000px, about 300 dpi at A2) */
-function shot(r,cb){if(!window.htmlToImage){alert('Export library did not load. Check your connection.');return}const n=document.createElement('div');n.style.cssText='position:fixed;left:0;top:0;z-index:-1;opacity:0;pointer-events:none';n.innerHTML=canvasHTML(projP(proj),1000);document.body.appendChild(n);htmlToImage.toPng(n.firstChild,{pixelRatio:r,cacheBust:true}).then(cb).catch(()=>alert('Export failed. Try draft quality or a laptop.')).finally(()=>n.remove())}
+/* v2.6.3 export fonts: html-to-image used to scan every Google @font-face (all subsets, cache-busted URLs) and often gave up silently, so exports fell back to a default font.
+   Now we load the fonts, then build the font CSS ourselves (only the families and subsets this poster uses, as data URLs) and hand it to html-to-image. */
+const FE={css:new Map(),bin:new Map()};
+const feTxt=u=>{if(!FE.css.has(u))FE.css.set(u,fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}));return FE.css.get(u)};
+const feBin=u=>{if(!FE.bin.has(u))FE.bin.set(u,fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(b=>new Promise((ok,no)=>{const f=new FileReader();f.onload=()=>ok(f.result);f.onerror=no;f.readAsDataURL(b)})));return FE.bin.get(u)};
+const feIn=(cp,rng)=>rng.split(',').some(p=>{p=p.trim().replace(/^U\+/i,'');if(p.indexOf('?')>=0)return cp>=parseInt(p.replace(/\?/g,'0'),16)&&cp<=parseInt(p.replace(/\?/g,'F'),16);const a=p.split('-'),lo=parseInt(a[0],16),hi=a[1]?parseInt(a[1],16):lo;return cp>=lo&&cp<=hi});
+async function fontEmbedCSS(root){
+ const fams=new Set();root.querySelectorAll('*').forEach(x=>{(getComputedStyle(x).fontFamily||'').split(',').forEach(f=>{f=f.trim().replace(/^['"]|['"]$/g,'');if(f)fams.add(f)})});
+ root.querySelectorAll('text,tspan').forEach(x=>{(x.getAttribute('font-family')||'').split(',').forEach(f=>{f=f.trim().replace(/^['"]|['"]$/g,'');if(f)fams.add(f)})});
+ const cps=new Set();for(const ch of (root.textContent||''))cps.add(ch.codePointAt(0));
+ const srcs=[];document.querySelectorAll('link[rel=stylesheet][href*="fonts.googleapis.com"]').forEach(l=>srcs.push(feTxt(l.href).catch(()=>'')));
+ const own=document.getElementById('tls-ff');if(own)srcs.push(Promise.resolve(own.textContent));
+ const blocks=[].concat(...(await Promise.all(srcs)).map(t=>t.match(/@font-face\s*\{[^}]*\}/g)||[]));
+ const out=await Promise.all(blocks.map(async b=>{
+  const fm=/font-family:\s*([^;]+);/.exec(b);if(!fm)return'';const fam=fm[1].trim().replace(/^['"]|['"]$/g,'');if(!fams.has(fam))return'';
+  const um=/unicode-range:\s*([^;]+);/.exec(b);if(um&&!/U\+0*41\b|U\+0000-00FF/i.test(um[1])){let hit=false;for(const c of cps)if(feIn(c,um[1])){hit=true;break}if(!hit)return''}
+  const urls=[...b.matchAll(/url\(([^)]+)\)/g)];let r=b;
+  for(const m of urls){const u=m[1].trim().replace(/^['"]|['"]$/g,'');if(/^data:/i.test(u))continue;try{r=r.replace(m[1],'"'+await feBin(u)+'"')}catch(e){return''}}
+  return r}));
+ return out.filter(Boolean).join('\n')||undefined}
+async function shotAsync(r){
+ if(!window.htmlToImage)throw new Error('lib');
+ await ffStyle().catch(()=>0);
+ const fams=new Set([proj.fd,proj.fb,'Great Vibes']),ws=new Set([400,700]);
+ proj.els.forEach(e=>{const s=e.style||{};if(s.ff){loadG(s.ff);fams.add(s.ff)}if(s.weight)ws.add(+s.weight)});
+ await Promise.all([...fams].flatMap(f=>[...ws].map(w=>document.fonts.load(w+' 16px "'+cn(f)+'"').catch(()=>0))));
+ await document.fonts.ready;FC.clear();
+ const n=document.createElement('div');n.style.cssText='position:fixed;left:0;top:0;z-index:-1;opacity:0;pointer-events:none';n.innerHTML=canvasHTML(projP(proj),1000);document.body.appendChild(n);
+ try{const css=await fontEmbedCSS(n),o={pixelRatio:r,cacheBust:true,fontEmbedCSS:css};
+  if(/iP(hone|ad|od)|^((?!chrome|android).)*safari/i.test(navigator.userAgent))await htmlToImage.toPng(n.firstChild,{...o,pixelRatio:1}).catch(()=>0); /* Safari drops fonts/images on the first render */
+  return await htmlToImage.toPng(n.firstChild,o)}
+ finally{n.remove()}}
+function shot(r,cb){toast&&toast('Preparing export…');shotAsync(r).then(cb).catch(e=>alert(e&&e.message==='lib'?'Export library did not load. Check your connection.':'Export failed. Try draft quality or a laptop.'))}
 const dlPng=r=>shot(r,u=>{const a=document.createElement('a');a.href=u;a.download=proj.name+'.png';a.click()});
 exportPNG=()=>dlPng(3);
 exportPDF=()=>{if(!window.jspdf){alert('PDF library did not load.');return}shot(3,u=>{const d=CV[proj.canvas||'A2'].cm,pdf=new jspdf.jsPDF({unit:'cm',format:[Math.min(d[0],d[1]),Math.max(d[0],d[1])],orientation:d[0]>d[1]?'landscape':'portrait'});pdf.addImage(u,'PNG',0,0,d[0],d[1]);pdf.save(proj.name+'.pdf')})};
@@ -886,7 +918,7 @@ async function ffStyle(){let st=$('#tls-ff');if(!st){st=document.createElement('
  for(const fam of Object.keys(FONTS)){if(FS[fam])continue;
   const u=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r('');fr.readAsDataURL(new Blob([FONTS[fam]]))});
   if(u){FS[fam]=1;st.appendChild(document.createTextNode(`@font-face{font-family:"${cn(fam)}";src:url(${u})}`))}}}
-const _shot=shot;shot=function(r,cb){ffStyle().then(()=>_shot(r,cb),()=>_shot(r,cb))};
+
 
 let fpId=null;
 function fpList(e){const s=e.style||{},q=(($('#fpq')||{}).value||'').toLowerCase(),up=Object.keys(FONTS).filter(n=>n.toLowerCase().includes(q)),gf=GF.filter(n=>n.toLowerCase().includes(q));
