@@ -379,18 +379,13 @@ function createView(){
  const exts=EXTRAS.map(x=>`<button class="opt ${cw.extras.includes(x[0])?'on':''}" data-a="cw" data-k="ext" data-v="${x[0]}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('');
  const notes=NOTES.map(n=>`<button class="chip" data-a="cw" data-k="note" data-v="${esc(n)}">+ ${n}</button>`).join('');
  const bases=`<option value="">Start from scratch</option>`+lib().map(t=>`<option value="${esc(t.template.id)}" ${cw.base===t.template.id?'selected':''}>${esc(t.template.name)}</option>`).join('');
- return `<h1>Create a template</h1><p>Tap your choices. The app writes the design instructions for an AI (ChatGPT, Claude, Gemini...). Paste the AI's answer back here and it becomes a template.</p>
- <div class="steps"><div><b>1</b>Tap your choices</div><div><b>2</b>Copy the prompt into an AI chat</div><div><b>3</b>Paste its answer back below</div></div>
- <div class="row"><button data-a="cw" data-k="rand">Surprise me</button></div>
+ return `<h1>Create a template</h1><p>Pick one of the 10 assignment options. The prompt is written for you, with creative poster design direction built in. Check the information list, copy the prompt into an AI chat, then paste the answer back.</p>
+ <div class="steps"><div><b>1</b>Pick an option</div><div><b>2</b>Copy the ready prompt</div><div><b>3</b>Paste the AI answer back</div></div>
  ${cwSec(1,'Which assignment option?','The 10 HM 302 layout options. Your choice sets the scope, the required content and where the template is filed.',cats)}
- ${cwSec(2,'How should it be arranged?','Pick the look that is closest. The little drawing shows where the big pieces go.',`<div class="lg">${lays}</div>`)}
- ${cwSec(3,'What mood and colors?','This sets the colors and fonts, so the AI uses the same ones as the app.',moods)}
- ${cwSec(4,'What information goes on it?','Filled in from the option you picked (what the assignment asks for). Turn items on or off, or add your own. A Sources list is always added.',`<div class="chips">${chips}</div><div class="row" style="flex-wrap:nowrap"><input id="cwf" placeholder="Add your own, e.g. Ferry schedule" aria-label="Add your own content field"><button data-a="cw" data-k="addf" style="flex:none">Add</button></div>`)}
- ${cwSec(5,'Any extra pieces?','Optional. These are small design elements the AI will try to include.',exts)}
- ${cwSec(6,'Anything else? (optional)','Write in your own words, or tap an idea to add it.',`<div class="chips" style="margin-bottom:8px">${notes}</div><textarea data-cw="notes" rows="3" placeholder="Example: Avoid boxes. Use a continuous route line.">${esc(cw.notes)}</textarea>`)}
- ${cwSec(7,'Name it','',`<label>Template name<input data-cw="name" value="${esc(cw.name)}"></label><label>Sheet shape<select data-cw="size">${SIZES.map(([k,l])=>`<option value="${k}" ${cw.size===k?'selected':''}>${l}</option>`).join('')}</select></label><label>Start from an existing template (best for variations)<select data-cw="base">${bases}</select></label>`)}
- ${cwSec(8,'Copy your prompt','Your choices: <b>Option '+CATS[cw.cat][1]+' · '+esc(CATS[cw.cat][0])+'</b> · <b>'+lay.n+'</b> · <b>'+mo.n+'</b>. Paste this prompt into an AI chat.',`<div class="row"><button class="p" data-a="cwcopy">Copy prompt</button><button data-a="cwdl">Download .txt</button></div><details class="adv"><summary class="mono">View prompt</summary><textarea id="pv" rows="10" readonly>${esc(genPrompt())}</textarea></details>`)}
- ${cwSec(9,"Paste the AI's answer",'Paste the whole answer. The app removes extra words, fixes small mistakes and shows a preview.',`<textarea id="pasteIn" data-cw="paste" rows="7" placeholder="Paste the JSON here">${esc(cw.paste)}</textarea><div class="row"><button class="p" data-a="cwcheck">Check and preview</button></div><div id="impo">${cw.impHTML||''}</div><details class="adv"><summary class="mono">Other ways to import</summary><label>Import a .json file<input type="file" id="imp" accept=".json,application/json"></label><div class="row"><button data-a="sample">Download sample template JSON</button></div></details>`)}`}
+ ${cwSec(2,'What information goes with it?','Filled in from the option you picked (what the assignment asks for). Turn items on or off, or add your own. A Sources list is always added.',`<div class="chips">${chips}</div><div class="row" style="flex-wrap:nowrap"><input id="cwf" placeholder="Add your own, e.g. Ferry schedule" aria-label="Add your own content field"><button data-a="cw" data-k="addf" style="flex:none">Add</button></div>`)}
+ <details class="adv"><summary class="mono">Optional: template name, extra notes, sheet shape</summary><label>Template name<input data-cw="name" value="${esc(cw.name)}"></label><label>Anything the AI should also follow<textarea data-cw="notes" rows="2" placeholder="Example: sunrise colors, island feeling">${esc(cw.notes)}</textarea></label><label>Sheet shape<select data-cw="size">${SIZES.map(([k,l])=>`<option value="${k}" ${cw.size===k?'selected':''}>${l}</option>`).join('')}</select></label><label>Start from an existing template (makes a variation)<select data-cw="base">${bases}</select></label></details>
+ ${cwSec(3,'Copy your prompt','Your choices: <b>Option '+CATS[cw.cat][1]+' · '+esc(CATS[cw.cat][0])+'</b>. The prompt is ready, with creative design direction included. Copy it into an AI chat.',`<div class="row"><button class="p" data-a="cwcopy">Copy prompt</button><button data-a="cwdl">Download .txt</button></div><details class="adv"><summary class="mono">View prompt</summary><textarea id="pv" rows="10" readonly>${esc(genPrompt())}</textarea></details>`)}
+ ${cwSec(4,"Paste the AI's answer",'Paste the whole answer. The app removes extra words, fixes small mistakes and shows a preview.',`<textarea id="pasteIn" data-cw="paste" rows="7" placeholder="Paste the JSON here">${esc(cw.paste)}</textarea><div class="row"><button class="p" data-a="cwcheck">Check and preview</button></div><div id="impo">${cw.impHTML||''}</div><details class="adv"><summary class="mono">Other ways to import</summary><label>Import a .json file<input type="file" id="imp" accept=".json,application/json"></label><div class="row"><button data-a="sample">Download sample template JSON</button></div></details>`)}`}
 
 function cwBrief(){
  const L=LAYOUTS.find(x=>x.k===cw.lay)||LAYOUTS[0],M=MOODS[cw.mood],P=PAL[M.pal],pr=PAIRS[M.pair],cat=CATS[cw.cat],
@@ -403,25 +398,40 @@ function tokenizeT(t){t=clone(t);const th=t.theme,lc=x=>String(x||'').toLowerCas
  const m=s=>typeof s==='string'?s.replace(/#[0-9a-f]{6}\b/gi,x=>name(x)):s;
  t.elements.forEach(e=>{if(e.style)for(const k in e.style)if(typeof e.style[k]==='string')e.style[k]=m(e.style[k]);if(e.svg)e.svg=m(e.svg)});
  if(!th.palette){th.palette=pal}th.background='@bg';return t}
+const FORMAT_EX={schemaVersion:'1.5',template:{id:'format-example-01',name:'Format example',category:'Destination Poster',assignmentOption:1,style:'Example',description:'Only shows the JSON format.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2'},theme:{background:'@bg',primary:'#10252B',secondary:'#C8552E',displayFont:'Playfair Display',bodyFont:'Inter',palette:{bg:'#F3EDE0',ink:'#10252B',light:'#FFFFFF',accent:'#C8552E',mid:'#6F8F95'}},contentSchema:{},elements:[
+{id:'photo',type:'image',label:'Main photo',instruction:'A strong photo of the place. Credit it in Sources.',editable:true,required:true,lock:true,bleed:true,position:{x:0,y:0,w:1000,h:900},style:{fade:'bottom'},src:''},
+{id:'kicker',type:'text',label:'Script kicker',instruction:'A short invitation in script type.',editable:true,position:{x:60,y:560,w:500,h:90},style:{size:64,font:'s',color:'@light',fit:true},text:'Discover',ph:true},
+{id:'title',type:'text',label:'Destination name',instruction:'The destination name, as big as it fits.',editable:true,required:true,position:{x:60,y:640,w:880,h:240},style:{size:190,font:'d',color:'@light',fit:true,tt:'uppercase',shadow:'0 2px 30px #0006'},text:'NAME',ph:true},
+{id:'arch',type:'image',label:'Second photo',instruction:'A second photo, cropped in an arch.',editable:true,position:{x:620,y:940,w:300,h:340},style:{mask:'arch'},src:''},
+{id:'wave',type:'svg',label:'Wave lines',instruction:'Decoration. Recolor or replace it.',editable:true,position:{x:0,y:1250,w:1000,h:164},style:{color:'@accent',opacity:0.5},svg:"<svg viewBox='0 0 400 60' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='0.8'><path d='M0 20c60-20 100 20 160 0s100 20 160 0 60 10 80 0'/></svg>"},
+{id:'about',type:'text',label:'About the place',instruction:'Two or three verified sentences about the place.',editable:true,required:true,position:{x:60,y:960,w:500,h:200},style:{size:21,font:'b',color:'@ink',lh:1.5,accent:'@accent'},text:'Write about the *place* with verified facts.',ph:true},
+{id:'sources',type:'sourceList',label:'Sources',instruction:'List the sources for facts and photos.',editable:true,rec:true,position:{x:60,y:1320,w:700,h:70},style:{size:13,color:'@ink'},items:[]}
+]};
 function genPrompt(){
  const{L,M,P,pr,cat,flds,ex,chosen,base}=cwBrief(),nm=(cw.name||'My Template').trim(),opt=parseInt(cw.opt)||null,
-  sz=CV[cw.size]?cw.size:'A2',C=CV[sz],land=C.cm[0]>C.cm[1],ex1=tokenizeT(base);
+  sz=CV[cw.size]?cw.size:'A2',C=CV[sz],land=C.cm[0]>C.cm[1],ex1=chosen?tokenizeT(chosen):FORMAT_EX;
  return `You are a graphic designer making ONE template for TOURISM LAYOUT STUDIO, a mobile poster editor. Reply with ONLY one valid JSON object: no explanation, no markdown, no code fences.
 
 BRIEF
 - Name: ${nm}
 - HM 302 Option ${cat[1]}: ${cat[2]}\n- Scope of this option: ${cat[3]}\n- Rule from the assignment: facts, places, fees, times and coordinates must be verified by the user, so never invent them. Use clear placeholders and slots instead (for maps, a map element with an instruction to insert a verified map).
 - Sheet: ${C.l} (${land?'landscape':'portrait'}), canvas 1000 x ${C.h}, size key "${sz}"
-- Layout idea: "${L.n}" = ${L.r}${sz!=='A2'?' (the layout idea is described for a portrait sheet: adapt the proportions to this sheet shape)':''}
-- Mood: "${M.n}" = ${M.d}
-- Colors (the palette for this template): bg ${P[1]}, ink (main text) ${P[2]}, light (contrast surface / text on dark areas) ${P[3]}, accent ${P[4]}, mid ${P[5]}
-- Fonts: theme.displayFont = "${pr[1]}", theme.bodyFont = "${pr[2]}"
 - Information to include (each as its own editable element, plus a Sources list):
 ${flds.map(x=>'  • '+x).join('\n')||'  • (your choice)'}
-- Extra design elements: ${ex.length?ex.map(x=>x[3]).join('; '):'none required'}
 - Notes from the user: ${(cw.notes||'').trim().replace(/\n+/g,' ')||'none'}
 
-${chosen?`START FROM THIS EXISTING TEMPLATE and make a clearly different NEW VARIATION (new id and name, rearranged layout, same JSON format). Rearrange it to follow the layout idea and mood above. Existing template (its colors are already tokens, see COLOR TOKENS):`:`EXAMPLE of the exact JSON format. Copy the FORMAT only, not the layout: design your own layout for the brief above.`}
+CREATIVE DIRECTION (you decide the whole look)
+- It must look like a real, professionally designed tourism poster, not a web page, form or slide. Invent ONE strong visual concept for this topic and state it in one sentence in template.description.
+- Avoid the boxes-and-cards look. Do NOT default to rectangles, cards, tiles or a grid of panels. Use at most 3 small containers (a badge, a label, a ticket) and only when they truly help. Information can sit directly on photos, on color washes, along a route or leader lines, on curved or vertical text, or in open whitespace.
+- Make photos part of the composition, not boxes: let a hero photo bleed off an edge or fill the whole sheet; fade it into the background (style.fade, ovg gradient overlays, vig vignette); crop photos with masks (arch, circle, ellipse) or into tall narrow strips; layer a cut-out subject over a giant title; overlap photos with big type; use diagonal bands and frames (polaroid, torn, film) for variety.
+- Treat type as imagery: one oversized word (style.fit), gradient or outlined text (tg, eff), a script accent next to a bold display font, mixed colors inside one text block with *accent* words, curved or vertical lines, letter-spaced captions, big contrast in scale (3 or 4 clear levels of hierarchy).
+- Color is your call. Pick what suits the place: (a) richly blended gradients (sunset sky, sea teal into night blue) with overlays, duotone and blend modes, (b) restrained plain color with generous whitespace and one accent, or (c) bold flat color areas. Do not always choose the same one.
+- Add small, refined details: scalable SVG contours, waves, route lines with dots, compass, stamps, tape, thin rules, tiny icons. Keep them subtle.
+- Use whitespace on purpose. Prefer asymmetry. Do not fill every area, and do not make every piece the same size.
+- Be different every time. Never reuse the arrangement of the format example.
+- Everything the student must fill in (photos, texts, maps) stays its own editable element with an instruction.
+
+${chosen?`START FROM THIS EXISTING TEMPLATE and make a clearly different NEW VARIATION (new id and name, rearranged layout, same JSON format). Rearrange it into a fresh, creative composition (see CREATIVE DIRECTION). Existing template (its colors are already tokens, see COLOR TOKENS):`:`FORMAT EXAMPLE. It only shows how the JSON is written. Do NOT copy its arrangement, fonts or colors: invent your own composition for the brief above.`}
 ${JSON.stringify(ex1)}
 
 FORMAT
@@ -436,7 +446,7 @@ FORMAT
 
 COLOR TOKENS (important)
 - Never write hex colors inside elements. Use the tokens @bg (page background), @ink (main text), @light (contrast surface, or text on dark areas), @accent, @mid in every color field (color, bg, border, accent, ov, patc, grad, svg fills and strokes). Example: "color":"@ink", "border":"2px solid @accent".
-- Write the real colors only in theme.palette, using exactly these values: {"bg":"${P[1]}","ink":"${P[2]}","light":"${P[3]}","accent":"${P[4]}","mid":"${P[5]}"}. Set theme.background to "@bg", theme.primary to the ink value and theme.secondary to the accent value.
+- Write the real colors YOU chose only in theme.palette as {"bg","ink","light","accent","mid"} (hex values). Set theme.background to "@bg", theme.primary to the ink value and theme.secondary to the accent value. A gradient is allowed for the page: put it in palette.bg, e.g. "linear-gradient(#0B1E3A,#14485A)".
 - This lets the user recolor the whole template with one tap, so always choose tokens by ROLE (text = @ink, highlights = @accent, panels = @light).
 
 DESIGN RULES
@@ -609,7 +619,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.4.0';
+const VERSION='2.5.0';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
@@ -814,7 +824,7 @@ function copyText(t,msg){const ok=()=>toast(msg||'Copied. Now paste it into your
 function rc(){const s=$('.scr'),y=s?s.scrollTop:0;render();const n=$('.scr');if(n)n.scrollTop=y}
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,k=b.dataset.k,v=b.dataset.v;
  if(a==='cw'){
-  if(k==='cat'){cw.cat=+v;cw.opt=String(CATS[cw.cat][1]);setFields(cw.cat);cw.fields=FIELDS.filter(f=>f[1]).map(f=>f[0])}
+  if(k==='cat'){cw.cat=+v;cw.opt=String(CATS[cw.cat][1]);setFields(cw.cat);cw.fields=FIELDS.filter(f=>f[1]).map(f=>f[0]);cw.name=CATS[cw.cat][2]}
   else if(k==='lay')cw.lay=v;
   else if(k==='mood')cw.mood=+v;
   else if(k==='fld')tog(cw.fields,FIELDS[+v][0]);
