@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0D2F3A"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tourism Layout Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;800&family=Inter:wght@400;600&family=Sora:wght@400;700&family=Manrope:wght@400;700&family=DM+Serif+Display&family=DM+Sans:wght@400;600&family=Space+Mono&family=Great+Vibes&family=Bebas+Neue&family=Oswald&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;800&family=Inter:wght@400;600&family=Sora:wght@400;700&family=Manrope:wght@400;700&family=DM+Serif+Display&family=DM+Sans:wght@400;600&family=Space+Mono&family=Great+Vibes&family=Bebas+Neue&family=Oswald&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
 :root{--bg:#E6ECEA;--ink:#10252B;--mut:#5B6F74;--ac:#2447D0;--ln:#B9C6C4;--pn:#F6F9F8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0F1D21;--ink:#E3ECEA;--mut:#8FA3A6;--ac:#7C98FF;--ln:#2A3E43;--pn:#162A2F}}
@@ -619,7 +619,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.6.3';
+const VERSION='2.6.4';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
@@ -663,7 +663,7 @@ const _eh=elHTML;elHTML=function(el,f,sel){const s=el.style||{};if(s.eff!=='arc'
 /* v2.6.3 export fonts: html-to-image used to scan every Google @font-face (all subsets, cache-busted URLs) and often gave up silently, so exports fell back to a default font.
    Now we load the fonts, then build the font CSS ourselves (only the families and subsets this poster uses, as data URLs) and hand it to html-to-image. */
 const FE={css:new Map(),bin:new Map()};
-const feTxt=u=>{if(!FE.css.has(u))FE.css.set(u,fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}));return FE.css.get(u)};
+const feTxt=u=>{if(!FE.css.has(u))FE.css.set(u,fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}).catch(()=>fetch(u+(u.includes('?')?'&':'?')+'_fe='+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.text()})).catch(e=>{FE.css.delete(u);throw e}));return FE.css.get(u)};
 const feBin=u=>{if(!FE.bin.has(u))FE.bin.set(u,fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.blob()}).then(b=>new Promise((ok,no)=>{const f=new FileReader();f.onload=()=>ok(f.result);f.onerror=no;f.readAsDataURL(b)})));return FE.bin.get(u)};
 const feIn=(cp,rng)=>rng.split(',').some(p=>{p=p.trim().replace(/^U\+/i,'');if(p.indexOf('?')>=0)return cp>=parseInt(p.replace(/\?/g,'0'),16)&&cp<=parseInt(p.replace(/\?/g,'F'),16);const a=p.split('-'),lo=parseInt(a[0],16),hi=a[1]?parseInt(a[1],16):lo;return cp>=lo&&cp<=hi});
 async function fontEmbedCSS(root){
@@ -898,7 +898,7 @@ input[type=color]{min-height:44px;padding:3px;cursor:pointer}
 const GF=['Playfair Display','Inter','Sora','Manrope','DM Serif Display','DM Sans','Space Mono','Great Vibes','Bebas Neue','Oswald','Montserrat','Poppins','Lora','Merriweather','Raleway','Roboto','Open Sans','Cormorant Garamond','Abril Fatface','Pacifico','Dancing Script','Lobster','Anton','Archivo Black','Caveat','Josefin Sans','Libre Baskerville','Nunito','Work Sans','Rubik','Quicksand','Permanent Marker','Amatic SC','Cinzel','Satisfy','Righteous'];
 const ONE=new Set(['Bebas Neue','Anton','Lobster','Pacifico','Abril Fatface','Archivo Black','Great Vibes','Satisfy','Righteous','Permanent Marker','DM Serif Display']);
 const gl=new Set(),cn=n=>String(n).replace(/['"\\;{}<>]/g,'');
-function loadG(n){if(!n||gl.has(n)||!GF.includes(n))return;gl.add(n);const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+n.replace(/ /g,'+')+(ONE.has(n)?'':':wght@400;700')+'&display=swap';document.head.appendChild(l)}
+function loadG(n){if(!n||gl.has(n)||!GF.includes(n))return;gl.add(n);const l=document.createElement('link');l.rel='stylesheet';l.crossOrigin='anonymous';l.href='https://fonts.googleapis.com/css2?family='+n.replace(/ /g,'+')+(ONE.has(n)?'':':wght@400;700')+'&display=swap';document.head.appendChild(l)}
 const isT=e=>e&&(TXT.includes(e.type)||e.type==='sourceList');
 const byId=id=>proj&&proj.els.find(x=>x.id===id);
 
