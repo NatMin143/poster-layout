@@ -619,7 +619,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.5.0';
+const VERSION='2.6.0';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
@@ -855,4 +855,87 @@ async function boot(){await IDB.open();
  for(const[fam,buf]of Object.entries(FONTS)){try{document.fonts.add(await new FontFace(fam,buf).load())}catch(e){}}
  render()}
 boot();
+</script>
+<style>
+input[type=color]{min-height:44px;padding:3px;cursor:pointer}
+#pk,#fp{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:56vh;overflow:auto;background:var(--pn);border-top:3px solid var(--ac);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px #0005}
+.pks{display:inline-block;width:16px;height:16px;border-radius:50%;border:1px solid #8888;vertical-align:-3px;margin-right:6px}
+</style>
+<script>/* ===== v2.6: hex/role color sheet, per-text typefaces (Google + uploaded), smoother editing =====
+   Additive only: new optional style.ff; old projects keep rendering exactly as before. */
+const GF=['Playfair Display','Inter','Sora','Manrope','DM Serif Display','DM Sans','Space Mono','Great Vibes','Bebas Neue','Oswald','Montserrat','Poppins','Lora','Merriweather','Raleway','Roboto','Open Sans','Cormorant Garamond','Abril Fatface','Pacifico','Dancing Script','Lobster','Anton','Archivo Black','Caveat','Josefin Sans','Libre Baskerville','Nunito','Work Sans','Rubik','Quicksand','Permanent Marker','Amatic SC','Cinzel','Satisfy','Righteous'];
+const ONE=new Set(['Bebas Neue','Anton','Lobster','Pacifico','Abril Fatface','Archivo Black','Great Vibes','Satisfy','Righteous','Permanent Marker','DM Serif Display']);
+const gl=new Set(),cn=n=>String(n).replace(/['"\\;{}<>]/g,'');
+function loadG(n){if(!n||gl.has(n)||!GF.includes(n))return;gl.add(n);const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+n.replace(/ /g,'+')+(ONE.has(n)?'':':wght@400;700')+'&display=swap';document.head.appendChild(l)}
+const isT=e=>e&&(TXT.includes(e.type)||e.type==='sourceList');
+const byId=id=>proj&&proj.els.find(x=>x.id===id);
+
+/* --- typeface per element: style.ff overrides Display/Body/Script --- */
+const _eh9=elHTML;elHTML=function(el,f,sel){const s=el.style;
+ if(s&&s.ff&&isT(el)){loadG(s.ff);return _eh9({...el,style:{...s,font:'b'}},{d:f.d,b:`'${cn(s.ff)}',sans-serif`},sel)}
+ return _eh9(el,f,sel)};
+const ffLabel=e=>(e.style||{}).ff||'Default · '+({d:'Display',s:'Script'}[(e.style||{}).font]||'Body');
+const _dsF=drawSheet;drawSheet=function(){_dsF();const sh=$('#sheet');if(!sh||mode!=='sel')return;const e=cur();if(!isT(e))return;const ins=sh.querySelector('.ins');
+ if(ins)ins.insertAdjacentHTML('afterend',`<button class="on" data-ffp="1" style="width:100%;margin:8px 0">Typeface: ${esc(ffLabel(e))} ›</button>`)};
+const _pf9=placeFT;placeFT=function(){_pf9();const f=$('#ftb'),e=view==='editor'&&!hid&&cur();if(!f||!e||f.style.display==='none')return;
+ if(TXT.includes(e.type)&&!f.querySelector('[data-ffp]')){const c=f.querySelector('[data-a=edup]');if(c)c.insertAdjacentHTML('beforebegin','<button data-ffp="1">Aa</button>')}};
+
+/* uploaded fonts: also registered as real @font-face (data URL) so PNG/PDF export can embed them */
+const FS={};
+async function ffStyle(){let st=$('#tls-ff');if(!st){st=document.createElement('style');st.id='tls-ff';document.head.appendChild(st)}
+ for(const fam of Object.keys(FONTS)){if(FS[fam])continue;
+  const u=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r('');fr.readAsDataURL(new Blob([FONTS[fam]]))});
+  if(u){FS[fam]=1;st.appendChild(document.createTextNode(`@font-face{font-family:"${cn(fam)}";src:url(${u})}`))}}}
+const _shot=shot;shot=function(r,cb){ffStyle().then(()=>_shot(r,cb),()=>_shot(r,cb))};
+
+let fpId=null;
+function fpList(e){const s=e.style||{},q=(($('#fpq')||{}).value||'').toLowerCase(),up=Object.keys(FONTS).filter(n=>n.toLowerCase().includes(q)),gf=GF.filter(n=>n.toLowerCase().includes(q));
+ const b=n=>`<button data-ff="${esc(n)}" class="${s.ff===n?'on':''}" style="width:100%;text-align:left;font:18px '${cn(n)}',sans-serif;min-height:44px;margin-bottom:4px">${esc(n)}</button>`;
+ return (up.length?'<div class="mono">MY FONTS</div>'+up.map(b).join(''):'')+(gf.length?'<div class="mono" style="margin-top:8px">GOOGLE FONTS (need internet the first time)</div>'+gf.map(b).join(''):'')}
+function fpOpen(id){const e=byId(id);if(!isT(e))return;pkClose();fpClose();fpId=id;GF.forEach(loadG);const s=e.style||{},d=document.createElement('div');d.id='fp';
+ const c=(k,l)=>`<button class="chip ${!s.ff&&(s.font||'b')===k?'on':''}" data-ffs="${k}">${l}</button>`;
+ d.innerHTML=`<div class="row" style="margin:0 0 8px;align-items:center"><b style="flex:1">Typeface · ${esc(e.label)}</b><button class="p" data-fpx="1">Done</button></div><div class="chips">${c('d','Display')}${c('b','Body')}${c('s','Script')}</div><input id="fpq" placeholder="Search fonts" style="margin-top:8px"><label>Upload your own font (WOFF, WOFF2, TTF, OTF)<input type="file" id="fpf" accept=".woff,.woff2,.ttf,.otf"></label><div id="fpl" style="margin-top:8px">${fpList(e)}</div>`;document.body.appendChild(d)}
+function fpClose(){const d=$('#fp');if(d)d.remove();fpId=null}
+function ffSet(name,role){const e=byId(fpId);if(!e)return;snap(1);e.style=e.style||{};if(role){delete e.style.ff;e.style.font=role}else e.style.ff=name;loadG(name);
+ drawCanvas();touch();if(name)document.fonts.load(`16px "${cn(name)}"`).then(()=>drawCanvas(),()=>0);
+ const b=document.querySelector('#sheet [data-ffp]');if(b)b.textContent='Typeface: '+ffLabel(e)+' ›';
+ const l=$('#fpl');if(l)l.innerHTML=fpList(e);document.querySelectorAll('#fp [data-ffs]').forEach(x=>x.classList.toggle('on',!e.style.ff&&(e.style.font||'b')===x.dataset.ffs))}
+document.addEventListener('change',ev=>{const t=ev.target,f=t.id==='fpf'&&t.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{const fam='Custom '+cn(f.name.replace(/\.\w+$/,''));new FontFace(fam,r.result).load().then(ff=>{document.fonts.add(ff);FONTS[fam]=r.result.slice(0);sv('tls-fonts',FONTS);ffSet(fam)}).catch(()=>toast('Could not load that font file.'))};r.readAsArrayBuffer(f)});
+document.addEventListener('input',ev=>{if(ev.target.id==='fpq'){const e=byId(fpId),l=$('#fpl');if(e&&l)l.innerHTML=fpList(e)}});
+
+/* --- color sheet: hex field, big visual picker, palette roles, recent colors, eyedropper --- */
+let pkIn=null,pkId=null,pkDirty=0;
+const nh=s=>{s=String(s).trim().replace(/^#/,'');if(!/^[0-9a-f]+$/i.test(s))return null;if(s.length==3||s.length==4)s=[...s].map(c=>c+c).join('');return s.length==6||s.length==8?'#'+s.toLowerCase():null};
+const sw9=c=>`<i class="pks" style="background:${esc(c)}"></i>`;
+function pkClose(){const d=$('#pk');if(d)d.remove();if(pkDirty&&pkIn){const h=RV(pkIn.dataset.pal?(proj.pal||{})[pkIn.dataset.pal]:(((byId(pkId)||{}).style||{})[(pkIn.dataset.f||'').slice(2)]));
+  if(/^#[0-9a-f]{6,8}$/i.test(h||'')){const r=ld('tls-recent',[]).filter(x=>x!==h.toLowerCase());r.unshift(h.toLowerCase());lsSet('tls-recent',r.slice(0,12))}}pkIn=null;pkDirty=0}
+function pkApply(v){const i=pkIn;if(!i||!proj)return;if(!pkDirty){snap(1);pkDirty=1}
+ if(i.dataset.pal)proj.pal[i.dataset.pal]=v;else{const e=byId(pkId);if(!e)return;e.style=e.style||{};setF(e,i.dataset.f,v)}
+ drawCanvas();touch();const h=RV(v);if(/^#[0-9a-f]{6,8}$/i.test(h||'')){pkIn.value=h.slice(0,7);const a=$('#pkh'),n=$('#pkn');if(a&&document.activeElement!==a)a.value=h;if(n)n.value=h.slice(0,7)}}
+function pkOpen(i){fpClose();pkClose();pkIn=i;pkId=selId;pkDirty=0;const key=(i.dataset.f||'').slice(2),raw=i.dataset.pal?(proj.pal||{})[i.dataset.pal]:((byId(selId)||{}).style||{})[key],h=RV(raw)||'',lab=((i.closest('label')||{}).textContent||'Color').trim(),
+ roles=proj.pal&&!i.dataset.pal?`<div class="mono" style="margin-top:8px">PALETTE (follows the template colors)</div><div class="chips">${ROLES.map(([k,l])=>`<button class="chip ${raw==='@'+k?'on':''}" data-pk="@${k}">${sw9(proj.pal[k])}${l}</button>`).join('')}</div>`:'',
+ rc=ld('tls-recent',[]),d=document.createElement('div');d.id='pk';
+ d.innerHTML=`<div class="row" style="margin:0 0 8px;align-items:center"><b style="flex:1">${esc(lab)}</b><button class="p" data-pkx="1">Done</button></div><div class="row"><input id="pkh" value="${esc(/^#/.test(h)?h:'')}" placeholder="#RRGGBB or #RRGGBBAA" maxlength="9" autocapitalize="off" autocomplete="off" spellcheck="false" style="flex:2;font:15px 'Space Mono',monospace"><input id="pkn" type="color" value="${/^#[0-9a-f]{6}/i.test(h)?h.slice(0,7):'#000000'}" style="flex:1;height:48px"></div>${roles}${rc.length?`<div class="mono" style="margin-top:8px">RECENT</div><div class="chips">${rc.map(c=>`<button class="chip" data-pk="${esc(c)}" aria-label="${esc(c)}">${sw9(c)}${esc(c)}</button>`).join('')}</div>`:''}${window.EyeDropper?'<div class="row"><button data-pk="eye">Pick a color from the screen</button></div>':''}`;document.body.appendChild(d)}
+document.addEventListener('click',ev=>{const i=ev.target;
+ if(i instanceof HTMLInputElement&&i.type==='color'&&!i.closest('#pk')&&proj&&view==='editor'&&(i.dataset.f||i.dataset.pal)){ev.preventDefault();pkOpen(i);return}
+ const b=i.closest&&i.closest('[data-pk],[data-pkx],[data-ffp],[data-ff],[data-ffs],[data-fpx]');if(!b)return;const d=b.dataset;
+ if('pkx'in d)pkClose();else if('fpx'in d)fpClose();else if('ffp'in d)fpOpen(selId);else if('ff'in d)ffSet(d.ff);else if('ffs'in d)ffSet('',d.ffs);
+ else if('pk'in d){if(d.pk==='eye'){new EyeDropper().open().then(r=>pkApply(r.sRGBHex)).catch(()=>0)}else pkApply(d.pk)}},true);
+document.addEventListener('input',ev=>{const t=ev.target;if(t.id==='pkh'){const h=nh(t.value);if(h)pkApply(h)}else if(t.id==='pkn')pkApply(t.value)});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){pkClose();fpClose()}});
+const _r9=render;render=function(){pkClose();fpClose();_r9()};
+
+/* --- smoother editing --- */
+/* undo history keeps photos by reference instead of copying megabytes into every snapshot */
+const IM=new Map(),IR=[];
+const ser=o=>JSON.stringify(o,(k,v)=>{if(k==='src'&&typeof v==='string'&&v.length>2000){let i=IM.get(v);if(i==null){i=IR.push(v)-1;IM.set(v,i)}return '@img:'+i}return v});
+const des=s=>JSON.parse(s,(k,v)=>typeof v==='string'&&v.startsWith('@img:')?IR[+v.slice(5)]:v);
+snap=function(force){const n=Date.now();if(force||n-lastH>900){hist.push(ser(proj.els));if(hist.length>60)hist.shift();fut=[]}lastH=n};
+undo=function(){if(!hist.length)return;fut.push(ser(proj.els));proj.els=des(hist.pop());refresh(true)};
+redo=function(){if(!fut.length)return;hist.push(ser(proj.els));proj.els=des(fut.pop());refresh(true)};
+/* at most one canvas rebuild per frame (typing, dragging, pinch and the color picker fire many events) */
+const _dcR=drawCanvas;let dcq=0;drawCanvas=function(){if(dcq)return;dcq=requestAnimationFrame(()=>{dcq=0;_dcR()})};
+/* autosave a little less often */
+touch=function(){const s=$('#st');if(s)s.textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(save,1200)};
 </script><script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>

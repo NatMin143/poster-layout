@@ -1,7 +1,7 @@
-/* Tourism Layout Studio service worker (v2.5.0): makes the app open offline.
+/* Tourism Layout Studio service worker (v2.6.0): makes the app open offline.
    - App shell: network first (so updates arrive), cache fallback.
    - Fonts and export libraries from Google Fonts / cdnjs: cached after first load. */
-const V = 'tls-v2.5.0';
+const V = 'tls-v2.6.0';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const EXT = ['fonts.googleapis.com', 'fonts.gstatic.com', 'cdnjs.cloudflare.com'];
 
