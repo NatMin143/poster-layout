@@ -222,7 +222,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 /* ===== TEMPLATE LOADING: built-ins come from <script data-tpl> JSON; imported ones from storage ===== */
 const BUILT=[...document.querySelectorAll('script[data-tpl]')].map(s=>JSON.parse(s.textContent));
 let custom=[],projects=[],tourSeen=0,FONTS={};
-const norm=t=>{const m=t.template||{},o=+m.assignmentOption;if(o>=1&&o<=10)m.category=CATS[o-1][0];else if(!o){const c=CATS.find(c=>c[0]===m.category);if(c)m.assignmentOption=c[1]}return t};
+const norm=t=>{if(t.theme||!t.fonts)normT(t);const m=t.template||{},o=+m.assignmentOption;if(o>=1&&o<=10)m.category=CATS[o-1][0];else if(!o){const c=CATS.find(c=>c[0]===m.category);if(c)m.assignmentOption=c[1]}return t};
 const lib=()=>[...BUILT,...custom].map(norm);
 const CV={A2:{h:1414,l:'A2',cm:[42,59.4]},'18x24':{h:1333,l:'18×24 in',cm:[45.72,60.96]},'4x5':{h:1250,l:'4:5 poster',cm:[40,50]},letter:{h:1294,l:'Letter',cm:[21.59,27.94]}};
 const ICONS=Object.fromEntries(Object.entries({hotel:"<rect x='5' y='3' width='14' height='18'/><path d='M9 7h2M13 7h2M9 11h2M13 11h2M10 21v-4h4v4'/>",flight:"<path d='M21 15l-8-4V5a1 1 0 00-2 0v6l-8 4v2l8-2v4l-2 1v1l3-.5 3 .5v-1l-2-1v-4l8 2z'/>",camera:"<path d='M4 8h3l2-3h6l2 3h3v11H4z'/><circle cx='12' cy='13' r='3.5'/>",document:"<path d='M6 3h9l4 4v14H6z'/><path d='M9 12h7M9 16h7'/>",pin:"<path d='M12 22C6 14 4 12 4 10a8 8 0 0116 0c0 2-2 4-8 12z'/><circle cx='12' cy='10' r='3'/>",phone:"<path d='M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z'/>",globe:"<circle cx='12' cy='12' r='9'/><path d='M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'/>",clock:"<circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/>",tag:"<path d='M3 12V3h9l9 9-9 9z'/><circle cx='7.5' cy='7.5' r='1.2'/>",leaf:"<path d='M5 19C5 9 11 4 20 4c0 9-5 15-15 15zM5 19l8-8'/>"}).map(([k,v])=>[k,`<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'>${v}</svg>`]));
@@ -232,7 +232,7 @@ const TYPES=[...TXT,'image','svg','icon','shape','line','divider','group','map',
 /* ===== TEMPLATE VALIDATION: required top-level fields, element id/type/label/position, instruction on editable ===== */
 function validate(t){const e=[];
  if(!t||typeof t!=='object')return['Not a JSON object.'];
- ['schemaVersion','template','canvas','theme','contentSchema','elements'].forEach(k=>{if(t[k]==null)e.push('Missing top-level field: '+k)});
+ ['schemaVersion','template','canvas','elements'].forEach(k=>{if(t[k]==null)e.push('Missing top-level field: '+k)});
  if(e.length)return e;
  if(!Array.isArray(t.elements))return['"elements" must be an array.'];
  t.elements.forEach((x,i)=>{const n=x.id||'#'+i;
@@ -265,13 +265,13 @@ function canvasHTML(P,w,o={}){ // P = {els,fd,fb,bg,size}
  const S=w/1000,H=P.H||1414,f={d:`'${P.fd}',serif`,b:`'${P.fb}',sans-serif`};
  return `<div class="cvw" style="width:${w}px;height:${H*S}px"><div class="cv" style="width:1000px;height:${H}px;background:${tk(P.bg,P.pal)};transform:scale(${S})">${P.els.filter(e=>!e.hidden).map(e=>elHTML(resEl(e,P.pal),f,e.id===o.sel)).join('')}${o.safe?'<div style="position:absolute;inset:50px;border:3px dashed #e0452b;pointer-events:none"></div>':''}</div></div>`}
 const projP=p=>({els:p.els,fd:p.fd,fb:p.fb,bg:p.bg,pal:p.pal,H:(CV[p.canvas]||CV.A2).h});
-const tplP=t=>({els:t.elements,fd:t.theme.displayFont,fb:t.theme.bodyFont,bg:t.theme.background,pal:t.theme.palette||null,H:(CV[(t.canvas||{}).size]||CV.A2).h});
+const tplP=t=>{if(t.theme||!t.fonts)normT(t);return{els:t.elements,fd:t.fonts.display,fb:t.fonts.body,bg:t.canvas.background,pal:null,H:(CV[(t.canvas||{}).size]||CV.A2).h}};
 
 /* ===== STATE ===== */
 let hid=false,zoom=1,view='home',proj=null,selId=null,mode='sel',safe=false,hist=[],fut=[],lastH=0,saveT=0,tdet=null;
 
 /* ===== PROJECT CRUD / AUTOSAVE ===== */
-function newProject(t){const d=clone(t);proj={id:'p'+Date.now(),name:d.template.name,tplId:d.template.id,els:d.elements,fd:d.theme.displayFont,fb:d.theme.bodyFont,bg:d.theme.background,updated:Date.now(),canvas:CV[(d.canvas||{}).size]?d.canvas.size:'A2',pal:d.theme.palette?clone(d.theme.palette):null};projects.unshift(proj);sv('tls-proj',projects);hist=[];fut=[];selId=null;mode='sel';view='editor';render()}
+function newProject(t){const d=clone(t);if(d.theme||!d.fonts)normT(d);proj={id:'p'+Date.now(),name:d.template.name,tplId:d.template.id,els:d.elements,fd:d.fonts.display,fb:d.fonts.body,bg:d.canvas.background||'#FFFFFF',updated:Date.now(),canvas:CV[(d.canvas||{}).size]?d.canvas.size:'A2',pal:null};projects.unshift(proj);sv('tls-proj',projects);hist=[];fut=[];selId=null;mode='sel';view='editor';render()}
 function save(){proj.updated=Date.now();const i=projects.findIndex(p=>p.id===proj.id);if(i<0)projects.unshift(proj);sv('tls-proj',projects).then(ok=>{const s=$('#st');if(s&&ok)s.textContent='Saved'})}
 function touch(){const s=$('#st');if(s)s.textContent='Saving…';clearTimeout(saveT);saveT=setTimeout(save,500)}
 /* ===== HISTORY: snapshot of elements before each change ===== */
@@ -392,12 +392,7 @@ function cwBrief(){
   flds=[...cw.fields,...cw.custom],ex=EXTRAS.filter(x=>cw.extras.includes(x[0])),
   chosen=lib().find(t=>t.template.id===cw.base),base=chosen||lib().find(t=>t.template.id===L.base)||BUILT[0];
  return{L,M,P,pr,cat,flds,ex,chosen,base}}
-function tokenizeT(t){t=clone(t);const th=t.theme,lc=x=>String(x||'').toLowerCase(),bg=lc(th.background),ink=lc(th.primary),acc=lc(th.secondary);
- const pal={bg:th.background,ink:th.primary,light:'#FFFFFF',accent:th.secondary,mid:'#7F8F8C'};
- const name=c=>{const x=lc(c);if(x===bg)return'@bg';if(x===ink)return'@ink';if(x===acc)return'@accent';const n=parseInt(x.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255,mx=Math.max(r,g,b),S=mx?(mx-Math.min(r,g,b))/mx:0,L=(.299*r+.587*g+.114*b)/255;return S>.4&&L>.2&&L<.85?'@accent':L>.7?'@light':L<.35?'@ink':'@mid'};
- const m=s=>typeof s==='string'?s.replace(/#[0-9a-f]{6}\b/gi,x=>name(x)):s;
- t.elements.forEach(e=>{if(e.style)for(const k in e.style)if(typeof e.style[k]==='string')e.style[k]=m(e.style[k]);if(e.svg)e.svg=m(e.svg)});
- if(!th.palette){th.palette=pal}th.background='@bg';return t}
+
 const FORMAT_EX={schemaVersion:'1.5',template:{id:'format-example-01',name:'Format example',category:'Destination Poster',assignmentOption:1,style:'Example',description:'Only shows the JSON format.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2'},theme:{background:'@bg',primary:'#10252B',secondary:'#C8552E',displayFont:'Playfair Display',bodyFont:'Inter',palette:{bg:'#F3EDE0',ink:'#10252B',light:'#FFFFFF',accent:'#C8552E',mid:'#6F8F95'}},contentSchema:{},elements:[
 {id:'photo',type:'image',label:'Main photo',instruction:'A strong photo of the place. Credit it in Sources.',editable:true,required:true,lock:true,bleed:true,position:{x:0,y:0,w:1000,h:900},style:{fade:'bottom'},src:''},
 {id:'kicker',type:'text',label:'Script kicker',instruction:'A short invitation in script type.',editable:true,position:{x:60,y:560,w:500,h:90},style:{size:64,font:'s',color:'@light',fit:true},text:'Discover',ph:true},
@@ -409,7 +404,7 @@ const FORMAT_EX={schemaVersion:'1.5',template:{id:'format-example-01',name:'Form
 ]};
 function genPrompt(){
  const{L,M,P,pr,cat,flds,ex,chosen,base}=cwBrief(),nm=(cw.name||'My Template').trim(),opt=parseInt(cw.opt)||null,
-  sz=CV[cw.size]?cw.size:'A2',C=CV[sz],land=C.cm[0]>C.cm[1],ex1=chosen?tokenizeT(chosen):FORMAT_EX;
+  sz=CV[cw.size]?cw.size:'A2',C=CV[sz],land=C.cm[0]>C.cm[1],ex1=chosen?clone(chosen):FORMAT_EX;
  return `You are a graphic designer making ONE template for TOURISM LAYOUT STUDIO, a mobile poster editor. Reply with ONLY one valid JSON object: no explanation, no markdown, no code fences.
 
 BRIEF
@@ -431,23 +426,24 @@ CREATIVE DIRECTION (you decide the whole look)
 - Be different every time. Never reuse the arrangement of the format example.
 - Everything the student must fill in (photos, texts, maps) stays its own editable element with an instruction.
 
-${chosen?`START FROM THIS EXISTING TEMPLATE and make a clearly different NEW VARIATION (new id and name, rearranged layout, same JSON format). Rearrange it into a fresh, creative composition (see CREATIVE DIRECTION). Existing template (its colors are already tokens, see COLOR TOKENS):`:`FORMAT EXAMPLE. It only shows how the JSON is written. Do NOT copy its arrangement, fonts or colors: invent your own composition for the brief above.`}
+${chosen?`START FROM THIS EXISTING TEMPLATE and make a clearly different NEW VARIATION (new id and name, rearranged layout, same JSON format). Rearrange it into a fresh, creative composition (see CREATIVE DIRECTION). Existing template (its colors are plain hex values; keep that):`:`FORMAT EXAMPLE. It only shows how the JSON is written. Do NOT copy its arrangement, fonts or colors: invent your own composition for the brief above.`}
 ${JSON.stringify(ex1)}
 
 FORMAT
-- Top level: schemaVersion "1.5", template {id (kebab-case, ends with -01), name, category (exactly "${cat[0]}"), assignmentOption (exactly ${cat[1]}), style, description, tags[]}, canvas {width:1000,height:${C.h},format:"${C.l}",orientation:"${land?'landscape':'portrait'}",size:"${sz}"}, theme {background:"@bg",primary,secondary,displayFont,bodyFont,palette:{bg,ink,light,accent,mid}}, contentSchema {}, elements [].
+- Top level: schemaVersion "2.0", template {id (kebab-case, ends with -01), name, category (exactly "${cat[0]}"), assignmentOption (exactly ${cat[1]}), style, description, tags[]}, canvas {width:1000,height:${C.h},format:"${C.l}",orientation:"${land?'landscape':'portrait'}",size:"${sz}",background:"a #RRGGBB color or a CSS gradient"}, fonts {display,body}, contentSchema {}, elements [].
 - Always design on a 1000 x ${C.h} canvas. x, y, w, h are in those units.
 - Each element: id (unique), type, label (short, plain English), instruction (one friendly sentence telling a student exactly what to put here), editable:true, required:true for must-fill content, rec:true for recommended, lock:true only for big photo or background pieces, bleed:true for pieces that deliberately run off the edge, sec (optional: a short section name such as "Tips" shared by every element of an optional block, so the user can hide the whole block), position {x,y,w,h}, style {size,weight,font:"d"|"b"|"s",color,lh,ls,align,bg,border,radius,pad,opacity,rotate,fit}.
 - Allowed types ONLY: ${TYPES.join(', ')}. Text-like types (${TXT.join(', ')}) use "text" with "ph":true while it is placeholder text; image and map use "src":""; svg and icon use "svg" (inline SVG, currentColor, single quotes); route and leader use "points":[[x,y],...] inside their own box (leader = a straight pointer line with a dot at its last point, for annotations); mapMarker uses "text"; sourceList uses "items":[]; shape, line and divider use style.bg.
 - Special types: "qr" (text = the link to encode; style.color dark, style.bg light; keep it square and at least 160 x 160); "table" (text lines like "Entrance fee | Add verified fee"); "legend" (text lines, one label per line; each gets a colored dot; a line may start with a #RRGGBB color); "months" (values: array of 12 numbers, 0=poor 1=ok 2=good 3=best, January first; style.color, style.accent); "meter" (value, max, optional text label; style.color).
 - style.fit:true makes text shrink automatically to fit its box. Use it on titles and any text whose length can vary.
-- Fonts: theme.displayFont and theme.bodyFont must be EXACTLY one of: ${FONT_OK.join(', ')}. style.font "d" = display font, "b" = body font, "s" = script (Great Vibes).
+- Fonts: fonts.display and fonts.body must be EXACTLY one of: ${FONT_OK.join(', ')}. style.font "d" = display font, "b" = body font, "s" = script (Great Vibes).
 - Extra style keys: grad, tg (text gradient), fade (bottom|top|left|right|edges), shape (${Object.keys(SH).join('|')}), card (${Object.keys(CARD).join('|')}), ovg (CSS gradient overlay on images), ovb (overlay blend), vig (vignette), tr (grayscale|sepia|contrast|warm|duotone), pat (${Object.keys(PAT).join('|')}) with patc, frame (${Object.keys(FRAME).join('|')}), eff (outline|highlight|shadow3d|arc), blend, shadow, tt (uppercase|capitalize), vert, accent (wrap words in *asterisks* in text to color them), mask (circle|ellipse|arch), zoom, px, py, ov/ova (color overlay and opacity on images). Icon elements take "icon": ${Object.keys(ICONS).join(', ')}.
 
-COLOR TOKENS (important)
-- Never write hex colors inside elements. Use the tokens @bg (page background), @ink (main text), @light (contrast surface, or text on dark areas), @accent, @mid in every color field (color, bg, border, accent, ov, patc, grad, svg fills and strokes). Example: "color":"@ink", "border":"2px solid @accent".
-- Write the real colors YOU chose only in theme.palette as {"bg","ink","light","accent","mid"} (hex values). Set theme.background to "@bg", theme.primary to the ink value and theme.secondary to the accent value. A gradient is allowed for the page: put it in palette.bg, e.g. "linear-gradient(#0B1E3A,#14485A)".
-- This lets the user recolor the whole template with one tap, so always choose tokens by ROLE (text = @ink, highlights = @accent, panels = @light).
+COLORS (important)
+- There is no theme and there are no color tokens. YOU choose the color palette for THIS template: 4 to 6 colors that suit the place and the mood (for example a sunset, a rainforest, an old map). Write real hex colors (#RRGGBB) directly in every color field of every element: color, bg, border, accent, ov, patc, grad, tg, shadow, and the fills and strokes inside svg. Example: "color":"#16343D", "border":"2px solid #B8431F".
+- Put the page background in canvas.background, as a hex color or a CSS gradient, for example "#F2EFE6" or "linear-gradient(#0B1E3A,#14485A)".
+- Use your palette consistently (one main text color, one accent, a light and a dark), but each element keeps its own color value so the student can recolor any single element.
+- Do not use @tokens and do not write a theme block.
 
 DESIGN RULES
 - Elements are drawn in array order: backgrounds and decoration first, text last.
@@ -455,7 +451,7 @@ DESIGN RULES
 - Text must fit its box. Characters per line is about w / (size x 0.55); lines x size x lh must be no more than h. Make boxes generous, and add style.fit:true to titles.
 - Sizes: title 70-160, sub-headings 28-44, body 18-24, captions and sources never below 13.
 - Do not let text boxes overlap each other. Text on top of a photo is fine if it has strong contrast (use an overlay or a bg color).
-- Text must contrast strongly with the color behind it (for example @ink on @bg, or @light on an @ink panel).
+- Text must contrast strongly with the color behind it (dark text on a light area, light text on a dark area or on a photo with an overlay; at least 4.5:1 for body text).
 - Use 10 to 25 elements. Every important piece is a separate editable element. Never use a flattened poster image as the background.
 - Make decorations with scalable SVG (contours, waves, routes, compass, markers, rules).
 - Include an instruction for every editable element, mark required content, and include a Sources list.
@@ -472,7 +468,7 @@ REMINDERS
 - Allowed element types ONLY: ${TYPES.join(', ')}.
 - Fonts must be EXACTLY one of: ${FONT_OK.join(', ')}.
 - Every element needs id, type, label and position {x,y,w,h} (numbers). Editable elements also need "instruction".
-- Canvas width is 1000. Colors must be tokens (@bg, @ink, @light, @accent, @mid) with the real colors only in theme.palette.
+- Canvas width is 1000. Colors must be real hex values (#RRGGBB) written directly on each element, and the page background goes in canvas.background. Do not use @tokens or a theme block.
 
 YOUR JSON
 ${raw}`}
@@ -529,9 +525,9 @@ function prep(t){const fx=[],er=[],wn=[];
  else{const c=t.canvas;if(!CV[c.size]){const k=Object.keys(CV).find(k=>CV[k].h===c.height);if(k){c.size=k}else{c.size='A2';wn.push('The canvas height '+c.height+' is not a standard sheet, so A2 portrait is used. Check that nothing sits outside the sheet.')}}
   if(c.height!==CV[c.size].h){c.height=CV[c.size].h;fx.push('Set the canvas height to '+CV[c.size].h+' for '+CV[c.size].l+'.')}c.width=1000}
  if(t.template&&typeof t.template==='object'){const m=t.template;if(!m.name){m.name='AI template';fx.push('Added a template name.')}if(!m.id)m.id=String(m.name).toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-01';{const o=+m.assignmentOption;if(o>=1&&o<=10){const n=CATS[o-1][0];if(m.category!==n){m.category=n;fx.push('Filed under Option '+o+' ('+n+').')}}else{const c=CATS.find(c=>c[0]===m.category);if(c){m.assignmentOption=c[1];fx.push('Set the assignment option to '+c[1]+' from the category.')}else{m.category=m.category||'Unassigned';wn.push('No HM 302 option (1-10) was given, so this template is filed under Other. Set template.assignmentOption to file it.')}}}}
- if(t.theme&&typeof t.theme==='object'){const h=t.theme;if(!h.background){h.background='#FFFFFF';fx.push('Set a white background.')}
-  if(!h.primary)h.primary=h.palette&&h.palette.ink||'#111111';if(!h.secondary)h.secondary=h.palette&&h.palette.accent||'#C8553D';
-  [['displayFont','Playfair Display'],['bodyFont','Inter']].forEach(([k,d])=>{if(!FONT_OK.includes(h[k])){fx.push(`Font "${h[k]||'(none)'}" is not installed, so ${d} is used instead.`);h[k]=d}})}
+ {const legacy=!!t.theme;normT(t);if(legacy)fx.push('Converted an older template format: colors are now written directly on each element.');
+  const h=t.fonts;[['display','Playfair Display'],['body','Inter']].forEach(([k,d])=>{if(!FONT_OK.includes(h[k])){fx.push(`Font "${h[k]||'(none)'}" is not installed, so ${d} is used instead.`);h[k]=d}});
+  if(typeof t.canvas.background!=='string'||!t.canvas.background.trim()){t.canvas.background='#FFFFFF';fx.push('Set a white page background.')}}
  if(Array.isArray(t.elements)){const seen=new Set();let oob=[];
   t.elements.forEach((x,i)=>{if(!x||typeof x!=='object'){er.push('Element #'+(i+1)+' is not an object.');return}
    if(!x.id){x.id='el'+(i+1);fx.push(`Gave element #${i+1} an id.`)}
@@ -545,10 +541,7 @@ function prep(t){const fx=[],er=[],wn=[];
    if(TXT.includes(x.type)&&x.text==null)x.text='';
    if((x.type==='image'||x.type==='map')&&x.src==null)x.src='';
    if(x.type==='sourceList'&&!Array.isArray(x.items))x.items=[]});
-  const used=new Set();t.elements.forEach(x=>{if(!x||typeof x!=='object')return;const sc=v=>{if(typeof v==='string')(v.match(/@[a-z]+\b/gi)||[]).forEach(m=>used.add(m.toLowerCase()))};Object.values(x.style||{}).forEach(sc);sc(x.svg)});if(typeof t.theme.background==='string')(t.theme.background.match(/@[a-z]+\b/gi)||[]).forEach(m=>used.add(m.toLowerCase()));
-  const bad=[...used].filter(m=>!['@bg','@ink','@light','@accent','@mid'].includes(m));if(bad.length)wn.push('Unknown color token(s): '+bad.join(', ')+'. Only @bg, @ink, @light, @accent and @mid work.');
-  if(used.size&&t.theme){const p=t.theme.palette,okp=p&&typeof p==='object'&&['bg','ink','light','accent','mid'].every(k=>/^#[0-9a-f]{6}$/i.test(p[k]||''));
-   if(!okp){const q=p&&typeof p==='object'?p:{};t.theme.palette={bg:/^#[0-9a-f]{6}$/i.test(q.bg||'')?q.bg:'#F4F1EA',ink:/^#[0-9a-f]{6}$/i.test(q.ink||'')?q.ink:t.theme.primary||'#16343D',light:/^#[0-9a-f]{6}$/i.test(q.light||'')?q.light:'#FFFFFF',accent:/^#[0-9a-f]{6}$/i.test(q.accent||'')?q.accent:t.theme.secondary||'#C8553D',mid:/^#[0-9a-f]{6}$/i.test(q.mid||'')?q.mid:'#7F8F8C'};fx.push('Filled in the missing color palette (the template uses color tokens).')}}
+  {const bad=new Set(),sc=v=>{if(typeof v==='string')(v.match(/@[a-z]+\b/gi)||[]).forEach(m=>bad.add(m))};t.elements.forEach(x=>{if(!x||typeof x!=='object')return;Object.values(x.style||{}).forEach(sc);sc(x.svg)});sc(t.canvas.background);if(bad.size)wn.push('Color tokens that could not be converted: '+[...bad].join(', ')+'. Colors should be hex values like #16343D.')}
   if(oob.length)wn.push('Outside the sheet: '+oob.join(', ')+'. You can move them in the editor.');
   if(t.elements.length<6)wn.push('Only '+t.elements.length+' elements, so this may be too simple.');
   if(!t.elements.some(x=>x&&x.type==='sourceList'))wn.push('No Sources list was included.');
@@ -602,7 +595,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]'),a=b
  else if(a==='sample')dlText(JSON.stringify(SAMPLE,null,2),'sample-template.json');
  else if(a==='png')exportPNG();
  else if(a==='pj')dlText(JSON.stringify({kind:'project',project:proj},null,2),proj.name+'.project.json');
- else if(a==='tj'){const t=clone(lib().find(t=>t.template.id===proj.tplId)||BUILT[0]);t.elements=clone(proj.els);t.theme.displayFont=proj.fd;t.theme.bodyFont=proj.fb;t.theme.background=proj.bg;if(proj.pal)t.theme.palette=clone(proj.pal);{const c=CV[proj.canvas||'A2'];t.canvas=Object.assign({},t.canvas,{size:proj.canvas||'A2',height:c.h,format:c.l,orientation:c.cm[0]>c.cm[1]?'landscape':'portrait'})}dlText(JSON.stringify(t,null,2),proj.name+'.template.json')}
+ else if(a==='tj'){const t=clone(lib().find(t=>t.template.id===proj.tplId)||BUILT[0]);t.elements=clone(proj.els);t.fonts={display:proj.fd,body:proj.fb};delete t.theme;t.schemaVersion='2.0';{const c=CV[proj.canvas||'A2'];t.canvas=Object.assign({},t.canvas,{size:proj.canvas||'A2',background:proj.bg,height:c.h,format:c.l,orientation:c.cm[0]>c.cm[1]?'landscape':'portrait'})}dlText(JSON.stringify(t,null,2),proj.name+'.template.json')}
 });
 document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset.f||!proj)return;const e=cur();if(!e)return;snap();setF(e,t.dataset.f,t.value);drawCanvas();touch()});
 document.addEventListener('change',ev=>{const t=ev.target,f=t.files&&t.files[0];
@@ -619,7 +612,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.6.4';
+const VERSION='2.7.0';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
@@ -734,7 +727,7 @@ const tf=t=>(!tc||t.template.category===tc)&&(!tq||(t.template.name+t.template.c
 function filterBar(){const cs=[...new Set(lib().map(t=>t.template.category))];return `<input id="tq" placeholder="Search templates" value="${esc(tq)}" aria-label="Search templates"><div class="row">${cs.map(c=>`<button data-a="tcat" data-k="${esc(c)}" class="${tc===c?'on':''}">${esc(c)}</button>`).join('')}</div>`}
 document.addEventListener('input',e=>{if(e.target.id==='tq'){tq=e.target.value;$('#tl').innerHTML=tplGroups()}});
 /* first-time tour + button tooltips */
-function tour(){const m=document.createElement('div');m.className='modal';m.innerHTML='<h1>Quick tour</h1>'+[['Select','Tap any part of the poster. A small toolbar appears next to it.'],['Edit','The Edit tab shows what to put in that element. Drag it, or use the corner handle to resize.'],['Add & Style','Add shapes, cards and decor, or recolor everything from the Style tab.'],['Check','Run the content and print checks before you export. Pinch to zoom.']].map(([a,b],i)=>`<div class="card"><b>${i+1}</b><div><b>${a}</b><br>${b}</div></div>`).join('')+'<button class="p" id="tg0">Got it</button>';document.body.appendChild(m);m.querySelector('#tg0').onclick=()=>m.remove()}
+function tour(){const m=document.createElement('div');m.className='modal';m.innerHTML='<h1>Quick tour</h1>'+[['Select','Tap any part of the poster. Its settings open in the panel below, with Copy, Lock and Delete at the top.'],['Edit','The panel has Content, Style, Effects and Layout tabs, showing only what applies to that element. Drag it, or use the corner handle to resize.'],['Add & Style','Add shapes, cards and decor, or open the Style tab to see every color in your poster and change one everywhere.'],['Check','Run the content and print checks before you export. Pinch to zoom.']].map(([a,b],i)=>`<div class="card"><b>${i+1}</b><div><b>${a}</b><br>${b}</div></div>`).join('')+'<button class="p" id="tg0">Got it</button>';document.body.appendChild(m);m.querySelector('#tg0').onclick=()=>m.remove()}
 const _es=editorShell;editorShell=function(){setTimeout(()=>{if(view==='editor'&&!tourSeen){tourSeen=1;sv('tls-tour',1);tour()}},500);return _es()};
 new MutationObserver(()=>document.querySelectorAll('button:not([title])').forEach(b=>{b.title=b.getAttribute('aria-label')||b.textContent.trim().slice(0,30)})).observe($('#app'),{childList:true,subtree:true});
 /* ===== v2.3: color tokens, auto-fit text, sections, new elements, layout check, more sheet sizes ===== */
@@ -885,6 +878,7 @@ async function boot(){await IDB.open();
   if(v===undefined){v=ld(k,d);if(IDB.db&&JSON.stringify(v)!==JSON.stringify(d))await IDB.set(k,v)}
   if(k==='tls-proj')projects=v;else if(k==='tls-custom')custom=v;else if(k==='tls-tour')tourSeen=v;else FONTS=v||{}}
  for(const[fam,buf]of Object.entries(FONTS)){try{document.fonts.add(await new FontFace(fam,buf).load())}catch(e){}}
+ {const mig=projects.some(p=>p&&p.pal);projects.forEach(migrateProj);if(mig)sv('tls-proj',projects)}
  render()}
 boot();
 </script>
@@ -980,4 +974,167 @@ const _dsA=drawSheet;drawSheet=function(){_dsA();const sh=$('#sheet');if(!sh||mo
 const _dsB=drawSheet;drawSheet=function(){_dsB();const sh=$('#sheet');if(!sh||mode!=='sel')return;const e=cur();if(!isT(e)||sh.querySelector('input[data-f="s.bg"]'))return;
  const s=e.style||{},h=RV(s.bg),ok=/^#[0-9a-f]{6}/i.test(h||''),b=sh.querySelector('[data-ffp]');
  if(b)b.insertAdjacentHTML('afterend',`<div class="g4" style="grid-template-columns:1fr 3fr"><div><label>Fill<input type="color" data-f="s.bg" value="${ok?h.slice(0,7):'#ffffff'}"></label></div><div class="mono" style="align-self:end;padding-bottom:10px">${s.bg?'Card or pill color. Tap the swatch to change it.':'No fill. Tap the swatch to add a card color.'}${s.grad?' A background gradient is set further down and covers this.':''}</div></div>`)};
-</script><script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
+</script><style>
+/* v2.7: docked panel header, tabs, color list, export overlay */
+.sheet{max-height:50%}
+.ph{position:sticky;top:-12px;z-index:3;background:var(--pn);margin:-12px -12px 10px;padding:8px 12px 6px;border-bottom:1px solid var(--ln)}
+.pr1{display:flex;align-items:center;gap:8px;min-height:30px}.pr1 b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}.pr1 .mono{flex:none}
+.pr1 button{min-height:30px;padding:0 10px;flex:none}
+.ty{flex:none;font:700 10px 'Space Mono',monospace;background:var(--ac);color:#fff;padding:3px 6px;border-radius:3px;letter-spacing:.06em;text-transform:uppercase}
+.qa{display:flex;gap:6px;margin:6px 0}.qa>*{margin:0;flex:1;min-width:0}.qa button{padding:0 6px;font-size:12px;min-height:36px}
+.sheet .qc{display:flex;align-items:center;justify-content:center;gap:6px;margin:0;min-height:36px;border:1px solid var(--ln);border-radius:4px;font-size:12px;background:var(--bg)}
+.qc input{width:26px;min-height:26px;height:26px;padding:0;border:0;background:none;flex:none}
+.pt{display:flex;gap:4px}.pt button{flex:1;min-width:0;min-height:34px;padding:0 4px;font-size:12px}.pt button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.clist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sheet .csw{display:flex;align-items:center;gap:8px;margin:0;border:1px solid var(--ln);border-radius:4px;background:var(--pn);padding:4px 8px;min-width:0}
+.csw input{width:40px;min-height:36px;padding:0;border:0;background:none;flex:none}.csw span{font:11px 'Space Mono',monospace;min-width:0;display:flex;flex-direction:column;line-height:1.3}.csw small{color:var(--mut);font-size:10px}
+#mo{position:fixed;left:0;right:0;bottom:0;z-index:8;max-height:60vh;overflow:auto;background:var(--pn);border-top:3px solid var(--ac);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 24px #0005}
+</style>
+<script>/* ===== v2.7.0: no theme (colors live on each element), docked panel header, tabbed Edit panel, Preview fix =====
+   Old templates and projects that use the @color tokens are converted to plain colors automatically. */
+const HX6=/^#[0-9a-f]{6}$/i;
+/* default role colors for converting an older template that used @tokens */
+function palOf(t){const h=t.theme||{},q=h.palette&&typeof h.palette==='object'?h.palette:{},
+ pick=(k,d)=>typeof q[k]==='string'&&q[k].trim()&&(k==='bg'||HX6.test(q[k]))?q[k]:d,
+ okb=typeof h.background==='string'&&h.background&&!h.background.includes('@');
+ return{bg:pick('bg',okb?h.background:'#F4F1EA'),ink:pick('ink',HX6.test(h.primary||'')?h.primary:'#16343D'),light:pick('light','#FFFFFF'),accent:pick('accent',HX6.test(h.secondary||'')?h.secondary:'#C8553D'),mid:pick('mid','#7F8F8C')}}
+function flatEl(e,p){if(e.style)for(const k in e.style){let v=e.style[k];if(typeof v==='string'){if(p&&v.includes('@'))v=tk(v,p);if(/^#[0-9a-f]{3}$/i.test(v))v='#'+[...v.slice(1)].map(c=>c+c).join('');e.style[k]=v}}
+ if(p&&typeof e.svg==='string'&&e.svg.includes('@'))e.svg=tk(e.svg,p)}
+/* template: theme + tokens  ->  fonts + canvas.background + plain colors on every element */
+function normT(t){const h=t.theme||{},p=palOf(t);
+ t.canvas=t.canvas||{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2'};
+ if(!t.canvas.background)t.canvas.background=h.background||'#FFFFFF';
+ t.canvas.background=typeof t.canvas.background==='string'?tk(t.canvas.background,p):'#FFFFFF';
+ if(!t.fonts||typeof t.fonts!=='object')t.fonts={display:h.displayFont||'Playfair Display',body:h.bodyFont||'Inter'};
+ (Array.isArray(t.elements)?t.elements:[]).forEach(e=>{if(e&&typeof e==='object')flatEl(e,p)});
+ delete t.theme;if(!t.schemaVersion||parseFloat(t.schemaVersion)<2)t.schemaVersion='2.0';return t}
+/* saved project: same conversion */
+function migrateProj(p){if(!p)return;const q=p.pal;(p.els||[]).forEach(e=>flatEl(e,q||null));if(q)p.bg=tk(p.bg,q);if(!p.bg)p.bg='#FFFFFF';p.pal=null}
+normT(FORMAT_EX);normT(SAMPLE);
+
+(function(){
+const ok6=v=>/^#[0-9a-f]{6}/i.test(v||'');
+/* ---------- Preview mode: menus and export always work ---------- */
+function setPreview(on){hid=!!on;const sh=$('#sheet');if(sh)sh.style.display=hid?'none':'';const b=$('#tgb');if(b){b.textContent=hid?'Done':'Preview';b.classList.toggle('on',hid)}drawCanvas()}
+function closeMore(){const d=$('#mo');if(d)d.remove()}
+function openMore(){closeMore();const d=document.createElement('div');d.id='mo';d.innerHTML='<div class="row" style="margin:0 0 4px;justify-content:flex-end"><button class="p" data-mox="1" style="flex:none;min-width:96px">Done</button></div>'+moreHTML();document.body.appendChild(d)}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a]');if(!b||!proj||view!=='editor')return;const a=b.dataset.a;
+ if(a==='tg'){ev.stopImmediatePropagation();ev.preventDefault();setPreview(!hid);return}
+ if(a==='m'){if(b.dataset.m==='more'){ev.stopImmediatePropagation();$('#mo')?closeMore():openMore();return}if(hid)setPreview(false);closeMore()}},true);
+document.addEventListener('click',ev=>{if(ev.target.closest&&ev.target.closest('#mo [data-a],[data-mox]'))setTimeout(closeMore,0)});
+const _r7=render;render=function(){closeMore();_r7()};
+
+/* ---------- no floating toolbar; keep only the resize handle ---------- */
+placeFT=function(){let f=$('#ftb');if(!f){f=document.createElement('div');f.id='ftb';f.className='ft';$('#app').appendChild(f)}f.style.display='none';
+ let h=$('#rh');if(!h){h=document.createElement('div');h.id='rh';$('#app').appendChild(h)}
+ const e=view==='editor'&&!hid&&cur(),n=e&&!e.lock&&document.querySelector('.cv .e.sel'),st=$('#stage');if(!n||!st){h.style.display='none';return}
+ const r=n.getBoundingClientRect(),s=st.getBoundingClientRect(),x=r.right-12,y=r.bottom-12;
+ if(x<s.left||x>s.right||y<s.top||y>s.bottom){h.style.display='none';return}
+ h.style.display='block';h.style.left=x+'px';h.style.top=y+'px'};
+/* bring a newly selected element into view above the panel */
+let lastSel=null;const _dcZ=drawCanvas;
+drawCanvas=function(){_dcZ();requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!selId){lastSel=null;return}if(view!=='editor'||hid||selId===lastSel)return;lastSel=selId;
+ const n=document.querySelector('.cv .e.sel'),st=$('#stage');if(!n||!st)return;const r=n.getBoundingClientRect(),s=st.getBoundingClientRect();if(r.top<s.top||r.bottom>s.bottom)n.scrollIntoView({block:'nearest',inline:'nearest'});placeFT()}))};
+
+/* ---------- Edit panel: header + Content / Style / Effects / Layout, only what applies ---------- */
+const kind=e=>{const t=e.type;if(t==='sourceList')return'src';if(TXT.includes(t))return t==='legend'?'legend':t==='table'?'table':'text';
+ if(t==='image'||t==='map')return'img';if(['svg','icon','compass'].includes(t))return'art';if(t==='route'||t==='leader')return'line';
+ if(['shape','line','divider','group'].includes(t))return'shape';if(t==='mapMarker')return'marker';return t};
+const NAMES={text:'Text',heading:'Heading',subheading:'Subheading',paragraph:'Paragraph',label:'Label',caption:'Caption',coordinate:'Coordinate',metadata:'Info',activity:'Activity',stat:'Stat',badge:'Badge',checklist:'Checklist',locationBadge:'Location',legend:'Legend',table:'Table',image:'Photo',map:'Map',svg:'Drawing',icon:'Icon',compass:'Compass',shape:'Shape',line:'Line',divider:'Divider',group:'Group',mapMarker:'Marker',route:'Route',leader:'Pointer',sourceList:'Sources',qr:'QR code',months:'Best months',meter:'Meter'};
+let itab='content';
+const G=(h,c)=>`<div class="g4"${c?` style="grid-template-columns:repeat(${c},1fr)"`:''}>${h}</div>`;
+const T=t=>`<div class="mono" style="margin:10px 0 4px">${t}</div>`;
+const FADE=[['','None'],['bottom','Bottom'],['top','Top'],['left','Left'],['right','Right'],['edges','Edges']];
+const BLEND=[['','Normal'],['multiply','Multiply'],['screen','Screen'],['overlay','Overlay']];
+function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
+ const col=(key,l,d)=>{const v=RV(s[key]);return `<div><label>${l}<input type="color" data-f="s.${key}" value="${ok6(v)?v.slice(0,7):(d||'#000000')}"></label></div>`};
+ const typeface=`<button class="on" data-ffp="1" style="width:100%;margin:0 0 8px">Typeface: ${esc(ffLabel(e))} ›</button>`;
+ let C='',S='',F='';
+ if(k==='text'){const stars=/\*.+?\*/.test(e.text||'');
+  C=`<label>Content<textarea rows="4" data-f="text">${esc(e.text||'')}</textarea></label><div class="mono" style="margin-top:4px">Tip: wrap words in *stars* to color them with the Accent color.</div>`;
+  S=typeface+G(num('s.size',s.size||20,'Size')+num('s.weight',s.weight||400,'Weight')+num('s.ls',s.ls||0,'Spacing')+num('s.lh',s.lh||1.2,'Line ht'))
+   +G(selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right']])+col('color','Color')+col('bg','Fill','#ffffff')+num('s.opacity',s.opacity??1,'Opacity'))
+   +`<div class="mono" style="margin:-2px 0 6px">Fill is the card color behind the text. It stays empty until you pick one.</div>`
+   +G(selH('s.tt','Case',s.tt,[['','As typed'],['uppercase','UPPER'],['capitalize','Title']])+selH('s.fit','Auto-fit',s.fit?'1':'',[['','Off'],['1','Shrink to fit']])+(stars?col('accent','*Accent*','#e0452b'):''),stars?3:2);
+  F=G(selH('s.eff','Text effect',s.eff,[['','None'],['outline','Outline'],['highlight','Highlight'],['shadow3d','3D shadow'],['arc','Curved']])+selH('s.blend','Blend',s.blend,BLEND)+selH('s.vert','Vertical',s.vert?'1':'',[['','No'],['1','Yes']])+selH('s.fade','Edge fade',s.fade,FADE))
+   +`<label>Shadow / glow (CSS)<input data-f="s.shadow" value="${esc(s.shadow||'')}" placeholder="0 0 20px #77ffff"></label><label>Text gradient (CSS)<input data-f="s.tg" value="${esc(s.tg||'')}" placeholder="linear-gradient(#e0452b,#ffffff00)"></label>`
+   +G(selH('s.card','Card (box behind text)',s.card,[['','None'],...Object.keys(CARD).map(x=>[x,x])])+num('s.pad',s.pad??0,'Padding'),2)}
+ else if(k==='legend'||k==='table'){
+  C=`<label>${k==='legend'?'Labels':'Rows'}<textarea rows="5" data-f="text">${esc(e.text||'')}</textarea></label><div class="mono" style="margin-top:4px">${k==='legend'?'One label per line. Start a line with #RRGGBB to choose its dot color.':'One row per line: Label | Value'}</div>`;
+  S=typeface+G(num('s.size',s.size||20,'Size')+num('s.lh',s.lh||1.2,'Line ht')+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))+(k==='legend'?G(col('accent','First dot','#c8553d'),4):'')}
+ else if(k==='src'){
+  C='<div class="mono">SOURCES</div>'+(e.items||[]).map((t,i)=>`<div class="ly"><input data-f="item.${i}" value="${esc(t)}" aria-label="Source ${i+1}"><button data-a="sup" data-k="${i}" aria-label="Move up">↑</button><button data-a="sdn" data-k="${i}" aria-label="Move down">↓</button><button data-a="sdel" data-k="${i}" aria-label="Remove">✕</button></div>`).join('')+'<div class="row"><button data-a="sadd">Add source</button></div>';
+  S=typeface+G(num('s.size',s.size||13,'Font size')+selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right']])+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))}
+ else if(k==='img'){
+  C=`<label>${e.type==='map'?'Replace map (image or SVG)':'Replace image'}<input type="file" id="imgf" accept="image/*"></label>`;
+  S=T('CROP · zoom and position')+G(num('s.zoom',s.zoom||1,'Zoom')+num('s.px',s.px??50,'Pos X %')+num('s.py',s.py??50,'Pos Y %')+selH('s.mask','Mask',s.mask,[['','None'],['circle','Circle'],['ellipse','Ellipse'],['arch','Arch']]))+G(num('s.radius',s.radius||0,'Radius')+num('s.opacity',s.opacity??1,'Opacity'),2);
+  F=G(selH('s.tr','Treatment',s.tr,[['','None'],['grayscale','Gray'],['sepia','Sepia'],['contrast','Contrast'],['warm','Warm'],['duotone','Duotone']])+col('ov','Overlay')+num('s.ova',s.ova??0.3,'Overlay op.')+selH('s.ovb','Overlay blend',s.ovb,[['','Normal'],['multiply','Multiply'],['screen','Screen'],['color','Color'],['overlay','Overlay']]))
+   +G(selH('s.vig','Vignette',s.vig?'1':'',[['','Off'],['1','On']])+selH('s.fade','Edge fade',s.fade,FADE)+selH('s.frame','Photo frame',s.frame,[['','None'],...Object.keys(FRAME).map(x=>[x,x])])+selH('s.shape','Shape',s.shape,[['','None'],...Object.keys(SH).map(x=>[x,x])]))
+   +`<label>Gradient overlay (CSS)<input data-f="s.ovg" value="${esc(s.ovg||'')}" placeholder="linear-gradient(#0000,#000a)"></label>`}
+ else if(k==='art'){
+  if(e.type==='icon')C+=G(selH('icon','Icon',e.icon,Object.keys(ICONS).map(x=>[x,x])),1);
+  if(e.type!=='compass')C+=`<label>Upload SVG<input type="file" id="svgf" accept=".svg,image/svg+xml"></label>`;
+  S=G(col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'),2);F=G(selH('s.blend','Blend',s.blend,BLEND)+selH('s.fade','Edge fade',s.fade,FADE),2)}
+ else if(k==='line'){
+  C=`<label>Points (x,y per line, inside the box)<textarea rows="4" data-f="pts">${esc((e.points||[]).map(q=>q.join(',')).join('\n'))}</textarea></label>`;
+  S=G(col('color','Color')+num('s.sw',s.sw||5,'Line width')+num('s.opacity',s.opacity??1,'Opacity'),3)}
+ else if(k==='shape'){
+  S=G(col('bg','Fill')+num('s.opacity',s.opacity??1,'Opacity')+(e.type==='shape'||e.type==='group'?selH('s.shape','Shape',s.shape,[['','None'],...Object.keys(SH).map(x=>[x,x])]):'')+num('s.radius',s.radius||0,'Radius'));
+  F=`<label>Background gradient (CSS)<input data-f="s.grad" value="${esc(s.grad||'')}" placeholder="linear-gradient(#ff0000,#0000ff)"></label>`+G(selH('s.pat','Pattern',s.pat,[['','None'],...Object.keys(PAT).map(x=>[x,x])])+col('patc','Pattern color')+selH('s.fade','Edge fade',s.fade,FADE)+selH('s.blend','Blend',s.blend,BLEND))}
+ else if(k==='marker'){
+  C=`<label>Label<input data-f="text" value="${esc(e.text||'')}"></label>`;
+  S=G(col('bg','Fill')+col('color','Text color','#ffffff')+num('s.size',s.size||20,'Text size')+num('s.opacity',s.opacity??1,'Opacity'))}
+ else if(k==='qr'){
+  C=`<label>Link or text<textarea rows="2" data-f="text">${esc(e.text||'')}</textarea></label><div class="mono" style="margin-top:4px">Scan it with your phone before you print.</div>`;
+  S=G(col('color','Dark','#111111')+col('bg','Light','#ffffff'),2)}
+ else if(k==='months'){
+  C=`<div class="mono">TAP A MONTH: 0 poor · 1 ok · 2 good · 3 best</div><div class="g4" style="grid-template-columns:repeat(6,1fr);margin:6px 0">${'JFMAMJJASOND'.split('').map((m,i)=>`<button data-a="mon" data-k="${i}" style="padding:0;min-height:44px">${m}<br><b>${(e.values||[])[i]|0}</b></button>`).join('')}</div>`;
+  S=G(col('color','Bars')+col('accent','Best')+num('s.size',s.size||18,'Label size'),3)}
+ else if(k==='meter'){
+  C=`<label>Label<input data-f="text" value="${esc(e.text||'')}"></label>`+G(num('value',e.value??3,'Level')+num('max',e.max??5,'Out of'),2);
+  S=G(col('color','Color')+num('s.size',s.size||18,'Label size'),2)}
+ const L=T('POSITION'+(lock?' · locked by the template':''))+G(['x','y','w','h'].map(c=>`<div><label>${c.toUpperCase()}<input type="number" data-f="p.${c}" value="${Math.round(p[c])}" ${lock?'disabled':''}></label></div>`).join(''))
+  +(lock?'<div class="row"><button data-a="detach">Unlock position (detach from template)</button></div>':'')
+  +G(num('s.rotate',s.rotate||0,'Rotate')+`<div style="grid-column:span 3"><label>Section (optional block name)<input data-f="sec" value="${esc(e.sec||'')}" placeholder="e.g. Tips"></label></div>`)+ARR;
+ return{k,C,S,F,L}}
+function panelHTML(e){const{k,C,S,F,L}=panelParts(e),s=e.style||{},lock=e.lock;
+ const tabs=[['content','Content',C],['style','Style',S],['fx','Effects',F],['layout','Layout',L]].filter(t=>t[2]);
+ if(!tabs.some(t=>t[0]===itab))itab=tabs[0][0];
+ const qkey=k==='img'?null:(k==='shape'||k==='marker'?'bg':'color'),qv=RV(s[qkey]),
+  qc=qkey?`<label class="qc"><span>Color</span><input type="color" data-f="s.${qkey}" value="${ok6(qv)?qv.slice(0,7):'#000000'}"></label>`:'',
+  ins=`<div class="ins"><div class="mono">WHAT TO PUT HERE</div>${esc(e.instruction||'')}</div>`,
+  flags=[e.required?'REQUIRED':'',lock?'LOCKED':''].filter(Boolean).join(' · ');
+ return `<div class="ph"><div class="pr1"><span class="ty">${esc(NAMES[e.type]||e.type)}</span><b>${esc(e.label)}</b>${flags?`<span class="mono">${flags}</span>`:''}<button data-a="tg" aria-label="Hide panel">▾</button></div>
+<div class="qa">${qc}<button data-a="edup">Copy</button><button data-a="lk3">${lock?'Unlock':'Lock'}</button><button data-a="edel">Delete</button></div>
+<div class="pt">${tabs.map(([id,l])=>`<button data-a="itab" data-k="${id}" class="${id===itab?'on':''}">${l}</button>`).join('')}</div></div>
+${itab===tabs[0][0]?ins:''}${tabs.find(t=>t[0]===itab)[2]}`}
+const _dsBase=drawSheet;
+drawSheet=function(){const sh=$('#sheet');if(!sh)return;const e=mode==='sel'&&cur();if(!e){_dsBase();return}
+ sh.innerHTML=panelHTML(e);document.querySelectorAll('.tools button').forEach(b=>b.classList.toggle('on',b.id==='t-'+mode))};
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a="itab"],[data-a="lk3"]');if(!b||!proj)return;
+ if(b.dataset.a==='itab'){itab=b.dataset.k;drawSheet();const sh=$('#sheet');if(sh)sh.scrollTop=0}
+ else{const e=cur();if(e){snap(1);e.lock=!e.lock;refresh(1)}}});
+
+/* ---------- Style tab: every color in the design, change one everywhere; optional color moods ---------- */
+function gatherColors(){const m=new Map(),add=s=>{if(typeof s==='string')(s.match(/#[0-9a-f]{6}/gi)||[]).forEach(h=>{h=h.toLowerCase();m.set(h,(m.get(h)||0)+1)})};
+ add(proj.bg);proj.els.forEach(e=>{if(e.style)for(const k in e.style)add(e.style[k]);add(e.svg);if(e.type==='legend')add(e.text)});
+ return[...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,30)}
+function mapColors(fn){proj.els.forEach(e=>{if(e.style)for(const k in e.style)if(typeof e.style[k]==='string')e.style[k]=fn(e.style[k]);if(typeof e.svg==='string')e.svg=fn(e.svg);if(e.type==='legend'&&typeof e.text==='string')e.text=fn(e.text)});proj.bg=fn(proj.bg)}
+function swapColor(o,n){const re=new RegExp(o+'(?![0-9a-f]{3})','gi');mapColors(v=>v.replace(re,n))}
+styleHTML=function(){const cs=gatherColors(),bg=String(proj.bg||'').toLowerCase();
+ return `<div class="mono">COLORS IN THIS DESIGN · tap one to change it everywhere</div><div class="clist">${cs.length?cs.map(([h,n])=>`<label class="csw"><input type="color" data-sw="${h}" data-cur="${h}" value="${h}"><span><b>${h}</b><small>${bg.includes(h)?'page · ':''}${n} use${n>1?'s':''}</small></span></label>`).join(''):'<span class="mono">No colors found yet.</span>'}</div>
+<details class="adv"><summary class="mono">Try a color mood (optional)</summary><div class="g4" style="grid-template-columns:repeat(3,1fr)">${PAL.map((p,i)=>`<button data-a="mood" data-i="${i}">${p[0]}<div class="sw">${p.slice(1).map(c=>`<i style="background:${c}"></i>`).join('')}</div></button>`).join('')}</div><div class="mono" style="margin-top:6px">Recolors everything by role (dark, light, accent). Approximate, so check the result. Undo brings your colors back.</div></details>
+<label>Page background (color or CSS gradient)<input data-f="bgp" value="${esc(proj.bg)}"></label>
+<div class="mono" style="margin-top:8px">CANVAS SIZE</div><div class="row">${Object.keys(CV).map(k=>`<button data-a="csz" data-k="${k}" class="${(proj.canvas||'A2')===k?'on':''}">${CV[k].l}</button>`).join('')}</div>
+<div class="row"><button data-a="safe" class="${safe?'on':''}">Safe area</button><button data-a="zo">Zoom −</button><button data-a="zi">Zoom +</button><button data-a="snap" class="${snapOn?'on':''}">Snap to grid &amp; center</button></div>
+<div class="mono" style="margin-top:8px">FONT PAIR · whole template (change one text's typeface in its Style tab)</div><div class="row">${PAIRS.map((p,i)=>`<button data-a="pair" data-i="${i}" class="${proj.fd===p[1]?'on':''}">${p[0]}</button>`).join('')}</div>
+<label>Custom font file (WOFF, WOFF2, TTF, OTF)<input type="file" id="fontf" accept=".woff,.woff2,.ttf,.otf"></label>`};
+let swDirty=0;
+document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset||!t.dataset.sw||!proj)return;const o=t.dataset.cur,n=t.value.toLowerCase();if(o===n)return;
+ if(!swDirty){snap(1);swDirty=1}swapColor(o,n);t.dataset.cur=n;const sp=t.parentNode.querySelector('b');if(sp)sp.textContent=n;drawCanvas();touch()});
+document.addEventListener('change',ev=>{const t=ev.target;if(t.dataset&&t.dataset.sw){swDirty=0;drawSheet()}});
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a="mood"]');if(!b||!proj)return;
+ const p=PAL[+b.dataset.i].slice(1);snap(1);mapColors(v=>v.replace(/#[0-9a-f]{6}/gi,x=>roleOf(x,p)));proj.bg=p[0];refresh(1)});
+})();
+</script>
+<script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
