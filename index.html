@@ -113,7 +113,7 @@ function elHTML(el,fonts,sel){
  if(s.bg)c+=`background:${s.bg};`;if(s.border)c+=`border:${s.border};`;if(s.radius)c+=`border-radius:${s.radius}px;`;if(s.color)c+=`color:${s.color};`;if(s.card&&CARD[s.card])c+=CARD[s.card]+(s.bg?`background:${s.bg};`:'');if(s.shape&&SH[s.shape])c+=SH[s.shape];if(s.frame&&FRAME[s.frame])c+=FRAME[s.frame];if(s.grad)c+=`background:${s.grad};`;if(s.pat&&PAT[s.pat])c+=`background:${PAT[s.pat](s.patc||'#0000002e')},${s.grad||s.bg||'#0000'};`;if(s.eff==='outline')c+=`-webkit-text-stroke:${s.sw||2}px ${s.color||'#000'};color:transparent;`;if(s.eff==='highlight')c+=`background:linear-gradient(transparent 58%,${s.accent||'#FFE45E'} 58%);`;if(s.eff==='shadow3d')c+='text-shadow:3px 3px 0 #0006,6px 6px 0 #0003;';if(s.blend)c+=`mix-blend-mode:${s.blend};`;if(s.fade){const g={bottom:'linear-gradient(#000 60%,transparent)',top:'linear-gradient(transparent,#000 40%)',edges:'radial-gradient(#000 55%,transparent 75%)',left:'linear-gradient(90deg,transparent,#000 40%)',right:'linear-gradient(90deg,#000 60%,transparent)'}[s.fade];if(g)c+=`-webkit-mask-image:${g};mask-image:${g};`}
  let i='';
  if(TXT.includes(el.type)||el.type==='sourceList'){
-  c+=`font-family:${s.font==='d'?fonts.d:s.font==='s'?"'Great Vibes',cursive":fonts.b};text-transform:${s.tt||'none'};${s.shadow?`text-shadow:${s.shadow};`:''}${s.vert?'writing-mode:vertical-rl;':''}${s.tg?`background:${s.tg};-webkit-background-clip:text;background-clip:text;color:transparent;`:''}font-size:${s.fit&&el.type!=='sourceList'?fitSize(el,fonts):(s.size||20)}px;font-weight:${s.weight||400};letter-spacing:${s.ls||0}em;line-height:${s.lh||1.3};text-align:${s.align||'left'};padding:${s.pad??(s.card?24:0)}px;white-space:pre-wrap;`;
+  c+=`font-family:${s.font==='d'?fonts.d:s.font==='s'?"'Great Vibes',cursive":fonts.b};text-transform:${s.tt||'none'};${s.shadow?`text-shadow:${s.shadow};`:(s.shd||s.shb)?`text-shadow:${s.shd||0}px ${s.shd||0}px ${s.shb||0}px ${s.shc||'#00000099'};`:''}${s.vert?'writing-mode:vertical-rl;':''}${s.tg?`background:${s.tg};-webkit-background-clip:text;background-clip:text;color:transparent;`:''}font-size:${s.fit&&el.type!=='sourceList'?fitSize(el,fonts):(s.size||20)}px;font-weight:${s.weight||400};letter-spacing:${s.ls||0}em;line-height:${s.lh||1.3};text-align:${s.align||'left'};${s.it?'font-style:italic;':''}${s.ul||s.st?`text-decoration:${[s.ul&&'underline',s.st&&'line-through'].filter(Boolean).join(' ')};`:''}${s.va?`display:flex;flex-direction:column;justify-content:${s.va==='m'?'center':'flex-end'};`:''}padding:${s.pad??(s.card?24:0)}px;white-space:pre-wrap;`;
   i=txtBody(el,s);
  }else if(el.type==='svg'||el.type==='icon')i=cleanSvg(el.svg||ICONS[el.icon]||'');
  else if(el.type==='compass')i="<svg viewBox='0 0 100 100' fill='none' stroke='currentColor' stroke-width='2'><circle cx='50' cy='50' r='44'/><path d='M50 8L60 50L50 92L40 50Z' fill='currentColor'/><path d='M8 50H92' stroke-width='1'/></svg>";
@@ -354,14 +354,14 @@ FORMAT
 - Special types: "qr" (text = the link to encode; style.color dark, style.bg light; keep it square and at least 160 x 160); "table" (text lines like "Entrance fee | Add verified fee"); "legend" (text lines, one label per line; each gets a colored dot; a line may start with a #RRGGBB color); "months" (values: array of 12 numbers, 0=poor 1=ok 2=good 3=best, January first; style.color, style.accent); "meter" (value, max, optional text label; style.color).
 - style.fit:true makes text shrink automatically to fit its box. Use it on titles and any text whose length can vary.
 - Fonts: see FONTS below (fonts.display and fonts.body must be names from that list).
-- Extra style keys: grad, tg (text gradient), fade (bottom|top|left|right|edges), shape (a shape name, see SHAPED PHOTOS), card (${Object.keys(CARD).join('|')}), ovg (CSS gradient overlay on images), ovb (overlay blend), vig (vignette), tr (grayscale|sepia|contrast|warm|duotone), pat (${Object.keys(PAT).join('|')}) with patc, frame (${Object.keys(FRAME).join('|')}), eff (outline|highlight|shadow3d|arc), blend, shadow, tt (uppercase|capitalize), vert, accent (wrap words in *asterisks* in text to color them), mask (older name for style.shape on images; prefer shape), zoom, px, py, ov/ova (color overlay and opacity on images). Icon elements take "icon": ${Object.keys(ICONS).join(', ')}.
+- Extra style keys: grad, tg (text gradient), fade (bottom|top|left|right|edges), shape (a shape name, see SHAPED PHOTOS), card (${Object.keys(CARD).join('|')}), ovg (CSS gradient overlay on images), ovb (overlay blend), vig (vignette), tr (grayscale|sepia|contrast|warm|duotone), pat (${Object.keys(PAT).join('|')}) with patc, frame (${Object.keys(FRAME).join('|')}), eff (outline|highlight|shadow3d|arc), blend, shadow, tt (uppercase|capitalize), vert, it (1 = italic), ul (1 = underline), st (1 = strikethrough), va ("m" or "b" = middle or bottom vertical alignment of the text inside its box; default top), sw (outline stroke width in px, used with eff outline), shd/shb/shc (soft text shadow distance px, blur px, color), accent (wrap words in *asterisks* in text to color them; inside any text, **double asterisks** make bold and _underscores_ make italic), mask (older name for style.shape on images; prefer shape), zoom, px, py, ov/ova (color overlay and opacity on images). Icon elements take "icon": ${Object.keys(ICONS).join(', ')}.
 
 ${fontBlock()}
 
 ${mathBlock(C.h)}
 
 SHAPED PHOTOS
-- Put style.shape on an image element to make a shaped photo slot, for example {"type":"image","style":{"shape":"hexagon"},"src":""}. The photo is cropped to fill the shape (never stretched or squashed), and the student can still choose the photo, zoom it and move it. style.shape also works on shape elements.\n- Allowed shape names ONLY: ${Object.keys(SH).join(', ')}.\n- A shape always fills its element box. Give star, heart, pin, flower, burst, cloud, hexagon, hexpoint, pentagon, octagon, cross, circle and squircle a roughly square box (w close to h). arch, shield, leaf, house and bookmark work best taller than wide. dome (a half-ellipse; about 2:1 wide gives a half-circle), wave, peaks, band, ribbon, parallelogram, trapezoid, chevron, arrow, stamp and rounded suit wide boxes.\n- Choose shapes that suit the place (arch for heritage and churches, wave for the sea, peaks for mountains, stamp for travel memories, pin for maps, leaf for nature, hexagon for modern city guides). Use at most 3 different shapes on one poster so it stays elegant, and keep text away from the empty corners of a shape unless it has strong contrast.\n\nCOLORS (important)
+- Put style.shape on an image element to make a shaped photo slot, for example {"type":"image","style":{"shape":"hexagon"},"src":""}. The photo is cropped to fill the shape (never stretched or squashed), and the student can still choose the photo, zoom it and move it. style.shape also works on shape elements.\n- Allowed shape names ONLY: ${Object.keys(SH).join(', ')}.\n- A shape always fills its element box and is never distorted for photos. ${shapeGuide()}\n- Choose shapes that suit the place (arch for heritage and churches, wave for the sea, peaks for mountains, stamp for travel memories, pin for maps, leaf for nature, hexagon for modern city guides). Spirals, swirls and galaxy suit festivals and playful posters; frame-arch, arch-twin, rainbow, gothic and deco suit heritage; torn-paper, wonky, ticketstub, luggage and filmstrip suit travel journals; blob, pebble and drip suit food and family; dunes, sunrise, shell, fish and crescent suit beaches and nights. Use at most 3 different shapes on one poster so it stays elegant, and keep text away from the empty corners of a shape unless it has strong contrast.\n\nCOLORS (important)
 - There is no theme and there are no color tokens. YOU choose the color palette for THIS template: 4 to 6 colors that suit the place and the mood (for example a sunset, a rainforest, an old map). Write real hex colors (#RRGGBB) directly in every color field of every element: color, bg, border, accent, ov, patc, grad, tg, shadow, and the fills and strokes inside svg. Example: "color":"#16343D", "border":"2px solid #B8431F".
 - Put the page background in canvas.background, as a hex color or a CSS gradient, for example "#F2EFE6" or "linear-gradient(#0B1E3A,#14485A)".
 - Use your palette consistently (one main text color, one accent, a light and a dark), but each element keeps its own color value so the student can recolor any single element.
@@ -415,7 +415,7 @@ function drawSheet(){const sh=$('#sheet');if(!sh)return;let h='';
   h=`<div class="mono">${esc(e.type.toUpperCase())} ${e.required?'· REQUIRED':''}${lock?' · LOCKED POSITION':''}</div><b>${esc(e.label)}</b><div class="ins"><div class="mono">WHAT TO PUT HERE</div>${esc(e.instruction||'')}</div>`;
   if(TXT.includes(e.type))h+=`<label>Content<textarea rows="4" data-f="text">${esc(e.text)}</textarea></label><div class="g4">${num('s.size',s.size||20,'Size')}${num('s.weight',s.weight||400,'Weight')}${num('s.ls',s.ls||0,'Spacing')}${num('s.lh',s.lh||1.3,'Line ht')}</div><div class="g4"><div><label>Font<select data-f="s.font"><option value="d" ${s.font==='d'?'selected':''}>Display</option><option value="s" ${s.font==='s'?'selected':''}>Script</option><option value="b" ${s.font!=='d'&&s.font!=='s'?'selected':''}>Body</option></select></label></div><div><label>Align<select data-f="s.align">${['left','center','right'].map(a=>`<option ${s.align===a?'selected':''}>${a}</option>`).join('')}</select></label></div><div><label>Color<input type="color" data-f="s.color" value="${/^#[0-9a-f]{6}$/i.test(RV(s.color)||'')?RV(s.color):'#000000'}"></label></div>${num('s.opacity',s.opacity??1,'Opacity')}</div>`;
   if(TXT.includes(e.type))h+=`<div class="g4">${selH('s.tt','Case',s.tt,[['','As typed'],['uppercase','UPPER'],['capitalize','Title']])}<div><label>*Accent*<input type="color" data-f="s.accent" value="${/^#[0-9a-f]{6}$/i.test(s.accent||'')?s.accent:'#e0452b'}"></label></div>${selH('s.vert','Vertical',s.vert?'1':'',[['','No'],['1','Yes']])}${selH('s.blend','Blend',s.blend,[['','Normal'],['multiply','Multiply'],['screen','Screen'],['overlay','Overlay']])}</div><label>Shadow / glow (CSS)<input data-f="s.shadow" value="${esc(s.shadow||'')}" placeholder="0 0 20px #7ff"></label><label>Text gradient (CSS)<input data-f="s.tg" value="${esc(s.tg||'')}" placeholder="linear-gradient(#e0452b,#fff0)"></label>`;
-  if(e.type==='sourceList')h+=`<div class="mono">SOURCES</div>`+(e.items||[]).map((t,k)=>`<div class="ly"><input data-f="item.${k}" value="${esc(t)}" aria-label="Source ${k+1}"><button data-a="sup" data-k="${k}" aria-label="Move up">↑</button><button data-a="sdn" data-k="${k}" aria-label="Move down">↓</button><button data-a="sdel" data-k="${k}" aria-label="Remove">✕</button></div>`).join('')+`<div class="row"><button data-a="sadd">Add source</button></div><div class="g4">${num('s.size',s.size||13,'Font size')}${selH('s.align','Align',s.align,[['left','Left'],['center','Center'],['right','Right']])}</div>`;
+  if(e.type==='sourceList')h+=`<div class="mono">SOURCES</div>`+(e.items||[]).map((t,k)=>`<div class="ly"><input data-f="item.${k}" value="${esc(t)}" aria-label="Source ${k+1}"><button data-a="sup" data-k="${k}" aria-label="Move up">↑</button><button data-a="sdn" data-k="${k}" aria-label="Move down">↓</button><button data-a="sdel" data-k="${k}" aria-label="Remove">✕</button></div>`).join('')+`<div class="row"><button data-a="sadd">Add source</button></div><div class="g4">${num('s.size',s.size||13,'Font size')}${selH('s.align','Align',s.align,[['left','Left'],['center','Center'],['right','Right'],['justify','Justify']])}</div>`;
   if(e.type==='image'||e.type==='map')h+=`<label>${e.type==='map'?'Replace map (image or SVG)':'Replace image'}<input type="file" id="imgf" accept="image/*"></label><div class="g4">${num('s.radius',s.radius||0,'Radius')}${num('s.opacity',s.opacity??1,'Opacity')}${num('s.rotate',s.rotate||0,'Rotate')}</div><div class="mono">CROP: zoom + position</div><div class="g4">${num('s.zoom',s.zoom||1,'Zoom')}${num('s.px',s.px??50,'Pos X %')}${num('s.py',s.py??50,'Pos Y %')}${selH('s.mask','Mask',s.mask,[['','None'],['circle','Circle'],['ellipse','Ellipse'],['arch','Arch']])}</div><div class="g4">${selH('s.tr','Treatment',s.tr,[['','None'],['grayscale','Gray'],['sepia','Sepia'],['contrast','Contrast'],['warm','Warm'],['duotone','Duotone']])}<div><label>Overlay<input type="color" data-f="s.ov" value="${/^#[0-9a-f]{6}$/i.test(RV(s.ov)||'')?RV(s.ov):'#000000'}"></label></div>${num('s.ova',s.ova??0.3,'Overlay op.')}</div><div class="g4">${selH('s.ovb','Blend',s.ovb,[['','Normal'],['multiply','Multiply'],['screen','Screen'],['color','Color'],['overlay','Overlay']])}${selH('s.vig','Vignette',s.vig?'1':'',[['','Off'],['1','On']])}</div><label>Gradient overlay (CSS)<input data-f="s.ovg" value="${esc(s.ovg||'')}" placeholder="linear-gradient(#0000,#000a)"></label>`;
   if(e.type==='icon')h+=`<div class="g4">${selH('icon','Icon',e.icon,Object.keys(ICONS).map(k=>[k,k]))}</div>`;
   if(['svg','icon','compass','route','leader'].includes(e.type))h+=`<label>Upload SVG<input type="file" id="svgf" accept=".svg,image/svg+xml"></label><div class="g4"><div><label>Color<input type="color" data-f="s.color" value="${/^#[0-9a-f]{6}$/i.test(RV(s.color)||'')?RV(s.color):'#000000'}"></label></div>${num('s.opacity',s.opacity??1,'Opacity')}${num('s.rotate',s.rotate||0,'Rotate')}</div>`;
@@ -549,7 +549,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.9.2';
+const VERSION='3.3.0';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 
 /* ===== v2.9 SHAPES: every entry is plain CSS (border-radius or clip-path), so the same shape works on a solid shape AND on a photo slot.
@@ -1023,7 +1023,7 @@ function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
  if(k==='text'){const stars=/\*.+?\*/.test(e.text||'');
   C=`<label>Content<textarea rows="4" data-f="text">${esc(e.text||'')}</textarea></label><div class="mono" style="margin-top:4px">Tip: wrap words in *stars* to color them with the Accent color.</div>`;
   S=typeface+G(num('s.size',s.size||20,'Size')+num('s.weight',s.weight||400,'Weight')+num('s.ls',s.ls||0,'Spacing')+num('s.lh',s.lh||1.3,'Line ht'))+(s.fit?`<div class="mono" style="margin:-2px 0 6px;color:var(--ac)">Auto-fit is ON, so Size is only a maximum: text shrinks to fit the box. To go bigger, enlarge the box (Layout tab) or set Auto-fit to Off below.</div>`:'')
-   +G(selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right']])+col('color','Color')+col('bg','Fill','#ffffff')+num('s.opacity',s.opacity??1,'Opacity'))
+   +G(selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right'],['justify','Justify']])+col('color','Color')+col('bg','Fill','#ffffff')+num('s.opacity',s.opacity??1,'Opacity'))
    +`<div class="mono" style="margin:-2px 0 6px">Fill is the card color behind the text. It stays empty until you pick one.</div>`
    +G(selH('s.tt','Case',s.tt,[['','As typed'],['uppercase','UPPER'],['capitalize','Title']])+selH('s.fit','Auto-fit',s.fit?'1':'',[['','Off'],['1','Shrink to fit']])+(stars?col('accent','*Accent*','#e0452b'):''),stars?3:2);
   F=G(selH('s.eff','Text effect',s.eff,[['','None'],['outline','Outline'],['highlight','Highlight'],['shadow3d','3D shadow'],['arc','Curved']])+selH('s.blend','Blend',s.blend,BLEND)+selH('s.vert','Vertical',s.vert?'1':'',[['','No'],['1','Yes']])+selH('s.fade','Edge fade',s.fade,FADE))
@@ -1034,7 +1034,7 @@ function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
   S=typeface+G(num('s.size',s.size||20,'Size')+num('s.lh',s.lh||1.3,'Line ht')+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))+(k==='legend'?G(col('accent','First dot','#c8553d'),4):'')}
  else if(k==='src'){
   C='<div class="mono">SOURCES</div>'+(e.items||[]).map((t,i)=>`<div class="ly"><input data-f="item.${i}" value="${esc(t)}" aria-label="Source ${i+1}"><button data-a="sup" data-k="${i}" aria-label="Move up">↑</button><button data-a="sdn" data-k="${i}" aria-label="Move down">↓</button><button data-a="sdel" data-k="${i}" aria-label="Remove">✕</button></div>`).join('')+'<div class="row"><button data-a="sadd">Add source</button></div>';
-  S=typeface+G(num('s.size',s.size||13,'Font size')+selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right']])+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))}
+  S=typeface+G(num('s.size',s.size||13,'Font size')+selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right'],['justify','Justify']])+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))}
  else if(k==='img'){
   C=`<label>${e.type==='map'?'Replace map (image or SVG)':'Replace image'}<input type="file" id="imgf" accept="image/*"></label>`;
   S=T('SHAPE · the photo is cropped to fit it, never stretched')+shapePick(e)+T('CROP · zoom and position')+G(num('s.zoom',s.zoom||1,'Zoom')+num('s.px',s.px??50,'Pos X %')+num('s.py',s.py??50,'Pos Y %'),3)+G(num('s.radius',s.radius||0,'Radius')+num('s.opacity',s.opacity??1,'Opacity'),2);
@@ -1250,5 +1250,322 @@ function settleImport(t){
   else{const th2=o.querySelector('.th');if(th2)th2.insertAdjacentHTML('afterend','<div class="mono" style="margin-top:8px">FIXED AUTOMATICALLY</div>'+item)}})}
 const _si9=showImport;
 showImport=function(text){_si9(text);if(window._imp)try{settleImport(window._imp)}catch(e){}};
+</script>
+<script>
+/* ===== v3.0 SHAPE PACK: 120+ unique shapes. Everything is plain CSS clip-path / border-radius, so each one works on a solid shape AND on a photo slot.
+   Curves are sampled into polygons and fitted to the box. Holes and separate pieces (rings, panes, dots, rainbow) are joined with zero-width bridges. ===== */
+(function(){
+ const TAU=Math.PI*2,D=Math.PI/180;
+ const fit=pts=>{let a=1e9,b=1e9,c=-1e9,d=-1e9;pts.forEach(q=>{a=Math.min(a,q[0]);c=Math.max(c,q[0]);b=Math.min(b,q[1]);d=Math.max(d,q[1])});const w=c-a||1,h=d-b||1;
+  return 'clip-path:polygon('+pts.map(q=>(+((q[0]-a)/w*100).toFixed(2))+'% '+(+((q[1]-b)/h*100).toFixed(2))+'%').join(',')+');'};
+ const area=p=>{let s=0;for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];s+=a[0]*b[1]-b[0]*a[1]}return s/2};
+ const orient=(p,pos)=>(area(p)>0)===pos?p:p.slice().reverse();
+ /* join pieces: first = outline; {pts,hole:true} cuts a hole; plain arrays are extra separate pieces (overlap is fine) */
+ const join=(main,...rest)=>{const m=orient(main,true),o=[...m,m[0]];rest.forEach(r=>{const hole=!Array.isArray(r),p=orient(hole?r.pts:r,!hole);o.push(p[0],...p.slice(1),p[0],m[0])});return o};
+ const polar=(n,f)=>Array.from({length:n},(_,i)=>{const t=i/n*TAU-Math.PI/2,r=f(t,i);return[50+50*r*Math.cos(t),50+50*r*Math.sin(t)]});
+ const circ=(cx,cy,rx,ry,n=72)=>Array.from({length:n},(_,i)=>{const t=i/n*TAU;return[cx+rx*Math.cos(t),cy+(ry??rx)*Math.sin(t)]});
+ const rect=(x0,y0,x1,y1)=>[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
+ const bez3=(a,b,c,d,n=24)=>Array.from({length:n},(_,i)=>{const t=(i+1)/n,u=1-t;return[u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]});
+ const bez2=(a,b,c,n=24)=>Array.from({length:n},(_,i)=>{const t=(i+1)/n,u=1-t;return[u*u*a[0]+2*u*t*b[0]+t*t*c[0],u*u*a[1]+2*u*t*b[1]+t*t*c[1]]});
+ const arc=(cx,cy,r,a0,a1,n=24,ry)=>Array.from({length:n+1},(_,i)=>{const t=(a0+(a1-a0)*i/n)*D;return[cx+r*Math.cos(t),cy+(ry??r)*Math.sin(t)]});
+ const chaikin=(p,it=3)=>{for(let k=0;k<it;k++){const o=[];p.forEach((a,i)=>{const b=p[(i+1)%p.length];o.push([a[0]*.75+b[0]*.25,a[1]*.75+b[1]*.25],[a[0]*.25+b[0]*.75,a[1]*.25+b[1]*.75])});p=o}return p};
+ const rng=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+ /* rays from a centre against circles: smooth union of lobes (cloud, clover, foils) */
+ const lobes=(C,O,n=200)=>Array.from({length:n},(_,i)=>{const t=i/n*TAU,u=[Math.cos(t),Math.sin(t)];let m=0;C.forEach(([x,y,r])=>{const b=u[0]*(O[0]-x)+u[1]*(O[1]-y),c=(O[0]-x)**2+(O[1]-y)**2-r*r,q=b*b-c;if(q>=0)m=Math.max(m,-b+Math.sqrt(q))});return[O[0]+u[0]*m,O[1]+u[1]*m]});
+ const foil=(n,d,r)=>lobes(Array.from({length:n},(_,i)=>{const t=i/n*TAU-Math.PI/2;return[50+d*Math.cos(t),50+d*Math.sin(t),r]}),[50,50]);
+ /* spiral arms: a band that grows out of the centre; pitch = gap between turns, w = band thickness as a share of the pitch */
+ const spiral=({turns=2.3,arms=1,w=.66,cw=1,p=1,steps=110,cap=true})=>{let out=[];const T=turns*TAU;
+  for(let a=0;a<arms;a++){const ph=a*TAU/arms,O=[],I=[];let last;
+   for(let i=0;i<=steps;i++){const t=i/steps,th=t*T,r=Math.pow(t,p),pitch=p*Math.pow(Math.max(t,.02),p-1)/T*TAU,hw=Math.min(.5*w*pitch,r*.92),an=cw*th+ph,c=Math.cos(an),s=Math.sin(an);
+    O.push([r*c+hw*c,r*s+hw*s]);I.push([r*c-hw*c,r*s-hw*s]);last={r,hw,an,c,s}}
+   const cp=[];if(cap)for(let k=1;k<9;k++){const an=last.an+cw*Math.PI*k/9;cp.push([last.r*last.c+last.hw*Math.cos(an),last.r*last.s+last.hw*Math.sin(an)])}
+   out=out.concat(O,cp,I.reverse())}
+  return out};
+ const crescent=(R,r,dx)=>{const x=(R*R-r*r+dx*dx)/(2*dx),y=Math.sqrt(R*R-x*x),a=Math.atan2(y,x),b=Math.atan2(y,x-dx),o=[],n=60;
+  for(let i=0;i<=n;i++){const t=a+(TAU-2*a)*i/n;o.push([R*Math.cos(t),R*Math.sin(t)])}
+  for(let i=1;i<n;i++){const t=(TAU-b)-(TAU-2*b)*i/n;o.push([dx+r*Math.cos(t),r*Math.sin(t)])}return o};
+ const archPts=(x0,x1,top,bot,n=36)=>{const r=(x1-x0)/2,cx=(x0+x1)/2,p=[[x0,bot]];for(let i=0;i<=n;i++){const t=(180+180*i/n)*D;p.push([cx+r*Math.cos(t),top+r+r*Math.sin(t)])}p.push([x1,bot]);return p};
+ /* edge helpers for boxes whose sides are wavy / jagged / scalloped. f(side position 0..100) -> outward offset */
+ const edged=(f,n=60,inset=0,sides=[1,1,1,1])=>{const p=[],m=inset,L=100-inset,E=(s,t)=>sides[s]?f(t,s):0;
+  for(let i=0;i<n;i++){const t=i/n*100;p.push([m+(L-m)*t/100,m-E(0,t)])}
+  for(let i=0;i<n;i++){const t=i/n*100;p.push([L+E(1,t),m+(L-m)*t/100])}
+  for(let i=0;i<n;i++){const t=i/n*100;p.push([L-(L-m)*t/100,L+E(2,t)])}
+  for(let i=0;i<n;i++){const t=i/n*100;p.push([m-E(3,t),L-(L-m)*t/100])}return p};
+ const blobH=(seed,amp=.2,k0=2,k1=5)=>{const r=rng(seed),H=[];for(let k=k0;k<=k1;k++)H.push([k,amp*(.5+r())/ (k*.55),r()*TAU]);
+  const raw=Array.from({length:140},(_,i)=>{const t=i/140*TAU;return Math.max(.3,.74+H.reduce((s,[k,a,ph])=>s+a*Math.cos(k*t+ph),0))});const mx=Math.max(...raw);
+  return Array.from({length:140},(_,i)=>{const t=i/140*TAU;return[50+50*raw[i]/mx*Math.cos(t),50+50*raw[i]/mx*Math.sin(t)]})};
+ const blobC=(seed,n=7,lo=.55)=>{const r=rng(seed);return chaikin(Array.from({length:n},(_,i)=>{const t=i/n*TAU,q=lo+(1-lo)*r();return[50+50*q*Math.cos(t),50+50*q*Math.sin(t)]}),4)};
+
+ const G={},DIM={},ORDER=[];
+ /* add(group, name, css, size). size: s square, w wide, ww very wide, t tall, tt very tall */
+ const add=(g,n,css,d='s')=>{if(typeof css!=='string')css=fit(css);SH[n]=css;G[n]=g;DIM[n]=d;if(!ORDER.includes(g))ORDER.push(g)};
+ /* tag the shapes that were already in the app */
+ const OLD={'Classic':'circle pill triangle arch blob band ribbon cut diamond rounded squircle dome archdown leaf hexagon hexpoint pentagon octagon parallelogram trapezoid chevron arrow cross star burst flower heart shield pin cloud wave stamp peaks house bookmark',};
+ const OLDD={tall:'arch shield leaf house bookmark',wide:'dome wave peaks band ribbon parallelogram trapezoid chevron arrow stamp rounded pill'};
+ Object.keys(OLD).forEach(g=>OLD[g].split(' ').forEach(n=>{if(SH[n]){G[n]=g;DIM[n]='s'}}));ORDER.unshift('Classic');
+ OLDD.tall.split(' ').forEach(n=>DIM[n]='t');OLDD.wide.split(' ').forEach(n=>DIM[n]=n==='band'||n==='wave'||n==='peaks'||n==='ribbon'?'ww':'w');
+
+ /* ---------- QUIRKY BOXES: rectangles with character ---------- */
+ const Q='Quirky boxes';
+ add(Q,'snip','clip-path:polygon(9% 0,91% 0,100% 9%,100% 91%,91% 100%,9% 100%,0 91%,0 9%);');
+ add(Q,'snipdiag','clip-path:polygon(0 0,80% 0,100% 20%,100% 100%,20% 100%,0 80%);');
+ add(Q,'scoop',[...arc(100,0,14,180,90,10),...arc(100,100,14,270,180,10),...arc(0,100,14,0,-90,10),...arc(0,0,14,90,0,10)],'w');
+ add(Q,'ticketstub',[[0,0],[100,0],[100,38],...arc(100,50,12,-90,-270,16),[100,62],[100,100],[0,100],[0,62],...arc(0,50,12,90,-90,16),[0,38]],'w');
+ add(Q,'folder','clip-path:polygon(0 0,38% 0,46% 12%,100% 12%,100% 100%,0 100%);','w');
+ add(Q,'dogear','clip-path:polygon(0 0,100% 0,100% 78%,78% 100%,0 100%);');
+ add(Q,'stairs','clip-path:polygon(0 100%,0 66%,33% 66%,33% 33%,66% 33%,66% 0,100% 0,100% 100%);');
+ add(Q,'sawtooth',(()=>{const p=[[0,0],[100,0],[100,88]];for(let i=1;i<=10;i++)p.push([100-i*10+5,100],[100-i*10,88]);return p})(),'w');
+ add(Q,'pinking',edged(t=>Math.abs(((t/5)%2)-1)*3.8,80,4),'w');
+ add(Q,'scallop',edged(t=>5*Math.abs(Math.sin(t/100*Math.PI*6)),120,6));
+ add(Q,'torn-bottom',(()=>{const r=rng(11),p=[[0,0],[100,0],[100,90]];for(let x=100;x>=0;x-=2.2)p.push([x,90+9*r()-(x%9<2?3:0)]);return p})(),'w');
+ add(Q,'torn-paper',(()=>{const r=rng(5);return edged(()=>-3.2*r(),70,3.2)})(),'w');
+ add(Q,'wonky','clip-path:polygon(2% 5%,98% 0,100% 94%,0 100%);');
+ add(Q,'wonky-b','clip-path:polygon(0 3%,100% 0,96% 100%,4% 96%);');
+ add(Q,'wonky-soft',chaikin([[3,6],[97,0],[100,93],[0,100]],3));
+ add(Q,'slant','clip-path:polygon(0 0,100% 0,100% 82%,0 100%);','w');
+ add(Q,'slant-top','clip-path:polygon(0 18%,100% 0,100% 100%,0 100%);','w');
+ add(Q,'ell','clip-path:polygon(0 0,46% 0,46% 54%,100% 54%,100% 100%,0 100%);');
+ add(Q,'bite-top',(()=>{const p=[[0,0],[32,0]];arc(50,0,18,180,0,20).forEach(q=>p.push(q));p.push([68,0],[100,0],[100,100],[0,100]);return p})(),'w');
+ add(Q,'tag','clip-path:polygon(0 0,78% 0,100% 50%,78% 100%,0 100%);','w');
+ add(Q,'luggage',join([[0,0],[78,0],[100,50],[78,100],[0,100]],{pts:circ(12,50,5.5,11)}),'w');
+ add(Q,'speech',(()=>{const p=[];p.push(...arc(14,14,14,180,270,8),...arc(86,14,14,270,360,8),...arc(86,66,14,0,90,8),[40,80],[18,100],[22,80],...arc(14,66,14,90,180,8));return p})(),'w');
+ add(Q,'bubble',[...arc(50,42,50,125,460,70,42),[14,100]]);
+ add(Q,'wavy-box',edged((t,s)=>s%2?0:4*Math.sin(t/100*TAU*2),90,5,[1,0,1,0]),'w');
+ add(Q,'awning',(()=>{const p=[[0,0],[100,0]],n=6,r=100/n/2;for(let k=n-1;k>=0;k--)arc(r*(2*k+1),84,r,0,180,10).forEach(q=>p.push(q));return p})(),'w');
+ add(Q,'camera','clip-path:polygon(0 18%,26% 18%,32% 4%,68% 4%,74% 18%,100% 18%,100% 100%,0 100%);','w');
+ add(Q,'panes',join(rect(0,0,48.5,48.5),rect(51.5,0,100,48.5),rect(0,51.5,48.5,100),rect(51.5,51.5,100,100)));
+ add(Q,'triptych',join(rect(0,0,31.5,100),rect(34.25,0,65.75,100),rect(68.5,0,100,100)),'w');
+ add(Q,'strips',join(rect(0,0,22,100),rect(26,0,48,100),rect(52,0,74,100),rect(78,0,100,100)),'w');
+ add(Q,'blinds',join(rect(0,0,100,16),rect(0,21,100,37),rect(0,42,100,58),rect(0,63,100,79),rect(0,84,100,100)),'w');
+ add(Q,'filmstrip',(()=>{const h=[];for(let i=0;i<9;i++){const x=4+i*10.6;h.push({pts:rect(x,4,x+6,11)},{pts:rect(x,89,x+6,96)})}return join(rect(0,0,100,100),...h)})(),'ww');
+ add(Q,'frame',join(rect(0,0,100,100),{pts:rect(14,14,86,86)}));
+ add(Q,'frame-round',join(chaikin(rect(0,0,100,100),3),{pts:chaikin(rect(15,15,85,85),3)}));
+ add(Q,'frame-arch',join(archPts(0,100,0,100),{pts:archPts(15,85,15,100)}),'t');
+
+ /* ---------- CIRCLES & CUTS ---------- */
+ const C='Circles & cuts';
+ add(C,'chomp',[[50,50],...arc(50,50,50,28,332,60)]);
+ add(C,'quarter-tl','border-radius:100% 0 0 0;');add(C,'quarter-tr','border-radius:0 100% 0 0;');add(C,'quarter-br','border-radius:0 0 100% 0;');add(C,'quarter-bl','border-radius:0 0 0 100%;');
+ add(C,'half-left','border-radius:100% 0 0 100%/50% 0 0 50%;','t');add(C,'half-right','border-radius:0 100% 100% 0/0 50% 50% 0;','t');
+ add(C,'crescent',crescent(50,47,22));
+ add(C,'crescent-fat',crescent(50,38,34));
+ add(C,'lens',(()=>{const c=30,r=50,a=Math.atan2(Math.sqrt(r*r-c*c),c)/D;return arc(-c,0,r,-a,a,40).concat(arc(c,0,r,180-a,180+a,40))})(),'w');
+ add(C,'drop',(()=>{const a0=Math.acos(42/58),pts=[[50,0]],A=-Math.PI/2+a0+0,B=-Math.PI/2-a0+Math.PI*2;for(let i=0;i<=60;i++){const t=A+(B-A)*i/60;pts.push([50+42*Math.cos(t),58+42*Math.sin(t)])}return pts})());
+ add(C,'egg',Array.from({length:120},(_,i)=>{const t=i/120*TAU;return[Math.cos(t)*(1+.17*Math.sin(t)),Math.sin(t)]}),'t');
+ add(C,'ring',join(circ(50,50,50),{pts:circ(50,50,28)}));
+ add(C,'ring-thin',join(circ(50,50,50),{pts:circ(50,50,40)}));
+ add(C,'c-ring',arc(50,50,50,-40,220,60).concat(arc(50,50,26,220,-40,40)));
+ add(C,'oval-frame',join(circ(50,50,50,50,90),{pts:circ(50,50,38,38,90)}),'t');
+ add(C,'seal',polar(160,t=>.9+.1*Math.abs(Math.cos(8*(t+Math.PI/2)))));
+ add(C,'cog',polar(240,t=>{const s=Math.sin(12*(t+Math.PI/2));return .8+.2*Math.max(-1,Math.min(1,s*3.2))*.5+.1}));
+ add(C,'quatrefoil',foil(4,22,30));add(C,'trefoil',foil(3,22,31));add(C,'cinquefoil',foil(5,24,26));
+ add(C,'dots3',join(circ(16.7,50,16.7),circ(50,50,16.7),circ(83.3,50,16.7)),'w3');
+ add(C,'dots-grid',(()=>{const a=[];for(let y=0;y<3;y++)for(let x=0;x<3;x++)a.push(circ(16.7+x*33.3,16.7+y*33.3,15));return join(...a)})());
+ add(C,'bubbles',join(circ(36,60,34),circ(80,28,19),circ(84,78,14),circ(14,14,12)));
+ add(C,'sunrise',(()=>{const p=[[0,100]];for(let i=0;i<=40;i++){const t=Math.PI+Math.PI*i/40,r=i%2?.78:1;p.push([50+50*r*Math.cos(t),100+100*r*Math.sin(t)])}p.push([100,100]);return p})(),'w');
+ add(C,'sparkle',Array.from({length:120},(_,i)=>{const t=i/120*TAU;return[Math.pow(Math.cos(t),3),Math.pow(Math.sin(t),3)]}));
+
+ /* ---------- SPIRALS & SWIRLS ---------- */
+ const S='Spirals & swirls';
+ add(S,'spiral',spiral({turns:2.3,w:.66}));
+ add(S,'spiral-tight',spiral({turns:3.4,w:.6}));
+ add(S,'spiral-ccw',spiral({turns:2.3,w:.66,cw:-1}));
+ add(S,'curl',spiral({turns:1.6,w:.8,p:1.5}));
+ add(S,'swirl',spiral({turns:1.25,arms:2,w:.72}));
+ add(S,'galaxy',spiral({turns:.95,arms:3,w:.74}));
+ add(S,'pinwheel',spiral({turns:.5,arms:4,w:.9,cap:false}));
+ add(S,'vortex',spiral({turns:.7,arms:5,w:.6}));
+
+ /* ---------- ORGANIC BLOBS ---------- */
+ const O='Organic blobs';
+ [[3,.2],[8,.22],[14,.2],[21,.24],[33,.2],[47,.18]].forEach(([s,a],i)=>add(O,'blob-'+'abcdef'[i],blobH(s,a,2,4)));
+ [[2,7],[9,8],[17,6]].forEach(([s,n],i)=>add(O,'pebble-'+'abc'[i],blobC(s,n,.6)));
+ add(O,'bean',Array.from({length:140},(_,i)=>{const t=i/140*TAU,x=Math.cos(t);let y=.7*Math.sin(t);if(y<0)y+=.34*Math.exp(-Math.pow(x*2.1,2));return[x,y]}),'w');
+ add(O,'splat',polar(220,t=>.6+.1*Math.cos(3*t+1)+.3*Math.pow(Math.max(0,Math.cos(4.5*t+.5)),8)+.18*Math.pow(Math.max(0,Math.cos(7*t+2)),10)));
+ add(O,'puddle',blobH(61,.2,2,4).map(([x,y])=>[x,50+(y-50)*.62]),'w');
+ add(O,'drip',(()=>{const D2=[[10,28,5],[27,16,4],[42,40,6],[58,20,4],[74,34,5.5],[90,22,4]],p=[[0,0],[100,0]];for(let x=100;x>=0;x-=1){let y=52;D2.forEach(([c,L,w])=>{y=Math.max(y,52+L*Math.exp(-Math.pow((x-c)/w,4))*1)});p.push([x,y])}return p})(),'w');
+ add(O,'amoeba',blobH(77,.3,3,6));
+
+ /* ---------- ARCHES & WINDOWS ---------- */
+ const A='Arches & windows';
+ add(A,'arch-twin',join(archPts(0,47,0,100),archPts(53,100,0,100)),'t');
+ add(A,'arch-trio',join(archPts(0,30,36,100),archPts(33.5,66.5,0,100),archPts(70,100,36,100)),'w');
+ add(A,'rainbow',(()=>{const band=(r1,r2)=>{const o=[],i=[];arc(50,50,r1,180,360,40).forEach(q=>o.push(q));arc(50,50,r2,360,180,40).forEach(q=>i.push(q));return[[50-r1,100],...o,[50+r1,100],[50+r2,100],...i,[50-r2,100]]};return join(band(50,39),band(34,23),band(18,7))})());
+ add(A,'gothic',(()=>{const p=[[0,100]];arc(100,46,100,-180,-120,20).forEach(q=>p.push(q));arc(0,46,100,-60,0,20).forEach(q=>p.push(q));p.push([100,100]);return p})(),'t');
+ add(A,'ogee',(()=>{const p=[[0,100],[0,52]];p.push(...bez3([0,52],[0,28],[44,32],[50,0]));p.push(...bez3([50,0],[56,32],[100,28],[100,52]));p.push([100,100]);return p})(),'t');
+ add(A,'keyhole',join(circ(50,34,34),[[34,100],[66,100],[58,58],[42,58]]),'t');
+ add(A,'horseshoe',(()=>{const p=[[22,100]];arc(50,50,50,125,415,60).forEach(q=>p.push(q));p.push([78,100]);return p})(),'t');
+ add(A,'deco','clip-path:polygon(0 100%,0 42%,9% 42%,9% 28%,22% 28%,22% 14%,36% 14%,36% 0,64% 0,64% 14%,78% 14%,78% 28%,91% 28%,91% 42%,100% 42%,100% 100%);','t');
+
+ /* ---------- NATURE, TRAVEL & GEOMETRY ---------- */
+ const N='Nature & geometry';
+ add(N,'dunes',(()=>{const p=[[0,100]];for(let x=0;x<=100;x+=2)p.push([x,46-26*Math.sin(x/100*TAU*1.1+.6)-10*Math.sin(x/100*TAU*2.7)]);p.push([100,100]);return p})(),'ww');
+ add(N,'volcano','clip-path:polygon(0 100%,36% 14%,42% 22%,50% 12%,58% 22%,64% 14%,100% 100%);','w');
+ add(N,'sail',(()=>{const p=[[0,0]];p.push(...bez3([0,0],[70,22],[104,70],[100,100]));p.push([0,100]);return p})(),'t');
+ add(N,'shell',(()=>{const p=[[50,100]];for(let i=0;i<=84;i++){const t=(205+130*i/84)*D,r=1-.07*Math.abs(Math.sin(i/84*Math.PI*7));p.push([50+52*r*Math.cos(t),100+98*r*Math.sin(t)])}return p})());
+ add(N,'fish',join(circ(40,50,40,32,60),[[62,50],[100,14],[92,50],[100,86]]),'w');
+ add(N,'star6',polar(12,(t,i)=>i%2?.56:1));
+ add(N,'star8',polar(16,(t,i)=>i%2?.68:1));
+ add(N,'star-soft',chaikin(polar(10,(t,i)=>i%2?.5:1),3));
+ add(N,'daisy',polar(240,t=>.66+.34*Math.abs(Math.cos(6*(t+Math.PI/2)))));
+ add(N,'bolt','clip-path:polygon(58% 0,14% 56%,44% 56%,34% 100%,86% 40%,56% 40%);','t');
+ add(N,'kite','clip-path:polygon(50% 0,100% 36%,50% 100%,0 36%);','t');
+ add(N,'heptagon',polar(7,()=>1));add(N,'dodecagon',polar(12,()=>1));
+ add(N,'tri-soft',chaikin([[50,2],[98,98],[2,98]],4));
+ add(N,'diamond-soft',chaikin([[50,0],[100,50],[50,100],[0,50]],4));
+ add(N,'hex-soft',chaikin(polar(6,()=>1),2));
+ add(N,'cross-soft',chaikin([[33,0],[67,0],[67,33],[100,33],[100,67],[67,67],[67,100],[33,100],[33,67],[0,67],[0,33],[33,33]],3));
+ add(N,'arrow-soft',chaikin([[0,26],[58,26],[58,0],[100,50],[58,100],[58,74],[0,74]],3),'w');
+
+ window.SHAPE_GROUP=G;window.SHAPE_DIM=DIM;window.SHAPE_ORDER=ORDER;
+ window.shapeSize=n=>({s:[300,300],w:[520,300],w3:[540,180],ww:[560,130],t:[260,400],tt:[220,440]}[DIM[n]||'s']);
+ window.shapeGuide=()=>{const by=d=>Object.keys(DIM).filter(k=>DIM[k]===d).join(', ');
+  return 'Shapes by family: '+ORDER.map(g=>g+' ('+Object.keys(G).filter(k=>G[k]===g).join(', ')+')').join('; ')+'. Best box: square for '+by('s')+'; wide (about 16:9) for '+by('w')+'; 3:1 wide for '+by('w3')+'; very wide strips for '+by('ww')+'; tall (about 2:3) for '+by('t')+'. Quirky boxes (snip, scoop, wonky, torn-paper, panes, strips, blinds, filmstrip, frame) are unusual rectangles; spiral, swirl, galaxy, pinwheel and vortex are bold decorative photo slots; panes, strips, dots3, dots-grid, bubbles, rainbow, arch-twin and arch-trio show ONE photo through several separate openings.'};
+})();
+
+/* ---- v3.0 UI: grouped shape picker, grouped Add tab with live previews, smart default sizes, AI knows every shape ---- */
+(function(){
+ Object.assign(SHAPE_ALIAS,{spirals:'spiral',snail:'spiral',twirl:'swirl',moon:'crescent','half-moon':'crescent-fat',halfmoon:'crescent-fat',donut:'ring',doughnut:'ring','circle-ring':'ring','picture-frame':'frame',window:'panes',windows:'panes','arch-window':'frame-arch','rainbow-arch':'rainbow',pacman:'chomp',pie:'chomp',organic:'blob-a',blob2:'blob-b',blob3:'blob-c',pebble:'pebble-a',torn:'torn-paper',paper:'torn-paper','torn-edge':'torn-bottom',ticket:'ticketstub',coupon:'scoop',sparkles:'sparkle',star4:'sparkle','four-point-star':'sparkle','gothic-arch':'gothic','pointed-arch':'gothic',onion:'ogee',lightning:'bolt',droplet:'drop',tear:'drop',lemon:'lens',eye:'lens',almond:'lens',clover:'quatrefoil','four-leaf':'quatrefoil',gear:'cog','scallop-circle':'seal',cookie:'seal',sunset:'sunrise','half-sun':'sunrise','paint-drip':'drip',dripping:'drip','speech-bubble':'speech',chat:'speech',tab:'folder',film:'filmstrip',strip:'filmstrip',blind:'blinds',circles:'dots3',dots:'dots3','dot-grid':'dots-grid',galaxies:'galaxy',whirl:'swirl',spin:'pinwheel',windmill:'pinwheel',horseshoe:'horseshoe','moorish-arch':'horseshoe','art-deco':'deco','deco-arch':'deco',keyholes:'keyhole',triptyque:'triptych',tag2:'luggage','luggage-tag':'luggage',flame:'drop',bubble2:'bubble',oval2:'egg'});
+ const BOX={s:[30,30],w:[44,26],w3:[46,16],ww:[48,14],t:[24,36],tt:[20,38]};
+ const prev=k=>{const b=BOX[SHAPE_DIM[k]||'s'];return `<i style="${SH[k].replace(/\d+px/g,'30%')}width:${b[0]}px;height:${b[1]}px"></i>`};
+ const names=g=>Object.keys(SHAPE_GROUP).filter(k=>SHAPE_GROUP[k]===g);
+ const nice=k=>k.replace(/-/g,' ');
+ shapePick=function(e){const s=e.style||{},cur=s.shape||(s.mask==='ellipse'?'circle':s.mask)||'';
+  const b=k=>`<button data-a="shp" data-v="${k}" class="shp${cur===k?' on':''}" aria-label="${nice(k)}">${prev(k)}<span>${nice(k)}</span></button>`;
+  return `<div class="shg"><button data-a="shp" data-v="" class="shp${cur===''?' on':''}" aria-label="None"><i style="width:30px;height:30px"></i><span>None</span></button></div>`+
+   SHAPE_ORDER.map(g=>`<div class="mono" style="margin:10px 0 4px">${g.toUpperCase()} · ${names(g).length}</div><div class="shg">${names(g).map(b).join('')}</div>`).join('')};
+ const _ah3=addHTML;addHTML=function(){const total=Object.keys(SHAPE_GROUP).length,
+  sec=`<div class="mono" style="margin-top:8px">SHAPES · ${total} to choose from. Tap one, then add a photo to fill it</div><div class="shg"><button data-a="add" data-t="shape:rect" class="shp"><i style="width:30px;height:30px"></i><span>box</span></button></div>`+
+   SHAPE_ORDER.map(g=>`<div class="mono" style="margin:10px 0 4px">${g.toUpperCase()} · ${names(g).length}</div><div class="shg">${names(g).map(k=>`<button data-a="add" data-t="shape:${k}" class="shp">${prev(k)}<span>${nice(k)}</span></button>`).join('')}</div>`).join('');
+  return _ah3().replace(/<div class="mono"[^>]*>SHAPES[^<]*<\/div><div class="g4">[\s\S]*?<\/div>/,sec.replace(/\$/g,'$$$$'))};
+ const _ae3=addEl;addEl=function(t){_ae3(t);if(typeof t==='string'&&t.startsWith('shape:')){const v=t.slice(6),e=proj.els[proj.els.length-1];if(e&&SHAPE_DIM[v]){const z=shapeSize(v);e.position={x:Math.round((1000-z[0])/2),y:560,w:z[0],h:z[1]};e.label=nice(v)+' shape';refresh(1)}}};
+})();
+</script>
+<style>
+/* ===== v3.1: calmer edit panel ===== */
+.sheet .ph{padding-top:6px}
+.grab{height:16px;margin:0 0 2px;display:grid;place-items:center;touch-action:none;cursor:ns-resize}
+.grab::before{content:"";width:44px;height:4px;border-radius:4px;background:var(--pk)}
+.pr1{gap:6px}.pr1 .ib{width:36px;min-height:36px;height:36px;padding:0;font-size:15px;border-radius:10px;border-width:1px}
+.pr1 .qc2{flex:none;display:block;margin:0;width:36px}.qc2 input{width:36px;min-height:36px;height:36px;padding:2px;border-radius:10px;border-width:1px}
+.pt{background:var(--soft);padding:3px;border-radius:12px;margin-top:6px}.pt button{border:0;background:none;min-height:34px;border-radius:9px;font-weight:600}
+.pt button.on{background:var(--ac);color:#fff}
+.sheet .g4:not([style*="repeat(6"]){grid-template-columns:1fr 1fr!important;gap:8px 10px}
+.sheet .g4>[style*="grid-column"]{grid-column:1/-1!important}
+.sheet .g4 label{font:600 11px 'Space Mono',monospace;color:var(--mut);margin:0}
+.sheet .g4 input[type=number],.sheet .g4 select{min-height:38px}
+.rg{display:block;width:100%;min-height:28px;padding:0;border:0;background:none;accent-color:var(--ac);margin:2px 0 0}
+.seg{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--ln);margin-top:2px}
+.seg button{flex:1;min-width:0;min-height:34px;padding:0 4px;border:0;border-radius:8px;background:none;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg button.on{background:var(--ac);color:#fff}
+.sheet details.adv{border:1px solid var(--ln);border-radius:10px;padding:0 10px;margin:10px 0}
+</style>
+<script>
+/* ===== v3.1: slim header + tab memory, sliders, segmented/toggle controls, advanced CSS fold, resizable sheet ===== */
+(function(){
+const lastTab={};let lastK=null;
+const RNG={'s.opacity':[0,1,.05],'s.zoom':[1,4,.05],'s.size':[8,200,1],'s.weight':[100,900,100],'s.ls':[-5,30,.5],'s.lh':[.8,2.5,.05],'s.px':[0,100,1],'s.py':[0,100,1],'s.radius':[0,200,1],'s.sw':[1,40,1],'s.rotate':[-180,180,1],'s.ova':[0,1,.05],'s.pad':[0,100,1]};
+const ADV=['s.shadow','s.tg','s.grad','s.ovg'];
+panelHTML=function(e){const{k,C,S,F,L}=panelParts(e),s=e.style||{},lock=e.lock;
+ const tabs=[['content','Content',C],['style','Style',S],['fx','Effects',F],['layout','Layout',L]].filter(t=>t[2]);
+ if(k!==lastK){lastK=k;if(lastTab[k])itab=lastTab[k]}
+ if(!tabs.some(t=>t[0]===itab))itab=tabs[0][0];lastTab[k]=itab;
+ const qkey=k==='img'?null:(k==='shape'||k==='marker'?'bg':'color'),qv=RV(s[qkey]),
+  qc=qkey?`<label class="qc2" title="Color"><input type="color" data-f="s.${qkey}" aria-label="Color" value="${ok6(qv)?qv.slice(0,7):'#000000'}"></label>`:'',
+  ins=e.instruction?`<div class="ins"><div class="mono">WHAT TO PUT HERE</div>${esc(e.instruction)}</div>`:'',
+  flags=[e.required?'REQUIRED':'',lock?'LOCKED':''].filter(Boolean).join(' · ');
+ return `<div class="ph"><div class="grab" role="separator" aria-label="Drag to resize panel"></div><div class="pr1"><span class="ty">${esc(NAMES[e.type]||e.type)}</span><b>${esc(e.label)}</b>${flags?`<span class="mono">${flags}</span>`:''}${qc}<button class="ib" data-a="edup" aria-label="Copy">⧉</button><button class="ib" data-a="lk3" aria-label="${lock?'Unlock':'Lock'}">${lock?'🔓':'🔒'}</button><button class="ib" data-a="edel" aria-label="Delete">🗑</button><button class="ib" data-a="tg" aria-label="Hide panel">▾</button></div>
+<div class="pt">${tabs.map(([id,l])=>`<button data-a="itab" data-k="${id}" class="${id===itab?'on':''}">${l}</button>`).join('')}</div></div>
+${itab===tabs[0][0]?ins:''}${tabs.find(t=>t[0]===itab)[2]}`};
+function enhance(){const sh=document.getElementById('sheet');if(!sh)return;
+ sh.querySelectorAll('input[type=number][data-f]').forEach(n=>{const r=RNG[n.dataset.f],l=n.closest('label');if(!r||!l)return;
+  const g=document.createElement('input');g.type='range';g.className='rg';g.min=r[0];g.max=r[1];g.step=r[2];g.value=n.value;g.setAttribute('aria-label',l.firstChild.textContent+' slider');
+  g.oninput=()=>{n.value=g.value;n.dispatchEvent(new Event('input',{bubbles:true}))};n.addEventListener('input',()=>{g.value=n.value});l.appendChild(g)});
+ sh.querySelectorAll('select[data-f]').forEach(s=>{if(s.options.length>(s.dataset.f==='s.align'?4:3))return;const w=document.createElement('div');w.className='seg';
+  [...s.options].forEach(o=>{const b=document.createElement('button');b.type='button';b.textContent=o.text;b.className=o.selected?'on':'';
+   b.onclick=()=>{s.value=o.value;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));w.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};w.appendChild(b)});
+  s.style.display='none';s.after(w)});
+ const adv=[...sh.querySelectorAll('label')].filter(l=>{const i=l.querySelector('input[data-f]');return i&&ADV.includes(i.dataset.f)});
+ if(adv.length){const d=document.createElement('details');d.className='adv';d.innerHTML='<summary>Advanced (CSS)</summary>';adv[0].before(d);adv.forEach(l=>d.appendChild(l))}}
+const _d=drawSheet;drawSheet=function(){_d();enhance()};
+const SN=[.22,.46,.74];let dg=null;
+document.addEventListener('pointerdown',ev=>{const g=ev.target.closest&&ev.target.closest('.grab'),s=document.getElementById('sheet');if(!g||!s)return;
+ dg={y:ev.clientY,h:s.offsetHeight,mv:0,g};try{g.setPointerCapture(ev.pointerId)}catch(_){}ev.preventDefault()});
+document.addEventListener('pointermove',ev=>{if(!dg)return;const s=document.getElementById('sheet'),dy=dg.y-ev.clientY;if(Math.abs(dy)>4)dg.mv=1;if(!dg.mv)return;
+ const h=Math.max(90,Math.min(innerHeight*.8,dg.h+dy));s.style.height=s.style.maxHeight=h+'px'});
+function end(){if(!dg)return;const s=document.getElementById('sheet'),f=s.offsetHeight/innerHeight;let i;
+ if(dg.mv)i=SN.reduce((a,v,j)=>Math.abs(v-f)<Math.abs(SN[a]-f)?j:a,0);else{i=SN.findIndex(v=>v>f+.03);if(i<0)i=0}
+ s.style.height=s.style.maxHeight=Math.round(innerHeight*SN[i])+'px';dg=null}
+document.addEventListener('pointerup',end);document.addEventListener('pointercancel',end);
+const _es=editorShell;editorShell=function(){return _es().replace(/(id="t-style">)Style/,'$1Theme')};
+})();
+</script>
+<style>
+/* ===== v3.2: effect presets, nudge + align, auto-peek ===== */
+.fxc{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}.fxc button{min-height:34px;border-radius:999px;padding:0 12px;font-size:12px}
+.fxc button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.lay{margin:4px 0 10px}.lay .r{display:grid;gap:6px;margin-top:6px}.lay .r5{grid-template-columns:repeat(5,1fr)}.lay .r6{grid-template-columns:repeat(6,1fr)}
+.lay button{min-height:38px;padding:0;font-size:14px}.lay button:disabled{opacity:.4}
+.tools{grid-template-columns:repeat(4,1fr)}
+</style>
+<script>
+(function(){
+let step=10,pk=null;
+const chips=[['None',{eff:'',shadow:'',tg:''}],['Outline',{eff:'outline',shadow:''}],['Highlight',{eff:'highlight',shadow:''}],['3D',{eff:'shadow3d',shadow:''}],['Curved',{eff:'arc',shadow:''}],['Soft shadow',{eff:'',shadow:'0 2px 8px #0008'}],['Glow',{eff:'',shadow:'0 0 18px #ffffffcc'}]];
+function enhance2(){const sh=document.getElementById('sheet');if(!sh||mode!=='sel')return;const e=cur();if(!e)return;const s=e.style||{};
+ const se=sh.querySelector('[data-f="s.eff"]');
+ if(se&&se.closest('.g4')){const d=document.createElement('div');d.className='fxc';
+  d.innerHTML=chips.map(([l,o],i)=>`<button type="button" data-fxp="${i}" class="${Object.keys(o).every(k=>(s[k]||'')===o[k])?'on':''}">${l}</button>`).join('');se.closest('.g4').before(d)}
+ const px=sh.querySelector('[data-f="p.x"]');
+ if(px&&px.closest('.g4')){const dis=e.lock?' disabled':'',d=document.createElement('div');d.className='lay';
+  d.innerHTML=`<div class="mono">NUDGE · ALIGN TO PAGE</div><div class="r r5"><button type="button" data-nd="-1,0"${dis} aria-label="Left">←</button><button type="button" data-nd="0,-1"${dis} aria-label="Up">↑</button><button type="button" data-nd="0,1"${dis} aria-label="Down">↓</button><button type="button" data-nd="1,0"${dis} aria-label="Right">→</button><button type="button" data-stp="1" aria-label="Nudge step" style="font-size:11px">Step ${step}</button></div>
+<div class="r r6">${[['l','⇤','Align left'],['c','↔','Center horizontally'],['r','⇥','Align right'],['t','⤒','Align top'],['m','↕','Center vertically'],['b','⤓','Align bottom']].map(([a,i,l])=>`<button type="button" data-al="${a}"${dis} aria-label="${l}" title="${l}">${i}</button>`).join('')}</div>`;px.closest('.g4').before(d)}}
+const _d=drawSheet;drawSheet=function(){_d();enhance2()};
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-fxp],[data-nd],[data-al],[data-stp]');if(!b||!proj)return;const e=cur();if(!e)return;
+ if(b.dataset.stp){step=step===1?10:step===10?50:1;b.textContent='Step '+step;return}
+ if(b.dataset.fxp!==undefined){snap(1);const st=e.style=e.style||{},o=chips[+b.dataset.fxp][1];for(const k in o){if(o[k])st[k]=o[k];else delete st[k]}refresh(1);return}
+ if(e.lock)return;const p=e.position,H=projP(proj).H;snap(1);
+ if(b.dataset.nd){const[dx,dy]=b.dataset.nd.split(',').map(Number);p.x+=dx*step;p.y+=dy*step}
+ else{const a=b.dataset.al;if(a==='l')p.x=0;if(a==='c')p.x=Math.round((1000-p.w)/2);if(a==='r')p.x=1000-p.w;if(a==='t')p.y=0;if(a==='m')p.y=Math.round((H-p.h)/2);if(a==='b')p.y=H-p.h}
+ refresh(1)});
+/* auto-peek: shrink the panel while an element is being dragged on the canvas */
+document.addEventListener('pointermove',()=>{if(pk||!drag||!drag.moved||hid)return;const s=document.getElementById('sheet');if(!s)return;
+ pk={h:s.style.height,m:s.style.maxHeight};s.style.height=s.style.maxHeight=Math.round(innerHeight*.22)+'px'});
+document.addEventListener('pointerup',()=>setTimeout(()=>{if(!pk)return;const s=document.getElementById('sheet');if(s){s.style.height=pk.h;s.style.maxHeight=pk.m}pk=null},0));
+/* Check moves into the ⋮ menu */
+const _mh=moreHTML;moreHTML=function(){return _mh()+'<div class="mono" style="margin-top:8px">CHECK</div><div class="row"><button data-a="m" data-m="check">Run content check</button></div>'};
+const _es2=editorShell;editorShell=function(){return _es2().replace(/<button data-a="m" data-m="check" id="t-check">Check<\/button>/,'')};
+})();
+</script>
+<style>
+/* ===== v3.3: text styling extras ===== */
+.tgl{display:flex;gap:6px;margin:4px 0 10px}.tgl button{flex:1;min-height:38px;padding:0;font-size:15px}.tgl button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.fxs{border:1px solid var(--ln);border-radius:10px;padding:8px 10px;margin:0 0 10px}.fxs .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.fxs label{font:600 11px 'Space Mono',monospace;color:var(--mut);margin:0;display:block}
+</style>
+<script>
+/* inline **bold** and _italic_ in text blocks */
+(function(){
+const _tb=txtBody;
+txtBody=function(el,s){if(el.type==='legend'||el.type==='table'||el.type==='sourceList')return _tb(el,s);
+ const tx=String(el.text||'').replace(/\*\*(.+?)\*\*/g,'\uE000$1\uE001').replace(/(^|[\s(])_([^_\n]+?)_(?=[\s.,;:!?)]|$)/g,'$1\uE002$2\uE003');
+ let h=_tb(Object.assign({},el,{text:tx}),s).replace(/\uE000/g,'<b>').replace(/\uE001/g,'</b>').replace(/\uE002/g,'<i>').replace(/\uE003/g,'</i>');
+ return s.va?`<div>${h}</div>`:h};
+const rg=(k,l,v,a,b,st)=>`<div><label>${l}<input type="number" step="${st}" data-f="${k}" value="${v}"><input type="range" class="rg" min="${a}" max="${b}" step="${st}" value="${v}" data-rg="${k}" aria-label="${l} slider"></label></div>`;
+function enhance3(){const sh=document.getElementById('sheet');if(!sh||mode!=='sel')return;const e=cur();if(!e)return;const s=e.style||{};
+ const w=sh.querySelector('[data-f="s.weight"]');
+ if(w&&w.closest('.g4')){const d=document.createElement('div');
+  d.innerHTML=`<div class="mono" style="margin:6px 0 4px">EMPHASIS · VERTICAL POSITION</div><div class="tgl">${[['it','<i>I</i>','Italic'],['ul','<u>U</u>','Underline'],['st','<s>S</s>','Strikethrough']].map(([k,h,l])=>`<button type="button" data-tg="${k}" class="${s[k]?'on':''}" aria-label="${l}" title="${l}">${h}</button>`).join('')}</div><div class="tgl">${[['','Top'],['m','Middle'],['b','Bottom']].map(([v,l])=>`<button type="button" data-va="${v}" class="${(s.va||'')===v?'on':''}">${l}</button>`).join('')}</div>`;
+  w.closest('.g4').before(d)}
+ const se=sh.querySelector('[data-f="s.eff"]');
+ if(se&&se.closest('.g4')&&!sh.querySelector('.fxs')){const d=document.createElement('div');d.className='fxs';
+  d.innerHTML=`<div class="mono" style="margin:0 0 6px">OUTLINE · SOFT SHADOW</div><div class="g2">${rg('s.sw','Outline width',s.sw||2,1,20,1)}${rg('s.shd','Shadow distance',s.shd||0,0,30,1)}${rg('s.shb','Shadow blur',s.shb||0,0,40,1)}<div><label>Shadow color<input type="color" data-f="s.shc" value="${/^#[0-9a-f]{6}$/i.test(s.shc||'')?s.shc:'#000000'}"></label></div></div><div class="mono" style="margin-top:6px">Outline shows when Text effect is Outline.</div>`;
+  const f=sh.querySelector('.fxc');(f||se.closest('.g4')).after(d)}}
+const _d=drawSheet;drawSheet=function(){_d();enhance3()};
+document.addEventListener('input',ev=>{const g=ev.target&&ev.target.dataset&&ev.target.dataset.rg;if(!g)return;const n=document.querySelector('#sheet input[type=number][data-f="'+g+'"]');if(n){n.value=ev.target.value;n.dispatchEvent(new Event('input',{bubbles:true}))}});
+document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset||!t.dataset.f||t.type!=='number')return;const r=document.querySelector('#sheet [data-rg="'+t.dataset.f+'"]');if(r)r.value=t.value});
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-tg],[data-va]');if(!b||!proj)return;const e=cur();if(!e)return;snap(1);const st=e.style=e.style||{};
+ if(b.dataset.tg){const k=b.dataset.tg;if(st[k])delete st[k];else st[k]=1}else{if(b.dataset.va)st.va=b.dataset.va;else delete st.va}refresh(1)});
+})();
 </script>
 <script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
