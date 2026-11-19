@@ -2,7 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#F8DCE6"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tourism Layout Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=Inter:wght@100..900&family=Sora:wght@100..800&family=Manrope:wght@200..800&family=DM+Serif+Display&family=DM+Sans:wght@100..1000&family=Space+Mono&family=Great+Vibes&family=Bebas+Neue&family=Oswald:wght@200..700&display=swap" rel="stylesheet" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400..900&family=Inter:wght@100..900&family=Sora:wght@100..800&family=Manrope:wght@200..800&family=DM+Serif+Display&family=DM+Sans:wght@100..1000&family=Space+Mono:wght@400;700&family=Great+Vibes&family=Bebas+Neue&family=Oswald:wght@200..700&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
 :root{--bg:#E6ECEA;--ink:#10252B;--mut:#5B6F74;--ac:#2447D0;--ln:#B9C6C4;--pn:#F6F9F8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}html,body{height:100%;margin:0}
@@ -31,7 +31,7 @@ nav button{flex:1;border:0;border-radius:0;background:none;min-height:52px}nav .
 .ins{border-left:3px solid var(--ac);padding:4px 10px;margin:6px 0;background:var(--bg)}
 .cvw{position:relative;box-shadow:0 0 0 1px var(--ln)}.cv{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;color:#111111}
 .cv .e{position:absolute;overflow:hidden}.cv .e svg{width:100%;height:100%;display:block}
-.cv .sel{outline:6px solid #2447D0;outline-offset:2px}.cv .ph{display:grid;place-items:center;text-align:center;width:100%;height:100%;background:repeating-linear-gradient(45deg,#0001 0 12px,#0000 12px 24px);border:3px dashed #0007;font:24px 'Space Mono',monospace;padding:20px;color:#000a}
+.cv .sel{outline:6px solid #2447D0;outline-offset:2px}.cv .phc{display:grid;place-items:center;text-align:center;width:100%;height:100%;box-sizing:border-box;background:repeating-linear-gradient(45deg,#0001 0 12px,#0000 12px 24px),#0000000d;border:3px dashed #0007;font:24px 'Space Mono',monospace;padding:20px;color:#000a}
 .ly{display:flex;gap:4px;align-items:center;border-bottom:1px solid var(--ln)}.ly button{min-width:44px;padding:0}.ly .n{flex:1;text-align:left;border:0;background:none}
 .ck{padding:6px 0;border-bottom:1px solid var(--ln)}.ok{color:#1b8a4b}.wn{color:#b7791f}.ms{color:#c53030}
 .modal{position:fixed;inset:0;background:var(--bg);z-index:9;overflow:auto;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px))}
@@ -82,7 +82,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 
 /* ===== TEMPLATE LOADING: imported / AI-made templates from storage ===== */
 const BUILT=[];
-const BLANK={schemaVersion:'2.0',template:{id:'blank-01',name:'Blank layout',category:'Destination Poster',assignmentOption:1,style:'Blank',description:'An empty sheet.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2',background:'#FFFFFF'},fonts:{display:'Playfair Display',body:'Inter'},elements:[{id:'title',type:'text',label:'Title',editable:true,required:true,instruction:'Type your destination or guide title.',position:{x:70,y:90,w:860,h:180},style:{size:110,weight:800,font:'d',lh:0.95,color:'#3D3035'},text:'Your title',ph:true}]};
+const BLANK={schemaVersion:'2.1',template:{id:'blank-01',name:'Blank layout',category:'Destination Poster',assignmentOption:1,style:'Blank',description:'An empty sheet.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2',background:'#FFFFFF'},fonts:{display:'Playfair Display',body:'Inter'},elements:[{id:'title',type:'text',label:'Title',editable:true,required:true,instruction:'Type your destination or guide title.',position:{x:70,y:90,w:860,h:180},style:{size:110,weight:800,font:'d',lh:0.95,color:'#3D3035'},text:'Your title',ph:true}]};
 let custom=[],projects=[],tourSeen=0,FONTS={};
 const norm=t=>{if(t.theme||!t.fonts)normT(t);const m=t.template||{},o=+m.assignmentOption;if(o>=1&&o<=10)m.category=CATS[o-1][0];else if(!o){const c=CATS.find(c=>c[0]===m.category);if(c)m.assignmentOption=c[1]}return t};
 const lib=()=>[...BUILT,...custom].map(norm);
@@ -106,6 +106,7 @@ function validate(t){const e=[];
 /* ===== RENDERER: element JSON -> absolutely positioned DOM in a 1000x1414 coordinate space (A2 ratio), scaled by CSS transform ===== */
 const PAIRS=[['Editorial','Playfair Display','Inter'],['Modern','Sora','Manrope'],['Travel Journal','DM Serif Display','DM Sans'],['Poster','Bebas Neue','Manrope'],['Condensed','Oswald','Inter']];
 const cleanSvg=s=>String(s).replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*')/gi,'');
+function photoHTML(el,s){return `<img src="${esc(el.src)}" style="width:100%;height:100%;object-fit:cover;display:block;transform:scale(${s.zoom||1});object-position:${s.px??50}% ${s.py??50}%;filter:${{grayscale:'grayscale(1)',sepia:'sepia(.8)',contrast:'contrast(1.4)',warm:'saturate(1.3) hue-rotate(-10deg)',duotone:'grayscale(1) contrast(1.15)'}[s.tr]||'none'}">`+(s.ov||s.ovg||s.ova!=null?`<div style="position:absolute;inset:0;background:${s.ovg||s.ov||'#000'};opacity:${s.ova??.3};mix-blend-mode:${s.ovb||'normal'}"></div>`:'')+(s.vig?`<div style="position:absolute;inset:0;background:radial-gradient(transparent 45%,#000b)"></div>`:'')}
 function elHTML(el,fonts,sel){
  const p=el.position,s=el.style||{};
  let c=`left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px;opacity:${s.opacity??1};transform:rotate(${s.rotate||0}deg);`;
@@ -121,7 +122,8 @@ function elHTML(el,fonts,sel){
  else if(el.type==='months'){c+=`font-family:${fonts.b};`;i=monthsHTML(el)}
  else if(el.type==='meter'){c+=`font-family:${fonts.b};`;i=meterHTML(el)}
  else if(el.type==='mapMarker'){c+=`border-radius:50%;display:grid;place-items:center;font:700 ${s.size||20}px sans-serif;`;i=esc(el.text||'')}
- else if(el.type==='image'||el.type==='map'){if(s.mask)c+=`clip-path:${{circle:'circle(50% at 50% 50%)',ellipse:'ellipse(50% 50% at 50% 50%)',arch:'inset(0 round 999px 999px 0 0)'}[s.mask]||'none'};`;i=el.src?`<img src="${esc(el.src)}" style="width:100%;height:100%;object-fit:cover;display:block;transform:scale(${s.zoom||1});object-position:${s.px??50}% ${s.py??50}%;filter:${{grayscale:'grayscale(1)',sepia:'sepia(.8)',contrast:'contrast(1.4)',warm:'saturate(1.3) hue-rotate(-10deg)',duotone:'grayscale(1) contrast(1.15)'}[s.tr]||'none'}">`+(s.ov||s.ovg||s.ova!=null?`<div style="position:absolute;inset:0;background:${s.ovg||s.ov||'#000'};opacity:${s.ova??.3};mix-blend-mode:${s.ovb||'normal'}"></div>`:'')+(s.vig?`<div style="position:absolute;inset:0;background:radial-gradient(transparent 45%,#000b)"></div>`:''):`<div class="ph">${esc(el.label)}<br>${esc((el.instruction||'').slice(0,90))}</div>`}
+ else if(el.type==='shape'&&el.src)i=photoHTML(el,s);
+ else if(el.type==='image'||el.type==='map'){if(s.mask){const LG={circle:'circle(50% at 50% 50%)',ellipse:'ellipse(50% 50% at 50% 50%)',arch:'inset(0 round 999px 999px 0 0)'};c+=LG[s.mask]?`clip-path:${LG[s.mask]};`:(SH[s.mask]||'')}i=el.src?photoHTML(el,s):`<div class="phc">${esc(el.label)}<br>${esc((el.instruction||'').slice(0,90))}</div>`}
  return `<div class="e${sel?' sel':''}" data-id="${esc(el.id)}" style="${c}">${i}</div>`}
 function canvasHTML(P,w,o={}){ // P = {els,fd,fb,bg,size}
  const S=w/1000,H=P.H||1414,f={d:`'${P.fd}',serif`,b:`'${P.fb}',sans-serif`};
@@ -167,7 +169,7 @@ function render(){const a=$('#app');
  if(view==='home')b=`<div class="hero"><div class="mono">SHEET A2 · 42 × 59.4 CM · PORTRAIT</div><h1>Tourism Layout Studio</h1><p>Design a visitor-ready tourism poster, step by step. You write the content and verify the facts; the studio handles the layout.</p>
  <div class="steps"><div><b>1</b>Start a layout</div><div><b>2</b>Add photos and text</div><div><b>3</b>Check and export</div></div>
  <div class="row"><button class="p" data-a="blank">Start a blank layout</button>${PRO?'<button data-a="go" data-v="create">Make a template</button>':''}<button data-a="go" data-v="projs">My projects</button></div></div>
- ${lib().length?`<h2>YOUR TEMPLATES</h2>${lib().slice(0,4).map(tplCard).join('')}<div class="row"><button data-a="go" data-v="tpls">See all templates</button></div>`:''}<p class="mono">Tourism Layout Studio v${VERSION} · schema 1.4</p>`;
+ ${lib().length?`<h2>YOUR TEMPLATES</h2>${lib().slice(0,4).map(tplCard).join('')}<div class="row"><button data-a="go" data-v="tpls">See all templates</button></div>`:''}<p class="mono">Tourism Layout Studio v${VERSION} · schema 2.1</p>`;
  if(view==='tpls')b=`<h1>Templates</h1>${filterBar()}<div id="tl">${tplGroups()}</div>`;
  if(view==='detail'){const t=tdet;b=`<button data-a="go" data-v="tpls">Back</button><div style="margin:12px 0">${thumb(t,Math.min(340,innerWidth-34))}</div><h1>${esc(t.template.name)}</h1><div class="mono">${esc(t.template.category)} · HM 302 OPTION ${t.template.assignmentOption??'—'}<br>STYLE: ${esc(t.template.style||'')}<br>${t.elements.length} ELEMENTS</div><h2>INCLUDES</h2>${t.elements.filter(e=>e.required||e.rec).map(e=>`<div class="ck">${e.required?'●':'○'} ${esc(e.label)} <span class="mono">${e.required?'required':'recommended'}</span></div>`).join('')}<div class="row"><button class="p" data-a="use" data-i="${esc(t.template.id)}">Use this template</button>${PRO?`<button data-a="cwvar" data-i="${esc(t.template.id)}">Make a variation</button>`:''}</div>`}
  if(view==='projs')b=`<h1>My projects</h1>${projects.length?projects.map(p=>`<div class="card"><div class="th" style="width:80px">${canvasHTML(projP(p),80)}</div><div class="i"><b>${esc(p.name)}</b><div class="mono">${esc(p.tplId)}<br>${fmt(p.updated)}</div><div class="row"><button class="p" data-a="open" data-i="${p.id}">Open</button><button data-a="ren" data-i="${p.id}">Rename</button><button data-a="dup" data-i="${p.id}">Duplicate</button><button data-a="del" data-i="${p.id}">Delete</button></div></div></div>`).join(''):'<p>No projects yet. Start with an empty sheet whenever you are ready.</p><button class="p" data-a="blank">Start a blank layout</button>'}`;
@@ -190,7 +192,56 @@ function exportPDF(){if(!window.html2canvas||!window.jspdf){alert('PDF libraries
  const n=document.createElement('div');n.style.cssText='position:fixed;left:-9999px;top:0';n.innerHTML=canvasHTML(projP(proj),1000);document.body.appendChild(n);
  html2canvas(n.firstChild,{scale:3,useCORS:true}).then(c=>{const d=CV[proj.canvas||'A2'].cm,pdf=new jspdf.jsPDF({unit:'cm',format:[Math.min(d[0],d[1]),Math.max(d[0],d[1])],orientation:d[0]>d[1]?'landscape':'portrait'});pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',0,0,d[0],d[1]);pdf.save(proj.name+'.pdf');n.remove()}).catch(()=>{n.remove();alert('PDF export failed.')})}
 /* ===== CREATE TAB v2.2: guided wizard. You tap choices; the app writes the expert design prompt. ===== */
-const FONT_OK=['Playfair Display','Inter','Sora','Manrope','DM Serif Display','DM Sans','Space Mono','Great Vibes','Bebas Neue','Oswald'];
+/* v2.9.2: ONE font table for the whole app: [name, group, weights that are really loaded, avg char width (em) for mixed case, for ALL CAPS].
+   Widths are averages over normal English text, rounded UP. Measured in a browser: Inter, DM Sans, Montserrat, Open Sans, Roboto, Lora, Poppins, Anton, Archivo Black.
+   Space Mono is exact (monospace). All others are estimates from the typeface style, so the prompt tells the AI to keep a 10% safety margin. */
+const FONTDB=[
+ ['Playfair Display','Serif','400-900',.50,.66],['DM Serif Display','Serif','400',.48,.62],['Abril Fatface','Serif','400',.50,.66],['Cormorant Garamond','Serif','400,700',.42,.56],['Cinzel','Serif','400,700',.62,.66,'every letter is drawn as a capital'],['Lora','Serif','400,700',.46,.58],['Merriweather','Serif','400,700',.54,.68],['Libre Baskerville','Serif','400,700',.54,.68],
+ ['Inter','Sans','100-900',.48,.59],['Manrope','Sans','200-800',.50,.62],['Sora','Sans','100-800',.54,.66],['DM Sans','Sans','100-1000',.46,.55],['Montserrat','Sans','400,700',.50,.62],['Poppins','Sans','400,700',.50,.56],['Raleway','Sans','400,700',.50,.62],['Roboto','Sans','400,700',.44,.54],['Open Sans','Sans','400,700',.46,.56],['Josefin Sans','Sans','400,700',.44,.55],['Nunito','Sans','400,700',.48,.58],['Work Sans','Sans','400,700',.50,.60],['Rubik','Sans','400,700',.50,.60],['Quicksand','Sans','400,700',.48,.60],
+ ['Bebas Neue','Condensed and poster','400',.38,.38,'every letter is drawn as a capital'],['Oswald','Condensed and poster','200-700',.44,.52],['Anton','Condensed and poster','400',.40,.41],['Archivo Black','Condensed and poster','400',.55,.66],['Righteous','Condensed and poster','400',.52,.60],['Amatic SC','Script and handwriting','400,700',.32,.32],
+ ['Great Vibes','Script and handwriting','400',.34,.46],['Pacifico','Script and handwriting','400',.52,.62],['Dancing Script','Script and handwriting','400,700',.42,.52],['Lobster','Script and handwriting','400',.46,.56],['Caveat','Script and handwriting','400,700',.36,.46],['Satisfy','Script and handwriting','400',.40,.50],['Permanent Marker','Script and handwriting','400',.52,.60],
+ ['Space Mono','Monospace','400,700',.60,.60]];
+const FONT_OK=FONTDB.map(f=>f[0]);
+const cwF=n=>FONTDB.find(f=>f[0]===n)||FONTDB[8];
+/* the FONTS block of the prompt: every font the app can draw, with real weights and widths */
+function fontBlock(){const groups=[];FONTDB.forEach(f=>{let g=groups.find(x=>x[0]===f[1]);if(!g)groups.push(g=[f[1],[]]);g[1].push(f)});
+ return `FONTS (every font below is installed in the app; write the name EXACTLY as shown)
+- fonts.display and fonts.body: choose ANY two fonts from the list. Do not copy the fonts of the format example. style.font "d" = the display font, "b" = the body font, "s" = Great Vibes script.
+- style.ff on a single text element = a one-off typeface for just that element (any name from the list). It overrides style.font. Use it sparingly, for one accent word or one script touch.
+- Use at most 3 typefaces on the whole poster. Pair a characterful display font with a calm body font.
+- Weights: style.weight must be one of the weights listed for that font. A font that lists only 400 has no bold: never set a heavier weight on it. Fonts with a range (for example 100-900) accept any hundred in that range.
+- "avg width" is the average width of one character as a fraction of style.size: the first number is for normal mixed-case text, the second for ALL CAPS (use it when style.tt is "uppercase" or the text is typed in capitals). You need it for the SPACING AND FIT MATH below.
+${groups.map(([g,l])=>'  '+g.toUpperCase()+'\n'+l.map(f=>`    ${f[0]} | weights ${f[2]} | avg width ${f[3].toFixed(2)} / CAPS ${f[4].toFixed(2)}${f[5]?' | '+f[5]:''}`).join('\n')).join('\n')}`}
+/* the SPACING AND FIT MATH block: units, formulas and worked examples with the real numbers of the chosen sheet */
+function mathBlock(H){const hi=H-50,ex=cwF('Inter'),ti=cwF('Anton'),
+ cwB=ex[3],cB=Math.round(22*cwB*100)/100,cplB=Math.floor(440/cB),lnB=Math.ceil(180/cplB),thB=lnB*22*1.5,hB=Math.ceil(thB*1.1/10)*10,
+ cT=Math.round(190*(ti[4]+.02)*10)/10,wT=Math.round(cT*9),hT=Math.ceil(190*1.1/10)*10;
+ return `SPACING AND FIT MATH (use these exact units and formulas; do the sums silently before you write each box, and do not print them)
+UNITS
+- The canvas is 1000 wide x ${H} tall. x, y, w, h, style.size, style.pad, style.radius and style.sw are plain NUMBERS in canvas units (1 unit = 1/1000 of the sheet width). Never write "px", "em" or "%" in them.
+- style.size = font size in units.
+- style.lh = line height as a MULTIPLIER of the font size, usually 1.0 to 1.6. Write 1.4, never 28. One line is size x lh units tall.
+- style.ls = letter spacing in EM, a fraction of the font size. 0 = normal, 0.02 = slightly open, 0.12 = wide-spaced small caps, -0.02 = tight giant title. Allowed range -0.05 to 0.30. NEVER write 2 or 5: that means 2 or 5 times the font size between every two letters. To convert: ls = wanted gap in units / size.
+- style.pad = space INSIDE the box on all four sides, in units. The box does not grow: padding takes space away from the text. Default 0 (24 when style.card is set, so set pad yourself when you use a card).
+- style.opacity is 0 to 1. style.rotate is in degrees.
+TEXT BOX MATH (do this for EVERY text element)
+ 1. uw = w - 2 x pad and uh = h - 2 x pad (the area the text really gets)
+ 2. char_w = size x (cw + ls), where cw is the "avg width" from the font list (the CAPS number for uppercase text)
+ 3. chars_per_line = floor(uw / char_w)
+ 4. lines = for each paragraph or line break, ceil(characters / chars_per_line), at least 1; add them up
+ 5. text_height = lines x size x lh
+ 6. REQUIRED: text_height x 1.1 <= uh. If it is not, make h bigger, w wider, or size smaller. Round the final h up to a multiple of 10.
+ 7. A word never breaks in the middle: longest_word_characters x char_w must be <= uw, or the end of the word is cut off at the edge of the box.
+ Example, body text: ${ex[0]}, size 22, lh 1.5, ls 0, pad 0, w 440, 180 characters of mixed-case text. char_w = 22 x (${cwB.toFixed(2)} + 0) = ${cB}. chars_per_line = floor(440 / ${cB}) = ${cplB}. lines = ceil(180 / ${cplB}) = ${lnB}. text_height = ${lnB} x 22 x 1.5 = ${thB}. Needed: ${thB} x 1.1 = ${Math.round(thB*11)/10}, so h = ${hB}.
+ Example, giant title: "DUMAGUETE" (9 capitals) in ${ti[0]}, size 190, lh 1.0, ls 0.02. char_w = 190 x (${ti[4].toFixed(2)} + 0.02) = ${cT}. Width of the word = 9 x ${cT} = ${wT}, so w must be at least ${wT} (use 880). One line: text_height = 190 x 1.0 = 190, so h = ${hT}.
+ style.fit:true shrinks the text (size is the maximum) until it fits the box height AND no word is wider than the box. It is only a safety net: still size every box with the math, so fit only has to make a small correction. fit does not work together with style.vert.
+LAYOUT GRID
+- Safe area: x from 50 to 950, y from 50 to ${hi}. The content width is 900.
+- Columns, gutter 30: 2 columns = w 435 at x 50 and 515. 3 columns = w 280 at x 50, 360 and 670. 4 columns = w 202 at x 50, 282, 514 and 746.
+- Gaps: 16 between a heading and the text under it, 32 between two blocks in one column, 60 between sections. Stack blocks with: next y = previous y + previous h + gap.
+- Round x, y, w, h to multiples of 10 (5 for small details).
+- Two boxes overlap when x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1. No two text boxes may overlap.
+FINAL CHECK before you reply: for every text element, confirm chars_per_line, lines and text_height fit the box (step 6 and 7); confirm every box is inside the safe area (unless bleed:true) and that no two text boxes overlap.`}
 const wf=b=>`<svg class="wf" viewBox="0 0 50 71" aria-hidden="true">${b}</svg>`;
 const LAYOUTS=[
  {k:'hero',n:'Big photo',d:'One huge photo is the star. A big title sits above or on top of it, short facts go underneath.',g:'one place or attraction',base:'coastal-expedition-01',r:'one dominant hero image (about 50-60% of the sheet height), a very large title above or overlapping it, then the description and activities in two short columns underneath',w:'<rect x="4" y="4" width="42" height="8" class="f"/><rect x="4" y="16" width="42" height="28" class="f"/><rect x="4" y="48" width="20" height="16"/><rect x="26" y="48" width="20" height="16"/>'},
@@ -198,7 +249,8 @@ const LAYOUTS=[
  {k:'route',n:'Winding route',d:'A dotted line zig-zags down the page and each stop sits along it, like a journey.',g:'itineraries and day plans',base:'route-journal-01',r:'one continuous dotted route line (svg or route element) winding from top to bottom, with each stop as a circle on the line and its text block placed beside the circle, alternating left and right; a small locator map in a corner',w:'<path d="M12 12C12 26 40 20 40 34S10 42 12 54S34 58 36 66" stroke-dasharray="2 2"/><circle cx="12" cy="12" r="3"/><circle cx="40" cy="34" r="3"/><circle cx="12" cy="54" r="3"/><circle cx="36" cy="66" r="3"/>'},
  {k:'type',n:'Giant title',d:'The letters themselves are the design: huge words, one smaller photo, lots of bold space.',g:'simple, bold, modern posters',base:'giant-type-01',r:'an enormous display-type title that fills most of the sheet width (two or three lines), one medium photo, and compact info blocks; very little decoration',w:'<rect x="4" y="4" width="42" height="11" class="f"/><rect x="4" y="18" width="42" height="11" class="f"/><rect x="4" y="34" width="26" height="20"/><rect x="34" y="34" width="12" height="20"/><rect x="4" y="58" width="42" height="7"/>'},
  {k:'panels',n:'Columns',d:'The page is split into 2-3 tall columns. Each column covers one topic with its own small photo.',g:'regional guides, lots of facts',base:'panel-columns-01',r:'a title band at the top, then 3 equal vertical columns, each with a small image on top and a heading plus short text underneath; thin dividing rules between columns',w:'<rect x="4" y="4" width="42" height="8" class="f"/><rect x="4" y="16" width="13" height="14" class="f"/><rect x="19" y="16" width="13" height="14" class="f"/><rect x="34" y="16" width="12" height="14" class="f"/><rect x="4" y="33" width="13" height="31"/><rect x="19" y="33" width="13" height="31"/><rect x="34" y="33" width="12" height="31"/>'},
- {k:'arch',n:'Arch frames',d:'Photos are cut into tall arches (like church windows). Calm, elegant and symmetrical.',g:'culture, heritage, elegant posters',base:'arch-triptych-01',r:'three tall arch-shaped image slots side by side (style.mask "arch"), a large title above, and a short caption block under each arch',w:'<rect x="4" y="4" width="42" height="7" class="f"/><path d="M4 46V30a6.5 6.5 0 0113 0v16z" class="f"/><path d="M19 46V30a6.5 6.5 0 0113 0v16z" class="f"/><path d="M34 46V30a6.5 6.5 0 0112 0v16z" class="f"/><rect x="4" y="50" width="13" height="14"/><rect x="19" y="50" width="13" height="14"/><rect x="34" y="50" width="12" height="14"/>'},
+ {k:'arch',n:'Arch frames',d:'Photos are cut into tall arches (like church windows). Calm, elegant and symmetrical.',g:'culture, heritage, elegant posters',base:'arch-triptych-01',r:'three tall arch-shaped image slots side by side (style.shape "arch"), a large title above, and a short caption block under each arch',w:'<rect x="4" y="4" width="42" height="7" class="f"/><path d="M4 46V30a6.5 6.5 0 0113 0v16z" class="f"/><path d="M19 46V30a6.5 6.5 0 0113 0v16z" class="f"/><path d="M34 46V30a6.5 6.5 0 0112 0v16z" class="f"/><rect x="4" y="50" width="13" height="14"/><rect x="19" y="50" width="13" height="14"/><rect x="34" y="50" width="12" height="14"/>'},
+ {k:'shapes',n:'Shape collage',d:'Photos cut into different shapes (circle, arch, hexagon, heart...) arranged like a playful collage.',g:'festivals, food, family and fun guides',base:'arch-triptych-01',r:'a playful collage of 4 to 6 image slots, each cut into a different shape with style.shape (for example circle, arch, hexagon, heart, stamp, cloud), overlapping slightly, a large title, and one short caption beside each photo; give each shape a suitable box (square for circle, hexagon, heart and star)',w:'<rect x="4" y="4" width="42" height="7" class="f"/><circle cx="15" cy="23" r="9" class="f"/><path d="M32 14l9 5v10l-9 5-9-5V19z" class="f"/><path d="M5 58V48a8 8 0 0116 0v10z" class="f"/><circle cx="36" cy="52" r="8" class="f"/><rect x="4" y="62" width="42" height="4"/>'},
  {k:'field',n:'Annotated photo',d:'A photo with thin lines pointing to notes, like a scientist\'s field notebook.',g:'nature, hiking, wildlife, adventure',base:'field-guide-01',r:'a large photo with thin callout lines pointing from short annotation boxes to parts of the photo, a technical-looking contour or grid background, and numbered field-note blocks below',w:'<rect x="4" y="4" width="34" height="7" class="f"/><rect x="4" y="15" width="28" height="26" class="f"/><path d="M24 22L36 18M20 34L36 36"/><rect x="36" y="14" width="10" height="8"/><rect x="36" y="32" width="10" height="8"/><rect x="4" y="45" width="20" height="19"/><rect x="26" y="45" width="20" height="19"/>'},
  {k:'grid',n:'Photo grid',d:'Four to six photos in a tidy grid, each with a short caption. Good when you have many places.',g:'food guides, many attractions',base:'arch-triptych-01',r:'a tidy grid of 4-6 image slots, each with a numbered caption underneath, a strong title at the top, and a small info strip at the bottom',w:'<rect x="4" y="4" width="30" height="7" class="f"/><rect x="4" y="15" width="20" height="20" class="f"/><rect x="26" y="15" width="20" height="20" class="f"/><rect x="4" y="38" width="20" height="20" class="f"/><rect x="26" y="38" width="20" height="20" class="f"/><rect x="4" y="61" width="42" height="5"/>'},
  {k:'icons',n:'Icon strip',d:'A hero photo with a row of icons below (Stay, See, Eat, Go, Prepare), each with a caption.',g:'practical guides and checklists',base:'giant-type-01',r:'a hero image at the top, then a row of 5 round or square icon elements with a one-word caption under each, then a short info text block; very clear and scannable',w:'<rect x="4" y="4" width="42" height="34" class="f"/><circle cx="8" cy="48" r="3.5"/><circle cx="17" cy="48" r="3.5"/><circle cx="26" cy="48" r="3.5"/><circle cx="35" cy="48" r="3.5"/><circle cx="44" cy="48" r="3.5"/><rect x="4" y="56" width="42" height="9"/>'}
@@ -220,7 +272,7 @@ const EXTRAS=[
  ['icons','Icon row','Small icons with captions (Stay, See, Eat...).','a row of icon elements with a caption under each'],
  ['stamp','Stamp or badge','A round stamp or label for decoration.','a decorative round stamp or badge (svg)'],
  ['photos','Photo grid','Several small photos in a grid.','a grid of 4-6 image slots with short captions'],
- ['arch','Arch or round photos','Photos cut into arch or circle shapes.','image elements using style.mask "arch" or "circle"'],
+ ['arch','Shaped photos','Photos cut into arches, circles, hexagons, hearts, stamps and more.','several image elements, each cut into a different shape with style.shape (for example arch, circle, hexagon, heart, stamp, cloud, pin, wave or peaks)'],
  ['frame','Photo frames','Polaroid or film-strip borders on photos.','style.frame (polaroid|film|double|torn) on some image elements'],
  ['pattern','Texture or pattern','Dots, stripes or contour lines in the background.','a background pattern using style.pat and style.patc'],
  ['callouts','Callout notes','Short notes with a line pointing at the photo.','annotation text boxes with thin leader lines (type "leader") pointing at the photo'],
@@ -258,11 +310,11 @@ function cwBrief(){
   chosen=lib().find(t=>t.template.id===cw.base),base=chosen||lib().find(t=>t.template.id===L.base)||BLANK;
  return{L,M,P,pr,cat,flds,ex,chosen,base}}
 
-const FORMAT_EX={schemaVersion:'1.5',template:{id:'format-example-01',name:'Format example',category:'Destination Poster',assignmentOption:1,style:'Example',description:'Only shows the JSON format.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2'},theme:{background:'@bg',primary:'#10252B',secondary:'#C8552E',displayFont:'Playfair Display',bodyFont:'Inter',palette:{bg:'#F3EDE0',ink:'#10252B',light:'#FFFFFF',accent:'#C8552E',mid:'#6F8F95'}},contentSchema:{},elements:[
+const FORMAT_EX={schemaVersion:'2.1',template:{id:'format-example-01',name:'Format example',category:'Destination Poster',assignmentOption:1,style:'Example',description:'Only shows the JSON format.',tags:[]},canvas:{width:1000,height:1414,format:'A2',orientation:'portrait',size:'A2'},theme:{background:'@bg',primary:'#10252B',secondary:'#C8552E',displayFont:'Playfair Display',bodyFont:'Inter',palette:{bg:'#F3EDE0',ink:'#10252B',light:'#FFFFFF',accent:'#C8552E',mid:'#6F8F95'}},contentSchema:{},elements:[
 {id:'photo',type:'image',label:'Main photo',instruction:'A strong photo of the place. Credit it in Sources.',editable:true,required:true,lock:true,bleed:true,position:{x:0,y:0,w:1000,h:900},style:{fade:'bottom'},src:''},
 {id:'kicker',type:'text',label:'Script kicker',instruction:'A short invitation in script type.',editable:true,position:{x:60,y:560,w:500,h:90},style:{size:64,font:'s',color:'@light',fit:true},text:'Discover',ph:true},
 {id:'title',type:'text',label:'Destination name',instruction:'The destination name, as big as it fits.',editable:true,required:true,position:{x:60,y:640,w:880,h:240},style:{size:190,font:'d',color:'@light',fit:true,tt:'uppercase',shadow:'0 2px 30px #0006'},text:'NAME',ph:true},
-{id:'arch',type:'image',label:'Second photo',instruction:'A second photo, cropped in an arch.',editable:true,position:{x:620,y:940,w:300,h:340},style:{mask:'arch'},src:''},
+{id:'arch',type:'image',label:'Second photo',instruction:'A second photo, cropped in an arch.',editable:true,position:{x:620,y:940,w:300,h:340},style:{shape:'arch'},src:''},
 {id:'wave',type:'svg',label:'Wave lines',instruction:'Decoration. Recolor or replace it.',editable:true,position:{x:0,y:1250,w:1000,h:164},style:{color:'@accent',opacity:0.5},svg:"<svg viewBox='0 0 400 60' preserveAspectRatio='none' fill='none' stroke='currentColor' stroke-width='0.8'><path d='M0 20c60-20 100 20 160 0s100 20 160 0 60 10 80 0'/></svg>"},
 {id:'about',type:'text',label:'About the place',instruction:'Two or three verified sentences about the place.',editable:true,required:true,position:{x:60,y:960,w:500,h:200},style:{size:21,font:'b',color:'@ink',lh:1.5,accent:'@accent'},text:'Write about the *place* with verified facts.',ph:true},
 {id:'sources',type:'sourceList',label:'Sources',instruction:'List the sources for facts and photos.',editable:true,rec:true,position:{x:60,y:1320,w:700,h:70},style:{size:13,color:'@ink'},items:[]}
@@ -283,7 +335,7 @@ ${flds.map(x=>'  • '+x).join('\n')||'  • (your choice)'}
 CREATIVE DIRECTION (you decide the whole look)
 - It must look like a real, professionally designed tourism poster, not a web page, form or slide. Invent ONE strong visual concept for this topic and state it in one sentence in template.description.
 - Avoid the boxes-and-cards look. Do NOT default to rectangles, cards, tiles or a grid of panels. Use at most 3 small containers (a badge, a label, a ticket) and only when they truly help. Information can sit directly on photos, on color washes, along a route or leader lines, on curved or vertical text, or in open whitespace.
-- Make photos part of the composition, not boxes: let a hero photo bleed off an edge or fill the whole sheet; fade it into the background (style.fade, ovg gradient overlays, vig vignette); crop photos with masks (arch, circle, ellipse) or into tall narrow strips; layer a cut-out subject over a giant title; overlap photos with big type; use diagonal bands and frames (polaroid, torn, film) for variety.
+- Make photos part of the composition, not boxes: let a hero photo bleed off an edge or fill the whole sheet; fade it into the background (style.fade, ovg gradient overlays, vig vignette); cut photos into shapes with style.shape on image elements (arch, circle, hexagon, heart, star, stamp, cloud, pin, wave, peaks and more, see SHAPED PHOTOS) or into tall narrow strips; layer a cut-out subject over a giant title; overlap photos with big type; use diagonal bands and frames (polaroid, torn, film) for variety.
 - Treat type as imagery: one oversized word (style.fit), gradient or outlined text (tg, eff), a script accent next to a bold display font, mixed colors inside one text block with *accent* words, curved or vertical lines, letter-spaced captions, big contrast in scale (3 or 4 clear levels of hierarchy).
 - Color is your call. Pick what suits the place: (a) richly blended gradients (sunset sky, sea teal into night blue) with overlays, duotone and blend modes, (b) restrained plain color with generous whitespace and one accent, or (c) bold flat color areas. Do not always choose the same one.
 - Add small, refined details: scalable SVG contours, waves, route lines with dots, compass, stamps, tape, thin rules, tiny icons. Keep them subtle.
@@ -295,16 +347,21 @@ ${chosen?`START FROM THIS EXISTING TEMPLATE and make a clearly different NEW VAR
 ${JSON.stringify(ex1)}
 
 FORMAT
-- Top level: schemaVersion "2.0", template {id (kebab-case, ends with -01), name, category (exactly "${cat[0]}"), assignmentOption (exactly ${cat[1]}), style, description, tags[]}, canvas {width:1000,height:${C.h},format:"${C.l}",orientation:"${land?'landscape':'portrait'}",size:"${sz}",background:"a #RRGGBB color or a CSS gradient"}, fonts {display,body}, contentSchema {}, elements [].
+- Top level: schemaVersion "2.1", template {id (kebab-case, ends with -01), name, category (exactly "${cat[0]}"), assignmentOption (exactly ${cat[1]}), style, description, tags[]}, canvas {width:1000,height:${C.h},format:"${C.l}",orientation:"${land?'landscape':'portrait'}",size:"${sz}",background:"a #RRGGBB color or a CSS gradient"}, fonts {display,body}, contentSchema {}, elements [].
 - Always design on a 1000 x ${C.h} canvas. x, y, w, h are in those units.
-- Each element: id (unique), type, label (short, plain English), instruction (one friendly sentence telling a student exactly what to put here), editable:true, required:true for must-fill content, rec:true for recommended, lock:true only for big photo or background pieces, bleed:true for pieces that deliberately run off the edge, sec (optional: a short section name such as "Tips" shared by every element of an optional block, so the user can hide the whole block), position {x,y,w,h}, style {size,weight,font:"d"|"b"|"s",color,lh,ls,align,bg,border,radius,pad,opacity,rotate,fit}.
-- Allowed types ONLY: ${TYPES.join(', ')}. Text-like types (${TXT.join(', ')}) use "text" with "ph":true while it is placeholder text; image and map use "src":""; svg and icon use "svg" (inline SVG, currentColor, single quotes); route and leader use "points":[[x,y],...] inside their own box (leader = a straight pointer line with a dot at its last point, for annotations); mapMarker uses "text"; sourceList uses "items":[]; shape, line and divider use style.bg.
+- Each element: id (unique), type, label (short, plain English), instruction (one friendly sentence telling a student exactly what to put here), editable:true, required:true for must-fill content, rec:true for recommended, lock:true only for big photo or background pieces, bleed:true for pieces that deliberately run off the edge, sec (optional: a short section name such as "Tips" shared by every element of an optional block, so the user can hide the whole block), position {x,y,w,h}, style {size (units), weight, font:"d"|"b"|"s", ff (optional font name), color, lh (multiplier, e.g. 1.4), ls (em, e.g. 0.02), align, bg, border, radius (units), pad (units), opacity (0 to 1), rotate (degrees), fit}. The units are explained in SPACING AND FIT MATH below.
+- Allowed types ONLY: ${TYPES.join(', ')}. Text-like types (${TXT.join(', ')}) use "text" with "ph":true while it is placeholder text; image and map use "src":""; svg and icon use "svg" (inline SVG, currentColor, single quotes); route and leader use "points":[[x,y],...] inside their own box (leader = a straight pointer line with a dot at its last point, for annotations); mapMarker uses "text"; sourceList uses "items":[]; shape, line and divider use style.bg. Image elements are the photo slots: any image can be cut into a shape with style.shape, and the student still picks the photo (see SHAPED PHOTOS). A "shape" element is only a solid decorative shape: never lay a plain shape over a photo to fake a shaped photo.
 - Special types: "qr" (text = the link to encode; style.color dark, style.bg light; keep it square and at least 160 x 160); "table" (text lines like "Entrance fee | Add verified fee"); "legend" (text lines, one label per line; each gets a colored dot; a line may start with a #RRGGBB color); "months" (values: array of 12 numbers, 0=poor 1=ok 2=good 3=best, January first; style.color, style.accent); "meter" (value, max, optional text label; style.color).
 - style.fit:true makes text shrink automatically to fit its box. Use it on titles and any text whose length can vary.
-- Fonts: fonts.display and fonts.body must be EXACTLY one of: ${FONT_OK.join(', ')}. style.font "d" = display font, "b" = body font, "s" = script (Great Vibes).
-- Extra style keys: grad, tg (text gradient), fade (bottom|top|left|right|edges), shape (${Object.keys(SH).join('|')}), card (${Object.keys(CARD).join('|')}), ovg (CSS gradient overlay on images), ovb (overlay blend), vig (vignette), tr (grayscale|sepia|contrast|warm|duotone), pat (${Object.keys(PAT).join('|')}) with patc, frame (${Object.keys(FRAME).join('|')}), eff (outline|highlight|shadow3d|arc), blend, shadow, tt (uppercase|capitalize), vert, accent (wrap words in *asterisks* in text to color them), mask (circle|ellipse|arch), zoom, px, py, ov/ova (color overlay and opacity on images). Icon elements take "icon": ${Object.keys(ICONS).join(', ')}.
+- Fonts: see FONTS below (fonts.display and fonts.body must be names from that list).
+- Extra style keys: grad, tg (text gradient), fade (bottom|top|left|right|edges), shape (a shape name, see SHAPED PHOTOS), card (${Object.keys(CARD).join('|')}), ovg (CSS gradient overlay on images), ovb (overlay blend), vig (vignette), tr (grayscale|sepia|contrast|warm|duotone), pat (${Object.keys(PAT).join('|')}) with patc, frame (${Object.keys(FRAME).join('|')}), eff (outline|highlight|shadow3d|arc), blend, shadow, tt (uppercase|capitalize), vert, accent (wrap words in *asterisks* in text to color them), mask (older name for style.shape on images; prefer shape), zoom, px, py, ov/ova (color overlay and opacity on images). Icon elements take "icon": ${Object.keys(ICONS).join(', ')}.
 
-COLORS (important)
+${fontBlock()}
+
+${mathBlock(C.h)}
+
+SHAPED PHOTOS
+- Put style.shape on an image element to make a shaped photo slot, for example {"type":"image","style":{"shape":"hexagon"},"src":""}. The photo is cropped to fill the shape (never stretched or squashed), and the student can still choose the photo, zoom it and move it. style.shape also works on shape elements.\n- Allowed shape names ONLY: ${Object.keys(SH).join(', ')}.\n- A shape always fills its element box. Give star, heart, pin, flower, burst, cloud, hexagon, hexpoint, pentagon, octagon, cross, circle and squircle a roughly square box (w close to h). arch, shield, leaf, house and bookmark work best taller than wide. dome (a half-ellipse; about 2:1 wide gives a half-circle), wave, peaks, band, ribbon, parallelogram, trapezoid, chevron, arrow, stamp and rounded suit wide boxes.\n- Choose shapes that suit the place (arch for heritage and churches, wave for the sea, peaks for mountains, stamp for travel memories, pin for maps, leaf for nature, hexagon for modern city guides). Use at most 3 different shapes on one poster so it stays elegant, and keep text away from the empty corners of a shape unless it has strong contrast.\n\nCOLORS (important)
 - There is no theme and there are no color tokens. YOU choose the color palette for THIS template: 4 to 6 colors that suit the place and the mood (for example a sunset, a rainforest, an old map). Write real hex colors (#RRGGBB) directly in every color field of every element: color, bg, border, accent, ov, patc, grad, tg, shadow, and the fills and strokes inside svg. Example: "color":"#16343D", "border":"2px solid #B8431F".
 - Put the page background in canvas.background, as a hex color or a CSS gradient, for example "#F2EFE6" or "linear-gradient(#0B1E3A,#14485A)".
 - Use your palette consistently (one main text color, one accent, a light and a dark), but each element keeps its own color value so the student can recolor any single element.
@@ -313,7 +370,7 @@ COLORS (important)
 DESIGN RULES
 - Elements are drawn in array order: backgrounds and decoration first, text last.
 - Keep text and photos at least 50 units inside every edge. Only decoration and pieces marked bleed:true may run off the edge.
-- Text must fit its box. Characters per line is about w / (size x 0.55); lines x size x lh must be no more than h. Make boxes generous, and add style.fit:true to titles.
+- Text must fit its box: apply the TEXT BOX MATH to every text element. Make boxes generous, and add style.fit:true to titles.
 - Sizes: title 70-160, sub-headings 28-44, body 18-24, captions and sources never below 13.
 - Do not let text boxes overlap each other. Text on top of a photo is fine if it has strong contrast (use an overlay or a bg color).
 - Text must contrast strongly with the color behind it (dark text on a light area, light text on a dark area or on a photo with an overlay; at least 4.5:1 for body text).
@@ -331,7 +388,9 @@ ${errs.map(x=>'- '+x.replace(/\n/g,' ')).join('\n')}
 
 REMINDERS
 - Allowed element types ONLY: ${TYPES.join(', ')}.
-- Fonts must be EXACTLY one of: ${FONT_OK.join(', ')}.
+- Fonts (fonts.display, fonts.body, style.ff) must be EXACTLY one of: ${FONT_OK.join(', ')}.
+- Units: x, y, w, h, size, pad, radius are plain numbers in canvas units. style.lh is a MULTIPLIER (1.4, never 28). style.ls is in EM (0.02, never 2). pad sits inside the box. If text is cut off, make its box taller or wider, or lower its size: text_height = lines x size x lh must be <= h - 2 x pad.
+- style.shape (on image or shape elements) must be one of: ${Object.keys(SH).join(', ')}.
 - Every element needs id, type, label and position {x,y,w,h} (numbers). Editable elements also need "instruction".
 - Canvas width is 1000. Colors must be real hex values (#RRGGBB) written directly on each element, and the page background goes in canvas.background. Do not use @tokens or a theme block.
 
@@ -383,6 +442,12 @@ const dlText=(t,n)=>dlBlob(new Blob([t],{type:'text/plain'}),n);
 /* ===== IMPORT v2.3: tolerant parsing, automatic small fixes, clear errors, "fix it" prompt ===== */
 function parseLoose(s){let t=String(s).trim().replace(/^```[a-z]*\s*/i,'').replace(/\s*```\s*$/,'');const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a)t=t.slice(a,b+1);
  try{return JSON.parse(t)}catch(e){return JSON.parse(t.replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/,\s*([}\]])/g,'$1'))}}
+const SHAPE_ALIAS={rect:'',rectangle:'',square:'',none:'',hex:'hexagon',hexa:'hexagon',round:'circle',oval:'circle',love:'heart','rounded-rectangle':'rounded','rounded-square':'rounded','round-rect':'rounded',superellipse:'squircle',stars:'star',sun:'burst',starburst:'burst',badge:'burst',teardrop:'pin','map-pin':'pin',location:'pin','postage-stamp':'stamp',mountain:'peaks',mountains:'peaks',waves:'wave',wavy:'wave','arch-top':'arch',tombstone:'arch','half-circle':'dome',semicircle:'dome','arch-bottom':'archdown',plus:'cross',rhombus:'diamond',lozenge:'diamond',petal:'leaf',home:'house',flag:'ribbon',banner:'ribbon'};
+function fixShapes(x,fx,wn){const ss=x.style;if(!ss)return;['shape','mask'].forEach(k=>{if(ss[k]==null||ss[k]==='')return;const raw=ss[k];let v=String(raw).trim().toLowerCase().replace(/[\s_]+/g,'-');if(v in SHAPE_ALIAS)v=SHAPE_ALIAS[v];
+  const ok=v&&(SH[v]||(k==='mask'&&v==='ellipse'));
+  if(ok){if(v!==raw){ss[k]=v;fx.push(`Shape "${raw}" on "${x.label||x.id}" is now "${v}".`)}}
+  else if(v===''){delete ss[k];fx.push(`Removed the shape "${raw}" on "${x.label||x.id}" (a plain rectangle).`)}
+  else{delete ss[k];wn.push(`Shape "${raw}" on "${x.label||x.id}" is not supported, so it stays a plain rectangle. Pick a shape in the editor.`)}})}
 function prep(t){const fx=[],er=[],wn=[];
  if(!t||typeof t!=='object'||Array.isArray(t))return{t,fx,wn,er:['The answer is not one JSON object. It should start with { and end with }.']};
  if(!t.schemaVersion){t.schemaVersion='1.4';fx.push('Added the missing schemaVersion.')}
@@ -400,10 +465,11 @@ function prep(t){const fx=[],er=[],wn=[];
    if(seen.has(x.id)){const n=x.id+'-'+(i+1);fx.push(`Renamed the duplicate id "${x.id}" to "${n}".`);x.id=n}seen.add(x.id);
    if(!x.label){x.label=x.id;fx.push(`Used "${x.id}" as the label.`)}
    if(!x.style||typeof x.style!=='object')x.style={};
+   fixShapes(x,fx,wn);
    if(x.editable==null)x.editable=true;
    if(x.editable!==false&&!x.instruction){x.instruction='Edit this: '+x.label+'.';fx.push(`Added a basic instruction to "${x.label}".`)}
    const p=x.position;if(!p||typeof p!=='object'||['x','y','w','h'].some(k=>typeof p[k]!=='number'||!isFinite(p[k])))er.push(`Element "${x.id}": position must be {x,y,w,h} with plain numbers.`);
-   else if(!['svg','shape','line'].includes(x.type)&&(p.x<0||p.y<0||p.x+p.w>1000||p.y+p.h>1414))oob.push(x.label);
+   else if(!['svg','shape','line'].includes(x.type)&&(p.x<0||p.y<0||p.x+p.w>1000||p.y+p.h>CV[t.canvas.size].h))oob.push(x.label);
    if(TXT.includes(x.type)&&x.text==null)x.text='';
    if((x.type==='image'||x.type==='map')&&x.src==null)x.src='';
    if(x.type==='sourceList'&&!Array.isArray(x.items))x.items=[]});
@@ -466,7 +532,7 @@ document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]'),a=b
  else if(a==='sample')dlText(JSON.stringify(SAMPLE,null,2),'sample-template.json');
  else if(a==='png')exportPNG();
  else if(a==='pj')dlText(JSON.stringify({kind:'project',project:proj},null,2),proj.name+'.project.json');
- else if(a==='tj'){const t=clone(lib().find(t=>t.template.id===proj.tplId)||BLANK);t.elements=clone(proj.els);t.fonts={display:proj.fd,body:proj.fb};delete t.theme;t.schemaVersion='2.0';{const c=CV[proj.canvas||'A2'];t.canvas=Object.assign({},t.canvas,{size:proj.canvas||'A2',background:proj.bg,height:c.h,format:c.l,orientation:c.cm[0]>c.cm[1]?'landscape':'portrait'})}dlText(JSON.stringify(t,null,2),proj.name+'.template.json')}
+ else if(a==='tj'){const t=clone(lib().find(t=>t.template.id===proj.tplId)||BLANK);t.elements=clone(proj.els);t.fonts={display:proj.fd,body:proj.fb};delete t.theme;t.schemaVersion='2.1';{const c=CV[proj.canvas||'A2'];t.canvas=Object.assign({},t.canvas,{size:proj.canvas||'A2',background:proj.bg,height:c.h,format:c.l,orientation:c.cm[0]>c.cm[1]?'landscape':'portrait'})}dlText(JSON.stringify(t,null,2),proj.name+'.template.json')}
 });
 document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset.f||!proj)return;const e=cur();if(!e)return;snap();setF(e,t.dataset.f,t.value);drawCanvas();touch()});
 document.addEventListener('change',ev=>{const t=ev.target,f=t.files&&t.files[0];
@@ -483,8 +549,36 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='2.8.1';
+const VERSION='2.9.2';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
+
+/* ===== v2.9 SHAPES: every entry is plain CSS (border-radius or clip-path), so the same shape works on a solid shape AND on a photo slot.
+   Curved shapes are sampled into smooth polygons and fitted to the box, so they always fill it. ===== */
+(function(){
+ const fit=pts=>{let a=1e9,b=1e9,c=-1e9,d=-1e9;pts.forEach(q=>{a=Math.min(a,q[0]);c=Math.max(c,q[0]);b=Math.min(b,q[1]);d=Math.max(d,q[1])});const w=c-a||1,h=d-b||1;
+  return 'clip-path:polygon('+pts.map(q=>(+((q[0]-a)/w*100).toFixed(2))+'% '+(+((q[1]-b)/h*100).toFixed(2))+'%').join(',')+');'};
+ const polar=(n,f)=>Array.from({length:n},(_,i)=>{const t=i/n*Math.PI*2-Math.PI/2,r=f(t,i);return[50+50*r*Math.cos(t),50+50*r*Math.sin(t)]});
+ const bez=(p0,p1,p2,n)=>Array.from({length:n},(_,i)=>{const t=(i+1)/n,u=1-t;return[u*u*p0[0]+2*u*t*p1[0]+t*t*p2[0],u*u*p0[1]+2*u*t*p1[1]+t*t*p2[1]]});
+ const heart=Array.from({length:140},(_,i)=>{const t=i/140*Math.PI*2;return[16*Math.pow(Math.sin(t),3),-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))]});
+ const squircle=Array.from({length:120},(_,i)=>{const t=i/120*Math.PI*2,c=Math.cos(t),n=Math.sin(t);return[Math.sign(c)*Math.sqrt(Math.abs(c)),Math.sign(n)*Math.sqrt(Math.abs(n))]});
+ const shield=[[0,0],[100,0],[100,38]].concat(bez([100,38],[100,78],[50,100],28),bez([50,100],[0,78],[0,38],28));
+ const pin=(()=>{const a0=Math.acos(42/58),pts=[[50,100]],A=Math.PI/2+a0,B=Math.PI/2-a0+Math.PI*2;for(let i=0;i<=60;i++){const t=A+(B-A)*i/60;pts.push([50+42*Math.cos(t),42+42*Math.sin(t)])}return pts})();
+ const cloud=(()=>{const D=[[26,66,26],[74,66,26],[36,48,20],[60,40,26],[50,62,30]],O=[50,60];return Array.from({length:160},(_,i)=>{const t=i/160*Math.PI*2,u=[Math.cos(t),Math.sin(t)];let m=0;D.forEach(([x,y,r])=>{const b=u[0]*(O[0]-x)+u[1]*(O[1]-y),c=(O[0]-x)**2+(O[1]-y)**2-r*r,q=b*b-c;if(q>=0)m=Math.max(m,-b+Math.sqrt(q))});return[O[0]+u[0]*m,Math.min(O[1]+u[1]*m,86)]})})();
+ const wave=(()=>{const p=[[0,0],[100,0]];for(let x=100;x>=0;x-=2)p.push([x,88+8*Math.sin(x/100*Math.PI*4)]);return p})();
+ const stamp=(()=>{const n=9,r=100/n/2*.8,p=[],side=[a=>[a,0,0,1],a=>[100,a,-1,0],a=>[100-a,100,0,-1],a=>[0,100-a,1,0]];
+  side.forEach(f=>{for(let k=0;k<n;k++){const ac=(k+.5)*100/n;for(let j=0;j<=10;j++){const ph=Math.PI*j/10,a=ac-r*Math.cos(ph),d=r*Math.sin(ph),q=f(a);p.push([q[0]+q[2]*d,q[1]+q[3]*d])}}});return p})();
+ const star=polar(10,(t,i)=>i%2?.42:1),burst=polar(32,(t,i)=>i%2?.84:1),flower=polar(180,t=>.76+.24*Math.cos(6*(t+Math.PI/2)));
+ Object.assign(SH,{
+  rounded:'border-radius:12%;',squircle:fit(squircle),dome:'border-radius:50% 50% 0 0/100% 100% 0 0;',archdown:'border-radius:0 0 999px 999px;',leaf:'border-radius:0 100% 0 100%;',
+  hexagon:'clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);',hexpoint:'clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);',
+  pentagon:'clip-path:polygon(50% 0,100% 38%,82% 100%,18% 100%,0 38%);',octagon:'clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);',
+  parallelogram:'clip-path:polygon(20% 0,100% 0,80% 100%,0 100%);',trapezoid:'clip-path:polygon(20% 0,80% 0,100% 100%,0 100%);',
+  chevron:'clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%,30% 50%);',arrow:'clip-path:polygon(0 25%,60% 25%,60% 0,100% 50%,60% 100%,60% 75%,0 75%);',
+  cross:'clip-path:polygon(33% 0,67% 0,67% 33%,100% 33%,100% 67%,67% 67%,67% 100%,33% 100%,33% 67%,0 67%,0 33%,33% 33%);',
+  star:fit(star),burst:fit(burst),flower:fit(flower),heart:fit(heart),shield:fit(shield),pin:fit(pin),cloud:fit(cloud),wave:fit(wave),stamp:fit(stamp),
+  peaks:'clip-path:polygon(0 100%,0 64%,20% 34%,34% 54%,56% 6%,78% 48%,88% 36%,100% 60%,100% 100%);',
+  house:'clip-path:polygon(50% 0,100% 36%,100% 100%,0 100%,0 36%);',bookmark:'clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);'});
+})();
 const TM='radial-gradient(circle 14px at 0 50%,#0000 97%,#000) left/52% 100% no-repeat,radial-gradient(circle 14px at 100% 50%,#0000 97%,#000) right/52% 100% no-repeat';
 const CARD={glass:'background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.45);border-radius:18px;',outline:'border:2px solid currentColor;border-radius:8px;',ticket:`background:#fff;-webkit-mask:${TM};mask:${TM};`,tag:'background:#fff;border-radius:0 999px 999px 0;',polaroid:'background:#fff;box-shadow:0 10px 28px #0005;border-radius:2px;'};
 const PAL=[['Coastal','#EEF1EC','#173F4A','#FFFFFF','#C8553D','#5C8A94'],['Sunset','#FBE9DC','#3A1F2B','#FFF6EE','#E4572E','#B5656B'],['Forest','#E3E8D8','#22372C','#F6F8EE','#9A4B22','#6E8B5B'],['Heritage','#F2E8D5','#3B2A1E','#FBF5E8','#A23B2A','#8A6B3D'],['Midnight','#0F2233','#EAF2F5','#16384D','#F2A65A','#7FB5C9'],['Mono','#EFEFEF','#111111','#FFFFFF','#E0452B','#777777']];
@@ -493,11 +587,11 @@ function roleOf(c,p){const n=parseInt(c.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&25
 function applyPal(i){const p=PAL[i].slice(1);snap(1);proj.bg=p[0];const m=c=>typeof c==='string'?c.replace(/#[0-9a-f]{6}\b/gi,x=>roleOf(x,p)):c;proj.els.forEach(e=>{['color','bg','accent','ov','border','grad','tg'].forEach(k=>{if(e.style&&e.style[k])e.style[k]=m(e.style[k])})});refresh(1)}
 function styleHTML(){return `<div class="mono">COLOR PALETTE · recolors the whole template</div><div class="g4" style="grid-template-columns:repeat(3,1fr)">${PAL.map((p,i)=>`<button data-a="pal" data-i="${i}">${p[0]}<div class="sw">${p.slice(1).map(c=>`<i style="background:${c}"></i>`).join('')}</div></button>`).join('')}</div><label>Canvas background (color or CSS gradient)<input data-f="bgp" value="${esc(proj.bg)}"></label><div class="mono" style="margin-top:8px">CANVAS SIZE</div><div class="row">${Object.keys(CV).map(k=>`<button data-a="csz" data-k="${k}" class="${(proj.canvas||'A2')===k?'on':''}">${CV[k].l}</button>`).join('')}</div><div class="row"><button data-a="safe" class="${safe?'on':''}">Safe area</button><button data-a="zo">Zoom −</button><button data-a="zi">Zoom +</button></div><div class="mono" style="margin-top:8px">FONT PAIR · whole template</div><div class="row">${PAIRS.map((p,i)=>`<button data-a="pair" data-i="${i}" class="${proj.fd===p[1]?'on':''}">${p[0]}</button>`).join('')}</div><label>Custom font file (WOFF, WOFF2, TTF, OTF)<input type="file" id="fontf" accept=".woff,.woff2,.ttf,.otf"></label>`}
 function moreHTML(){return `<div class="mono">EXPORT & PROJECT · v${VERSION}</div><div class="row"><button data-a="print">Print preview</button><button data-a="png">PNG</button><button data-a="pdf">PDF</button></div><div class="row"><button data-a="pj">Project JSON</button><button data-a="tj">Template JSON</button><button data-a="ren2">Rename</button></div>`}
-function addHTML(){const g=(t,a)=>`<div class="mono" style="margin-top:8px">${t}</div><div class="g4">${a.map(([k,l])=>`<button data-a="add" data-t="${k}">${l}</button>`).join('')}</div>`;return g('TEXT',[['text','Text'],['heading','Heading'],['activity','Activity'],['stat','Stat'],['badge','Badge'],['checklist','Checklist']])+g('SHAPES',[['shape:rect','Box'],...Object.keys(SH).map(s=>['shape:'+s,s[0].toUpperCase()+s.slice(1)]),['line','Line']])+g('CARDS',Object.keys(CARD).map(s=>['card:'+s,s[0].toUpperCase()+s.slice(1)]))+g('MEDIA & MAP',[['image','Image'],['svg','SVG'],['icon','Icon'],['map','Map'],['mapMarker','Marker'],['route','Route'],['compass','Compass'],['sourceList','Sources']])}
+function addHTML(){const g=(t,a)=>`<div class="mono" style="margin-top:8px">${t}</div><div class="g4">${a.map(([k,l])=>`<button data-a="add" data-t="${k}">${l}</button>`).join('')}</div>`;return g('TEXT',[['text','Text'],['heading','Heading'],['activity','Activity'],['stat','Stat'],['badge','Badge'],['checklist','Checklist']])+g('SHAPES · tap one, then add a photo to fill it',[['shape:rect','Box'],...Object.keys(SH).map(s=>['shape:'+s,s[0].toUpperCase()+s.slice(1)]),['line','Line']])+g('CARDS',Object.keys(CARD).map(s=>['card:'+s,s[0].toUpperCase()+s.slice(1)]))+g('MEDIA & MAP',[['image','Image'],['svg','SVG'],['icon','Icon'],['map','Map'],['mapMarker','Marker'],['route','Route'],['compass','Compass'],['sourceList','Sources']])}
 function editorShell(){hid=false;return `<div class="bar"><button data-a="back" aria-label="Back">←</button><b>${esc(proj.name)}</b><button data-a="undo" aria-label="Undo">↶</button><button data-a="redo" aria-label="Redo">↷</button><button data-a="tg" id="tgb">Preview</button><button data-a="m" data-m="more" aria-label="More">⋮</button><span class="mono" id="st">Saved</span></div><div class="stage" id="stage"></div><div class="sheet" id="sheet"></div><div class="tools">${[['sel','Edit'],['layers','Layers'],['add','Add'],['style','Style'],['check','Check']].map(([m,l])=>`<button data-a="m" data-m="${m}" id="t-${m}">${l}</button>`).join('')}</div>`}
 const _ds=drawSheet;drawSheet=function(){const sh=$('#sheet');if(!sh)return;if(mode==='style'||mode==='more'||mode==='add')sh.innerHTML='<div class="row" style="margin:0 0 6px"><button data-a="tg">Hide panel ▾</button></div>'+(mode==='style'?styleHTML():mode==='more'?moreHTML():addHTML());else _ds();document.querySelectorAll('.tools button').forEach(b=>b.classList.toggle('on',b.id==='t-'+mode))};
 const _dc=drawCanvas;drawCanvas=function(){_dc();placeFT()};
-const _ae=addEl;addEl=function(t){if(!t.includes(':'))return _ae(t);const[k,v]=t.split(':');_ae(k==='card'?'text':'shape');const e=proj.els[proj.els.length-1],w=v==='band'||v==='ribbon';
+const _ae=addEl;addEl=function(t){if(!t.includes(':'))return _ae(t);const[k,v]=t.split(':');_ae(k==='card'?'text':'shape');const e=proj.els[proj.els.length-1],w=['band','ribbon','wave','peaks'].includes(v);
  if(k==='shape'){e.label=v+' shape';e.position={x:300,y:600,w:w?500:300,h:w?120:300};e.style={bg:'#D9643A',shape:v}}
  else{e.label=v+' card';e.text='Card text';e.position={x:200,y:600,w:500,h:200};e.style={size:24,font:'b',color:v==='glass'?'#ffffff':'#111111',card:v}}
  refresh(1)};
@@ -580,7 +674,7 @@ document.addEventListener('pointermove',()=>{if(!drag||!drag.moved)return;const 
 const ptr=new Map();let pz=null,rs=null;
 document.addEventListener('pointerdown',e=>{if(e.target.closest('#stage')){ptr.set(e.pointerId,[e.clientX,e.clientY]);if(ptr.size===2){const[a,b]=[...ptr.values()];pz={d:Math.hypot(a[0]-b[0],a[1]-b[1]),z:zoom};drag=null}}const h=e.target.closest('#rh'),c=h&&cur();if(c){e.preventDefault();rs={e:c,x:e.clientX,y:e.clientY,w:c.position.w,h:c.position.h,sc:$('.cvw').getBoundingClientRect().width/1000,m:false}}});
 document.addEventListener('pointermove',e=>{if(ptr.has(e.pointerId)){ptr.set(e.pointerId,[e.clientX,e.clientY]);if(pz&&ptr.size===2){const[a,b]=[...ptr.values()];zoom=Math.max(.5,Math.min(3,pz.z*Math.hypot(a[0]-b[0],a[1]-b[1])/pz.d));drawCanvas()}}
- if(rs){if(!rs.m){snap(1);rs.m=true}const g=snapOn?10:1;rs.e.position.w=Math.max(20,Math.round((rs.w+(e.clientX-rs.x)/rs.sc)/g)*g);rs.e.position.h=Math.max(10,Math.round((rs.h+(e.clientY-rs.y)/rs.sc)/g)*g);drawCanvas()}});
+ if(rs){if(!rs.m){snap(1);rs.m=true}const g=snapOn?10:1;const ra=((rs.e.style||{}).rotate||0)*Math.PI/180,ddx=e.clientX-rs.x,ddy=e.clientY-rs.y,lx=ddx*Math.cos(ra)+ddy*Math.sin(ra),ly=-ddx*Math.sin(ra)+ddy*Math.cos(ra);rs.e.position.w=Math.max(20,Math.round((rs.w+lx/rs.sc)/g)*g);rs.e.position.h=Math.max(10,Math.round((rs.h+ly/rs.sc)/g)*g);drawCanvas()}});
 const pu=e=>{ptr.delete(e.pointerId);if(ptr.size<2)pz=null;if(rs&&rs.m){drawSheet();touch()}rs=null};document.addEventListener('pointerup',pu);document.addEventListener('pointercancel',pu);
 const _pf=placeFT;placeFT=function(){_pf();let h=$('#rh');if(!h){h=document.createElement('div');h.id='rh';$('#app').appendChild(h)}const e=view==='editor'&&!hid&&cur(),n=e&&!e.lock&&document.querySelector('.cv .e.sel');if(!n){h.style.display='none';return}const r=n.getBoundingClientRect();h.style.display='block';h.style.left=(r.right-12)+'px';h.style.top=(r.bottom-12)+'px'};
 document.addEventListener('click',ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
@@ -598,7 +692,7 @@ const tf=t=>(!tc||t.template.category===tc)&&(!tq||(t.template.name+t.template.c
 function filterBar(){const cs=[...new Set(lib().map(t=>t.template.category))];return `<input id="tq" placeholder="Search templates" value="${esc(tq)}" aria-label="Search templates"><div class="row">${cs.map(c=>`<button data-a="tcat" data-k="${esc(c)}" class="${tc===c?'on':''}">${esc(c)}</button>`).join('')}</div>`}
 document.addEventListener('input',e=>{if(e.target.id==='tq'){tq=e.target.value;$('#tl').innerHTML=tplGroups()}});
 /* first-time tour + button tooltips */
-function tour(){const m=document.createElement('div');m.className='modal';m.innerHTML='<h1>Quick tour</h1>'+[['Select','Tap any part of the poster. Its settings open in the panel below, with Copy, Lock and Delete at the top.'],['Edit','The panel has Content, Style, Effects and Layout tabs, showing only what applies to that element. Drag it, or use the corner handle to resize.'],['Add & Style','Add shapes, cards and decor, or open the Style tab to see every color in your poster and change one everywhere.'],['Check','Run the content and print checks before you export. Pinch to zoom.']].map(([a,b],i)=>`<div class="card"><b>${i+1}</b><div><b>${a}</b><br>${b}</div></div>`).join('')+'<button class="p" id="tg0">Got it</button>';document.body.appendChild(m);m.querySelector('#tg0').onclick=()=>m.remove()}
+function tour(){const m=document.createElement('div');m.className='modal';m.innerHTML='<h1>Quick tour</h1>'+[['Select','Tap any part of the poster. Its settings open in the panel below, with Copy, Lock and Delete at the top.'],['Edit','The panel has Content, Style, Effects and Layout tabs, showing only what applies to that element. Drag it, use the corner handle to resize, or the round handle above it to rotate.'],['Add & Style','Add shapes, cards and decor. Any shape can hold a photo: add one, then choose a photo for it. Open the Style tab to see every color in your poster and change one everywhere.'],['Check','Run the content and print checks before you export. Pinch to zoom.']].map(([a,b],i)=>`<div class="card"><b>${i+1}</b><div><b>${a}</b><br>${b}</div></div>`).join('')+'<button class="p" id="tg0">Got it</button>';document.body.appendChild(m);m.querySelector('#tg0').onclick=()=>m.remove()}
 const _es=editorShell;editorShell=function(){setTimeout(()=>{if(view==='editor'&&!tourSeen){tourSeen=1;sv('tls-tour',1);tour()}},500);return _es()};
 new MutationObserver(()=>document.querySelectorAll('button:not([title])').forEach(b=>{b.title=b.getAttribute('aria-label')||b.textContent.trim().slice(0,30)})).observe($('#app'),{childList:true,subtree:true});
 /* ===== v2.3: color tokens, auto-fit text, sections, new elements, layout check, more sheet sizes ===== */
@@ -760,7 +854,7 @@ input[type=color]{min-height:44px;padding:3px;cursor:pointer}
 </style>
 <script>/* ===== v2.6: hex/role color sheet, per-text typefaces (Google + uploaded), smoother editing =====
    Additive only: new optional style.ff; old projects keep rendering exactly as before. */
-const GF=['Playfair Display','Inter','Sora','Manrope','DM Serif Display','DM Sans','Space Mono','Great Vibes','Bebas Neue','Oswald','Montserrat','Poppins','Lora','Merriweather','Raleway','Roboto','Open Sans','Cormorant Garamond','Abril Fatface','Pacifico','Dancing Script','Lobster','Anton','Archivo Black','Caveat','Josefin Sans','Libre Baskerville','Nunito','Work Sans','Rubik','Quicksand','Permanent Marker','Amatic SC','Cinzel','Satisfy','Righteous'];
+const GF=FONT_OK; /* v2.9.2: same list as the prompt (see FONTDB) */
 const ONE=new Set(['Bebas Neue','Anton','Lobster','Pacifico','Abril Fatface','Archivo Black','Great Vibes','Satisfy','Righteous','Permanent Marker','DM Serif Display']);
 const gl=new Set(),cn=n=>String(n).replace(/['"\\;{}<>]/g,'');
 function loadG(n){if(!n||gl.has(n)||!GF.includes(n))return;gl.add(n);const l=document.createElement('link');l.rel='stylesheet';l.crossOrigin='anonymous';l.href='https://fonts.googleapis.com/css2?family='+n.replace(/ /g,'+')+(ONE.has(n)?'':':wght@400;700')+'&display=swap';document.head.appendChild(l)}
@@ -898,10 +992,15 @@ const _r7=render;render=function(){closeMore();_r7()};
 /* ---------- no floating toolbar; keep only the resize handle ---------- */
 placeFT=function(){let f=$('#ftb');if(!f){f=document.createElement('div');f.id='ftb';f.className='ft';$('#app').appendChild(f)}f.style.display='none';
  let h=$('#rh');if(!h){h=document.createElement('div');h.id='rh';$('#app').appendChild(h)}
- const e=view==='editor'&&!hid&&cur(),n=e&&!e.lock&&document.querySelector('.cv .e.sel'),st=$('#stage');if(!n||!st){h.style.display='none';return}
- const r=n.getBoundingClientRect(),s=st.getBoundingClientRect(),x=r.right-12,y=r.bottom-12;
- if(x<s.left||x>s.right||y<s.top||y>s.bottom){h.style.display='none';return}
- h.style.display='block';h.style.left=x+'px';h.style.top=y+'px'};
+ let t=$('#rt');if(!t){t=document.createElement('div');t.id='rt';t.title='Drag to rotate';t.setAttribute('aria-label','Rotate');$('#app').appendChild(t)}
+ const e=view==='editor'&&!hid&&cur(),n=e&&!e.lock&&document.querySelector('.cv .e.sel'),st=$('#stage'),cw=$('.cvw');if(!n||!st||!cw){h.style.display='none';t.style.display='none';return}
+ /* handles follow the element even when it is rotated: work from its centre, size and angle */
+ const r=n.getBoundingClientRect(),s=st.getBoundingClientRect(),sc=cw.getBoundingClientRect().width/1000,p=e.position,an=((e.style||{}).rotate||0)*Math.PI/180,co=Math.cos(an),si=Math.sin(an),
+  cx=r.left+r.width/2,cy=r.top+r.height/2,at=(lx,ly)=>[cx+lx*co-ly*si,cy+lx*si+ly*co],inS=q=>q[0]>=s.left&&q[0]<=s.right&&q[1]>=s.top&&q[1]<=s.bottom;
+ const c=at(p.w*sc/2,p.h*sc/2);
+ if(inS(c)){h.style.display='block';h.style.left=(c[0]-12)+'px';h.style.top=(c[1]-12)+'px'}else h.style.display='none';
+ let q=at(0,-(p.h*sc/2+32));if(!inS(q))q=at(0,p.h*sc/2+32);
+ if(inS(q)){t.style.display='block';t.style.left=(q[0]-15)+'px';t.style.top=(q[1]-15)+'px'}else t.style.display='none'};
 /* bring a newly selected element into view above the panel */
 let lastSel=null;const _dcZ=drawCanvas;
 drawCanvas=function(){_dcZ();requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!selId){lastSel=null;return}if(view!=='editor'||hid||selId===lastSel)return;lastSel=selId;
@@ -938,9 +1037,9 @@ function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
   S=typeface+G(num('s.size',s.size||13,'Font size')+selH('s.align','Align',s.align||'left',[['left','Left'],['center','Center'],['right','Right']])+col('color','Color')+num('s.opacity',s.opacity??1,'Opacity'))}
  else if(k==='img'){
   C=`<label>${e.type==='map'?'Replace map (image or SVG)':'Replace image'}<input type="file" id="imgf" accept="image/*"></label>`;
-  S=T('CROP · zoom and position')+G(num('s.zoom',s.zoom||1,'Zoom')+num('s.px',s.px??50,'Pos X %')+num('s.py',s.py??50,'Pos Y %')+selH('s.mask','Mask',s.mask,[['','None'],['circle','Circle'],['ellipse','Ellipse'],['arch','Arch']]))+G(num('s.radius',s.radius||0,'Radius')+num('s.opacity',s.opacity??1,'Opacity'),2);
+  S=T('SHAPE · the photo is cropped to fit it, never stretched')+shapePick(e)+T('CROP · zoom and position')+G(num('s.zoom',s.zoom||1,'Zoom')+num('s.px',s.px??50,'Pos X %')+num('s.py',s.py??50,'Pos Y %'),3)+G(num('s.radius',s.radius||0,'Radius')+num('s.opacity',s.opacity??1,'Opacity'),2);
   F=G(selH('s.tr','Treatment',s.tr,[['','None'],['grayscale','Gray'],['sepia','Sepia'],['contrast','Contrast'],['warm','Warm'],['duotone','Duotone']])+col('ov','Overlay')+num('s.ova',s.ova??0.3,'Overlay op.')+selH('s.ovb','Overlay blend',s.ovb,[['','Normal'],['multiply','Multiply'],['screen','Screen'],['color','Color'],['overlay','Overlay']]))
-   +G(selH('s.vig','Vignette',s.vig?'1':'',[['','Off'],['1','On']])+selH('s.fade','Edge fade',s.fade,FADE)+selH('s.frame','Photo frame',s.frame,[['','None'],...Object.keys(FRAME).map(x=>[x,x])])+selH('s.shape','Shape',s.shape,[['','None'],...Object.keys(SH).map(x=>[x,x])]))
+   +G(selH('s.vig','Vignette',s.vig?'1':'',[['','Off'],['1','On']])+selH('s.fade','Edge fade',s.fade,FADE)+selH('s.frame','Photo frame',s.frame,[['','None'],...Object.keys(FRAME).map(x=>[x,x])]),3)
    +`<label>Gradient overlay (CSS)<input data-f="s.ovg" value="${esc(s.ovg||'')}" placeholder="linear-gradient(#0000,#000a)"></label>`}
  else if(k==='art'){
   if(e.type==='icon')C+=G(selH('icon','Icon',e.icon,Object.keys(ICONS).map(x=>[x,x])),1);
@@ -950,7 +1049,8 @@ function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
   C=`<label>Points (x,y per line, inside the box)<textarea rows="4" data-f="pts">${esc((e.points||[]).map(q=>q.join(',')).join('\n'))}</textarea></label>`;
   S=G(col('color','Color')+num('s.sw',s.sw||5,'Line width')+num('s.opacity',s.opacity??1,'Opacity'),3)}
  else if(k==='shape'){
-  S=G(col('bg','Fill')+num('s.opacity',s.opacity??1,'Opacity')+(e.type==='shape'||e.type==='group'?selH('s.shape','Shape',s.shape,[['','None'],...Object.keys(SH).map(x=>[x,x])]):'')+num('s.radius',s.radius||0,'Radius'));
+  const sp=e.type==='shape'||e.type==='group';if(e.type==='shape')C=photoPanel(e);
+  S=(sp?T('SHAPE')+shapePick(e):'')+G(col('bg','Fill')+num('s.opacity',s.opacity??1,'Opacity')+num('s.radius',s.radius||0,'Radius'),3)+(e.type==='shape'&&e.src?T('PHOTO CROP · zoom and position')+G(num('s.zoom',s.zoom||1,'Zoom')+num('s.px',s.px??50,'Pos X %')+num('s.py',s.py??50,'Pos Y %'),3):'');
   F=`<label>Background gradient (CSS)<input data-f="s.grad" value="${esc(s.grad||'')}" placeholder="linear-gradient(#ff0000,#0000ff)"></label>`+G(selH('s.pat','Pattern',s.pat,[['','None'],...Object.keys(PAT).map(x=>[x,x])])+col('patc','Pattern color')+selH('s.fade','Edge fade',s.fade,FADE)+selH('s.blend','Blend',s.blend,BLEND))}
  else if(k==='marker'){
   C=`<label>Label<input data-f="text" value="${esc(e.text||'')}"></label>`;
@@ -966,7 +1066,7 @@ function panelParts(e){const s=e.style||{},k=kind(e),p=e.position,lock=e.lock;
   S=G(col('color','Color')+num('s.size',s.size||18,'Label size'),2)}
  const L=T('POSITION'+(lock?' · locked by the template':''))+G(['x','y','w','h'].map(c=>`<div><label>${c.toUpperCase()}<input type="number" data-f="p.${c}" value="${Math.round(p[c])}" ${lock?'disabled':''}></label></div>`).join(''))
   +(lock?'<div class="row"><button data-a="detach">Unlock position (detach from template)</button></div>':'')
-  +G(num('s.rotate',s.rotate||0,'Rotate')+`<div style="grid-column:span 3"><label>Section (optional block name)<input data-f="sec" value="${esc(e.sec||'')}" placeholder="e.g. Tips"></label></div>`)+ARR;
+  +`<div class="row"><button data-a="rot" data-v="-90">↺ 90°</button><button data-a="rot" data-v="90">↻ 90°</button><button data-a="rot" data-v="0">Reset rotation</button></div>`+G(num('s.rotate',s.rotate||0,'Rotate')+`<div style="grid-column:span 3"><label>Section (optional block name)<input data-f="sec" value="${esc(e.sec||'')}" placeholder="e.g. Tips"></label></div>`)+ARR;
  return{k,C,S,F,L}}
 function panelHTML(e){const{k,C,S,F,L}=panelParts(e),s=e.style||{},lock=e.lock;
  const tabs=[['content','Content',C],['style','Style',S],['fx','Effects',F],['layout','Layout',L]].filter(t=>t[2]);
@@ -985,6 +1085,27 @@ drawSheet=function(){const sh=$('#sheet');if(!sh)return;const e=mode==='sel'&&cu
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a="itab"],[data-a="lk3"]');if(!b||!proj)return;
  if(b.dataset.a==='itab'){itab=b.dataset.k;drawSheet();const sh=$('#sheet');if(sh)sh.scrollTop=0}
  else{const e=cur();if(e){snap(1);e.lock=!e.lock;refresh(1)}}});
+
+
+/* ---------- v2.9: shape picker (live previews) and photo-in-shape controls ---------- */
+function shapePick(e){const s=e.style||{},cur=s.shape||(s.mask==='ellipse'?'circle':s.mask)||'',
+ b=(k,l)=>`<button data-a="shp" data-v="${k}" class="shp${cur===k?' on':''}" aria-label="${l}"><i style="${k?SH[k].replace(/\d+px/g,'30%'):''}"></i><span>${l}</span></button>`;
+ return `<div class="shg">${b('','None')}${Object.keys(SH).map(k=>b(k,k)).join('')}</div>`}
+function photoPanel(e){return `<label>${e.src?'Replace photo':'Fill this shape with a photo'}<input type="file" id="imgf" accept="image/*"></label>${e.src?'<div class="row"><button data-a="rmimg">Remove photo</button></div>':''}<div class="mono" style="margin-top:4px">The photo is cropped to the shape, never stretched. Use Zoom and Pos in the Style tab to choose which part shows.</div>`}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a="shp"],[data-a="rmimg"]');if(!b||!proj)return;const e=cur();if(!e)return;snap(1);const st=e.style=e.style||{};
+ if(b.dataset.a==='rmimg'){delete e.src}else{delete st.mask;if(b.dataset.v)st.shape=b.dataset.v;else delete st.shape}refresh(1)});
+
+/* ---------- v2.9.1: rotate any element by dragging the round handle above it (snaps to every 15 degrees) ---------- */
+let rot=null;
+document.addEventListener('pointerdown',ev=>{const t=ev.target.closest&&ev.target.closest('#rt'),c=t&&cur();if(!c)return;const n=document.querySelector('.cv .e.sel');if(!n)return;ev.preventDefault();
+ const r=n.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;rot={e:c,cx,cy,a0:Math.atan2(ev.clientY-cy,ev.clientX-cx),r0:+((c.style||{}).rotate)||0,m:false};t.classList.add('drag');t.dataset.deg=Math.round(rot.r0)+'°'});
+document.addEventListener('pointermove',ev=>{if(!rot)return;if(!rot.m){snap(1);rot.m=true}
+ let v=rot.r0+(Math.atan2(ev.clientY-rot.cy,ev.clientX-rot.cx)-rot.a0)*180/Math.PI;v=((v+180)%360+360)%360-180;const m=Math.round(v/15)*15;v=Math.abs(v-m)<4?m:Math.round(v);if(v===-180)v=180;
+ (rot.e.style=rot.e.style||{}).rotate=v;const t=$('#rt');if(t)t.dataset.deg=v+'°';drawCanvas()});
+const ru2=()=>{if(rot){const t=$('#rt');if(t)t.classList.remove('drag');if(rot.m){drawSheet();touch()}}rot=null};
+document.addEventListener('pointerup',ru2);document.addEventListener('pointercancel',ru2);
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-a="rot"]');if(!b||!proj)return;const e=cur();if(!e)return;snap(1);const st=e.style=e.style||{},v=+b.dataset.v;
+ {let q=v?(((((+st.rotate||0)+v+180)%360)+360)%360-180):0;if(q===-180)q=180;st.rotate=q}refresh(1)});
 
 /* ---------- Style tab: every color in the design, change one everywhere; optional color moods ---------- */
 function gatherColors(){const m=new Map(),add=s=>{if(typeof s==='string')(s.match(/#[0-9a-f]{6}/gi)||[]).forEach(h=>{h=h.toLowerCase();m.set(h,(m.get(h)||0)+1)})};
@@ -1051,10 +1172,83 @@ nav .on{color:var(--ac);font-weight:700;background:var(--bg);box-shadow:inset 0 
 .empty{text-align:center;background:var(--pn);border:1.5px dashed var(--pk);border-radius:18px;padding:28px 18px;margin-top:10px}.empty p{max-width:44ch;margin:6px auto 14px;color:var(--mut)}
 @media(min-width:900px){.scr{padding:32px max(24px,calc((100vw - 860px)/2)) 40px}nav{justify-content:center}nav button{flex:0 1 200px}.hero{padding:28px 28px 20px}.hero h1{font-size:40px}button.p,.row>button{min-width:150px}.row>*{flex:0 1 auto}}
 @media(max-width:480px){.hero{padding:16px 14px 10px}.hero .row>button{flex:1 1 100%}}
+
+/* v2.9: shape picker and shaped photo placeholders */
+.shg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}
+.shp{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:62px;padding:6px 2px;font-size:10.5px;line-height:1.1;min-width:0}
+.shp i{display:block;width:30px;height:30px;background:currentColor;opacity:.85}
+.shp span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v2.9.1: rotate handle */
+#rt{position:fixed;z-index:6;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid var(--ac);touch-action:none;display:none;box-sizing:border-box;cursor:grab}
+#rt::before{content:"\21BB";position:absolute;inset:0;display:grid;place-items:center;font:700 16px/1 sans-serif;color:var(--ac)}
+#rt.drag::after{content:attr(data-deg);position:absolute;left:50%;top:-30px;transform:translateX(-50%);background:var(--ink);color:#fff;font:600 12px/1 sans-serif;padding:5px 8px;border-radius:6px;white-space:nowrap}
 </style>
 <script>
 /* v2.8: friendly empty Templates tab (no built-in templates ship with the app) */
 const _tg=tplGroups;
 tplGroups=function(){if(!lib().length&&!tq)return `<div class="empty"><b>No templates yet</b><p>Start from a blank layout. Saved templates will appear here.</p><div class="row" style="justify-content:center"><button class="p" data-a="blank">Start a blank layout</button></div></div>`;return _tg()};
+</script>
+<script>
+/* ===== v2.9.2: AI templates behave. Any listed font loads, wrong spacing units are repaired on import,
+   auto-fit measures width too (long words were cut off), and cut-off text is fitted automatically. ===== */
+['Playfair Display','Inter','Sora','Manrope','DM Serif Display','DM Sans','Space Mono','Great Vibes','Bebas Neue','Oswald'].forEach(n=>gl.add(n)); /* already loaded by the <link> in <head> */
+
+/* 1. a template or project may use ANY listed font as its Display/Body font: load it when the canvas is drawn */
+const _cv9=canvasHTML;canvasHTML=function(P,w,o){loadG(P.fd);loadG(P.fb);return _cv9(P,w,o)};
+
+/* 2. measuring: same rules as the real element. A word wider than the box is NOT broken (the real box just cuts it off),
+   so such a size counts as "does not fit" and Auto-fit shrinks until the longest word fits. Also honours a per-element typeface. */
+const _mh9=measureH;
+measureH=function(el,fonts,size){const s=el.style||{};
+ if(s.ff&&TXT.includes(el.type)){el={...el,style:{...s,font:'b'}};fonts={d:fonts.d,b:`'${cn(s.ff)}',sans-serif`}}
+ const M=measurer();M.style.overflowWrap='normal';
+ const h=_mh9(el,fonts,size);
+ return M.scrollWidth>M.clientWidth+1?h+1e6:h};
+
+/* 3. repair what AI chats get wrong: font names, units written as text, letter spacing in px, line height in px */
+const FONT_LC=Object.fromEntries(FONT_OK.map(n=>[n.toLowerCase(),n]));
+const canonFont=v=>FONT_LC[String(v==null?'':v).trim().replace(/^['"]|['"]$/g,'').toLowerCase()]||null;
+const NUMK=['size','weight','ls','lh','pad','radius','opacity','rotate','sw','zoom'],WORD_W={thin:100,extralight:200,light:300,normal:400,regular:400,medium:500,semibold:600,bold:700,extrabold:800,black:900};
+function spacingFix(t,fx){const seen=new Set(),say=m=>{if(!seen.has(m)){seen.add(m);fx.push(m)}};
+ t.elements.forEach(x=>{if(!x||typeof x!=='object'||!x.style||typeof x.style!=='object')return;const s=x.style,lab=x.label||x.id;
+  NUMK.forEach(k=>{const v=s[k];if(typeof v!=='string')return;const m=/^\s*(-?\d*\.?\d+)\s*(px|em|rem|deg|%)?\s*$/i.exec(v);
+   if(m){s[k]=m[2]==='%'&&k==='opacity'?+m[1]/100:+m[1];say(`Wrote the number ${m[1]} for ${k} on "${lab}" without the unit text "${v.trim()}".`)}
+   else if(k==='weight'&&WORD_W[v.trim().toLowerCase()]){s[k]=WORD_W[v.trim().toLowerCase()];say(`Weight "${v}" on "${lab}" is now ${s[k]}.`)}});
+  if(!(TXT.includes(x.type)||x.type==='sourceList'))return;
+  const sz=+s.size>0?+s.size:20,p=x.position||{};
+  if(s.size!=null&&!(+s.size>0)){delete s.size;say(`Removed an invalid font size on "${lab}".`)}
+  if(s.ls!=null&&isFinite(s.ls)){let v=+s.ls;if(Math.abs(v)>1)v=v/sz;v=Math.max(-.1,Math.min(.5,Math.round(v*1000)/1000));
+   if(v!==+s.ls){say(`Letter spacing ${s.ls} on "${lab}" was too wide (it is measured in em, a fraction of the font size), so it is now ${v}.`);s.ls=v}}
+  if(s.lh!=null&&isFinite(s.lh)){let v=+s.lh;if(v>3.5)v=v/sz;v=Math.max(.7,Math.min(3,Math.round(v*100)/100));
+   if(v!==+s.lh){say(`Line height ${s.lh} on "${lab}" is a multiplier of the font size (not px), so it is now ${v}.`);s.lh=v}}
+  if(s.pad!=null&&isFinite(s.pad)&&p.w>0&&p.h>0){let v=+s.pad;const m=Math.floor(Math.min(p.w,p.h)/8);if(v<0)v=0;if(v>m)v=m;if(v!==+s.pad){say(`Padding ${s.pad} on "${lab}" left almost no room for the text, so it is now ${v}.`);s.pad=v}}
+  if(s.font!=null&&!['d','b','s'].includes(s.font)){const f=String(s.font).toLowerCase(),v=/disp|head|title/.test(f)?'d':/script|hand/.test(f)?'s':'b';say(`Font role "${s.font}" on "${lab}" is now "${v}" (d = display, b = body, s = script).`);s.font=v}
+  if(s.ff!=null){const c=canonFont(s.ff);if(c){if(c!==s.ff){say(`Typeface "${s.ff}" on "${lab}" is now spelled "${c}".`);s.ff=c}}else{say(`Typeface "${s.ff}" on "${lab}" is not installed, so the template font is used instead.`);delete s.ff}}})}
+const _prep9=prep;
+prep=function(t){const pre=[];
+ try{if(t&&typeof t==='object'&&!Array.isArray(t)&&t.fonts&&typeof t.fonts==='object')['display','body'].forEach(k=>{const c=canonFont(t.fonts[k]);if(c&&c!==t.fonts[k]){pre.push(`Font name "${t.fonts[k]}" is now spelled "${c}".`);t.fonts[k]=c}})}catch(e){}
+ const r=_prep9(t);r.fx.unshift(...pre);
+ try{if(!r.er.length&&r.t&&Array.isArray(r.t.elements))spacingFix(r.t,r.fx)}catch(e){}
+ return r};
+
+/* 4. after an import preview appears: wait for the template's fonts, then turn on Auto-fit for text that would be cut off */
+function cutOff(t){const F={d:`'${t.fonts.display}',serif`,b:`'${t.fonts.body}',sans-serif`};
+ return t.elements.filter(e=>e&&TXT.includes(e.type)&&e.type!=='sourceList'&&!e.hidden&&String(e.text||'').trim()&&e.position&&e.position.h>0&&!(e.style&&(e.style.vert||e.style.fit||e.style.eff==='arc'))&&measureH(e,F,(e.style&&e.style.size)||20)>e.position.h+2)}
+function settleImport(t){
+ const fams=new Set([t.fonts.display,t.fonts.body]);t.elements.forEach(e=>{if(e&&e.style&&e.style.ff)fams.add(e.style.ff)});
+ const ld=Promise.all([...fams].flatMap(f=>{loadG(f);return[400,700].map(w=>document.fonts.load(w+' 20px "'+cn(f)+'"').catch(()=>0))}));
+ Promise.race([ld,new Promise(r=>setTimeout(r,2500))]).then(()=>{
+  if(window._imp!==t)return;FC.clear();
+  const bad=cutOff(t),o=$('#impo');if(!bad.length||!o)return;
+  bad.forEach(e=>{e.style=e.style||{};e.style.fit=true});
+  const th=o.querySelector('.th');if(th)th.outerHTML=thumb(t,180);
+  const names=bad.slice(0,6).map(e=>'"'+(e.label||e.id)+'"').join(', ')+(bad.length>6?' and '+(bad.length-6)+' more':''),
+   item=`<div class="ck ok">✓ Turned on Auto-fit for ${bad.length} text box${bad.length>1?'es':''} that would have been cut off: ${esc(names)}. The text now shrinks to fit instead.</div>`,
+   oks=o.querySelectorAll('.ck.ok');
+  if(oks.length)oks[oks.length-1].insertAdjacentHTML('afterend',item);
+  else{const th2=o.querySelector('.th');if(th2)th2.insertAdjacentHTML('afterend','<div class="mono" style="margin-top:8px">FIXED AUTOMATICALLY</div>'+item)}})}
+const _si9=showImport;
+showImport=function(text){_si9(text);if(window._imp)try{settleImport(window._imp)}catch(e){}};
 </script>
 <script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
