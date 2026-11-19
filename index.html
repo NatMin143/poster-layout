@@ -549,7 +549,7 @@ document.addEventListener('pointermove',ev=>{if(!drag)return;const dx=(ev.client
 document.addEventListener('pointerup',()=>{if(drag&&drag.moved){drawSheet();touch()}drag=null});
 addEventListener('resize',()=>{if(view==='editor')drawCanvas()});
 /* ===== v2.0: palettes, shapes, cards, floating toolbar, 5-tab editor ===== */
-const VERSION='3.3.0';
+const VERSION='3.5.0';
 const SH={circle:'border-radius:50%;',pill:'border-radius:999px;',triangle:'clip-path:polygon(50% 0,100% 100%,0 100%);',arch:'border-radius:999px 999px 0 0;',blob:'border-radius:60% 40% 55% 45%/50% 60% 40% 50%;',band:'clip-path:polygon(0 0,100% 18%,100% 100%,0 82%);',ribbon:'clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%);',cut:'clip-path:polygon(0 0,calc(100% - 40px) 0,100% 40px,100% 100%,0 100%);',diamond:'clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);'};
 
 /* ===== v2.9 SHAPES: every entry is plain CSS (border-radius or clip-path), so the same shape works on a solid shape AND on a photo slot.
@@ -1566,6 +1566,74 @@ document.addEventListener('input',ev=>{const g=ev.target&&ev.target.dataset&&ev.
 document.addEventListener('input',ev=>{const t=ev.target;if(!t.dataset||!t.dataset.f||t.type!=='number')return;const r=document.querySelector('#sheet [data-rg="'+t.dataset.f+'"]');if(r)r.value=t.value});
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-tg],[data-va]');if(!b||!proj)return;const e=cur();if(!e)return;snap(1);const st=e.style=e.style||{};
  if(b.dataset.tg){const k=b.dataset.tg;if(st[k])delete st[k];else st[k]=1}else{if(b.dataset.va)st.va=b.dataset.va;else delete st.va}refresh(1)});
+})();
+</script>
+<style>
+/* ===== v3.4: template-first home ===== */
+.hmt{display:flex;align-items:baseline;justify-content:space-between;margin:2px 0 14px}.hmt b{font:800 24px 'Playfair Display',serif}
+.rcs{display:flex;gap:10px;overflow-x:auto;margin:0 0 16px;padding-bottom:4px}
+.rc{flex:none;width:72px;min-height:0;height:auto;padding:0;border:0;background:none;text-align:left;border-radius:8px}
+.rc span{display:block;font-size:11px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hq{margin:0 0 8px}.hcs{display:flex;gap:6px;overflow-x:auto;margin:0 0 14px}.hcs .chip{flex:none}
+.hg{display:grid;gap:14px 12px;justify-content:space-between}
+.tile .tb{display:block;width:100%;height:auto;min-height:0;padding:0;border:0;background:none;border-radius:10px}
+.tile .tb .th{border-radius:10px;box-shadow:0 0 0 1px var(--ln),0 6px 16px #B95F7C22}
+.tn{display:flex;align-items:center;gap:4px;margin-top:6px}.tn b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.tn .ib2{min-height:36px;width:36px;padding:0;border:0;background:none;font-size:20px}
+.tile.bl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:0;padding:0;border:2px dashed var(--pk);border-radius:10px;background:var(--pn);color:var(--ac);font-weight:600}
+</style>
+<script>
+(function(){
+let hq='',hc='';
+const hf=t=>(!hc||t.template.category===hc)&&(!hq||(t.template.name+t.template.category+(t.template.style||'')+(t.template.tags||[]).join(' ')).toLowerCase().includes(hq.toLowerCase()));
+const cols=()=>innerWidth>=900?4:innerWidth>=600?3:2,cw=()=>{const c=cols(),W=innerWidth>=900?860:innerWidth-32;return Math.floor((W-(c-1)*12)/c)};
+const grid=()=>{const w=cw();return `<button class="tile bl" data-a="blank" style="height:${Math.round(w*1.414)}px"><b style="font-size:28px;line-height:1">+</b>Blank layout</button>`+lib().filter(hf).map(t=>`<div class="tile"><button class="tb" data-a="use" data-i="${esc(t.template.id)}" aria-label="Use ${esc(t.template.name)}">${thumb(t,w)}</button><div class="tn"><b>${esc(t.template.name)}</b><button class="ib2" data-a="detail" data-i="${esc(t.template.id)}" aria-label="Details for ${esc(t.template.name)}">⋯</button></div></div>`).join('')};
+const gs=()=>`grid-template-columns:repeat(${cols()},${cw()}px)`;
+const _r=render;
+render=function(){_r();const a=document.getElementById('app'),nav=a.querySelector('nav');
+ if(nav&&!PRO){const t=nav.querySelector('[data-v="tpls"]');if(t)t.remove();if(view==='detail'){const h=nav.querySelector('[data-v="home"]');if(h)h.classList.add('on');const bk=a.querySelector('.scr [data-v="tpls"]');if(bk)bk.dataset.v='home'}}
+ if(view!=='home')return;const sc=a.querySelector('.scr');if(!sc)return;
+ const cs=[...new Set(lib().map(t=>t.template.category))],many=lib().length>8,rec=projects.slice(0,4);
+ sc.innerHTML=`<div class="hmt"><b>Tourism Layout Studio</b></div>
+${rec.length?`<div class="rcs">${rec.map(p=>`<button class="rc" data-a="open" data-i="${p.id}" aria-label="Continue ${esc(p.name)}"><div class="th" style="width:72px">${canvasHTML(projP(p),72)}</div><span>${esc(p.name)}</span></button>`).join('')}</div>`:''}
+${many?`<input id="hq" class="hq" placeholder="Search templates" value="${esc(hq)}" aria-label="Search templates"><div class="hcs">${cs.map(c=>`<button class="chip${hc===c?' on':''}" data-hc="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:''}
+<div class="hg" id="hg" style="${gs()}">${grid()}</div>`};
+document.addEventListener('input',ev=>{if(ev.target.id!=='hq')return;hq=ev.target.value;const g=document.getElementById('hg');if(g)g.innerHTML=grid()});
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-hc]');if(!b)return;hc=hc===b.dataset.hc?'':b.dataset.hc;
+ document.querySelectorAll('[data-hc]').forEach(x=>x.classList.toggle('on',x.dataset.hc===hc));const g=document.getElementById('hg');if(g)g.innerHTML=grid()});
+addEventListener('resize',()=>{if(view==='home'){const g=document.getElementById('hg');if(g){g.style.cssText=gs();g.innerHTML=grid()}}});
+})();
+</script>
+<style>
+/* ===== v3.5: import template (editor menu) ===== */
+#im{position:fixed;left:0;right:0;bottom:0;z-index:10;max-height:82vh;overflow:auto;background:var(--pn);border-top:3px solid var(--pk);border-radius:18px 18px 0 0;box-shadow:0 -8px 28px #B95F7C33;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px))}
+#im .th{margin:6px 0 10px}
+</style>
+<script>
+(function(){
+let it=null;
+const res=h=>{const o=document.getElementById('imr');if(o)o.innerHTML=h},
+ close=()=>{const d=document.getElementById('im');if(d)d.remove();it=null},
+ clean=s=>String(s).replace(/AI template/g,'Imported template').replace(/\b(the )?AI\b/gi,'the file');
+function pick(){let d=document.getElementById('im');if(!d){d=document.createElement('div');d.id='im';document.body.appendChild(d)}
+ d.innerHTML=`<div class="row" style="margin:0 0 6px;justify-content:space-between;align-items:center"><b>Import template</b><button data-im="close" style="flex:none;min-width:80px">Close</button></div><label>Choose a .json file<input type="file" id="imf" accept=".json,application/json"></label><details class="adv"><summary>Paste instead</summary><textarea id="imt" rows="5" placeholder="Paste template JSON"></textarea><div class="row"><button class="p" data-im="check">Check</button></div></details><div id="imr"></div>`}
+function check(text){let t;it=null;try{t=parseLoose(text)}catch(e){res('<div class="err">This does not look like a valid template file.</div>');return}
+ const r=prep(t);if(r.er.length){res(`<div class="err">${r.er.map(x=>esc(clean(x))).join('\n')}</div>`);return}
+ if(t.template.name==='AI template')t.template.name='Imported template';it=t;
+ res(`<p class="mono">PREVIEW · ${esc(t.template.name)} · ${t.elements.length} elements</p>${thumb(t,150)}${r.wn.map(x=>`<div class="ck wn">⚠ ${esc(clean(x))}</div>`).join('')}<div class="row"><button class="p" data-im="use">Use in this layout</button><button data-im="add">Add to my templates</button></div>`)}
+function use(){const t=it;if(!t||!proj)return;if(!confirm('Replace this layout with the imported template? You can undo it.'))return;
+ const d=clone(t);if(d.theme||!d.fonts)normT(d);snap(1);proj.els=d.elements;proj.fd=d.fonts.display;proj.fb=d.fonts.body;proj.bg=d.canvas.background||'#FFFFFF';proj.canvas=CV[(d.canvas||{}).size]?d.canvas.size:'A2';proj.pal=null;proj.tplId=d.template.id;
+ selId=null;mode='sel';close();render();touch();toast('Template applied. Undo brings back the old layout.')}
+function add(){const t=it;if(!t)return;t.template.id=(t.template.id||'imported')+'-'+Date.now();custom.push(t);sv('tls-custom',custom);close();toast('Added to your templates')}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-im],[data-a="imp3"],[data-a="tdl"],[data-a="trm"]');if(!b)return;
+ if(b.dataset.a==='imp3'){pick();return}
+ if(b.dataset.a==='tdl'){if(tdet)dlText(JSON.stringify(tdet,null,2),(tdet.template.name||'template').replace(/[^\w-]+/g,'-')+'.json');return}
+ if(b.dataset.a==='trm'){if(tdet&&confirm('Remove this template from your list?')){const id=tdet.template.id;custom=custom.filter(x=>x.template.id!==id);sv('tls-custom',custom);view='home';render();toast('Template removed')}return}
+ const k=b.dataset.im;if(k==='close')close();else if(k==='check'){const v=(document.getElementById('imt')||{}).value||'';if(!v.trim()){toast('Paste the template first.');return}check(v)}else if(k==='use')use();else if(k==='add')add()},true);
+document.addEventListener('change',ev=>{const t=ev.target;if(t.id!=='imf')return;ev.stopImmediatePropagation();const f=t.files&&t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>check(r.result);r.readAsText(f)},true);
+const _mh=moreHTML;moreHTML=function(){return _mh()+'<div class="mono" style="margin-top:8px">TEMPLATES</div><div class="row"><button data-a="imp3">Import template…</button></div>'};
+const _r2=render;render=function(){_r2();if(view!=='detail'||!tdet)return;const sc=document.querySelector('.scr');if(!sc)return;
+ const mine=custom.some(x=>x.template.id===tdet.template.id);sc.insertAdjacentHTML('beforeend',`<div class="row"><button data-a="tdl">Export JSON</button>${mine?'<button data-a="trm">Remove template</button>':''}</div>`)};
 })();
 </script>
 <script>if('serviceWorker'in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script></body></html>
